@@ -464,9 +464,9 @@ function Register({ onLogin }) {
       >
         {/* Logo */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <img src={logoUrl} alt="BioSync" style={{ height: 48, marginBottom: 16 }} />
+          <img src={logoUrl} alt="BioSync" style={{ height: 56, marginBottom: 16 }} />
           <Typography variant="h5" sx={{ fontWeight: 600, color: '#1f8a4c' }}>
-            Criar Conta BioSync
+            Criar Conta
           </Typography>
         </Box>
 

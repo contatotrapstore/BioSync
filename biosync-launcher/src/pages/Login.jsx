@@ -104,22 +104,17 @@ function Login({ onLogin }) {
           }}
         >
           <Box>
-            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 4 }}>
+            <Box sx={{ mb: 4 }}>
               <Box
                 component="img"
                 src={logoUrl}
                 alt="BioSync Logo"
-                sx={{ height: 48, width: 'auto' }}
+                sx={{ height: 56, width: 'auto', mb: 1.5 }}
               />
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: '0.16em' }}>
-                  BIOSYNC
-                </Typography>
-                <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.8) }}>
-                  Plataforma de jogos neuroeducacionais
-                </Typography>
-              </Box>
-            </Stack>
+              <Typography variant="body2" sx={{ color: alpha('#ffffff', 0.8) }}>
+                Plataforma de jogos neuroeducacionais
+              </Typography>
+            </Box>
 
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
               Bem-vindo de volta!
