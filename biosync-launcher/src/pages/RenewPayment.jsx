@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Payment, Pix, CreditCard, CheckCircle, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
-import logoUrl from '../assets/logo-branca.png';
+import logoUrl from '../assets/logo-azul.png';
 
 function RenewPayment() {
   const navigate = useNavigate();
@@ -191,7 +191,7 @@ function RenewPayment() {
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#070d0a', px: 2 }}>
         <Paper sx={{ maxWidth: 600, width: '100%', p: 4, borderRadius: 4 }}>
           <Stack spacing={3} alignItems="center">
-            <img src={logoUrl} alt="NeuroGame" style={{ height: 48 }} />
+            <img src={logoUrl} alt="biosync" style={{ height: 48 }} />
 
             <CheckCircle sx={{ fontSize: 64, color: '#1f8a4c' }} />
 
@@ -241,7 +241,7 @@ function RenewPayment() {
         <Stack spacing={3}>
           {/* Logo e título */}
           <Box sx={{ textAlign: 'center' }}>
-            <img src={logoUrl} alt="NeuroGame" style={{ height: 48, marginBottom: 16 }} />
+            <img src={logoUrl} alt="biosync" style={{ height: 48, marginBottom: 16 }} />
             <Typography variant="h5" sx={{ fontWeight: 600, color: '#1f8a4c' }}>
               Renovar Acesso
             </Typography>

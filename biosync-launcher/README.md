@@ -1,6 +1,6 @@
-# NeuroGame Launcher
+# BioSync Launcher
 
-Desktop application for browsing and playing the NeuroGame library.
+Desktop application for browsing and playing the BioSync library.
 
 ## Features
 
@@ -34,8 +34,8 @@ VITE_GAMES_PATH=../Jogos
 The default expects the folder structure:
 
 ```
-NeuroGame/
-+- neurogame-launcher/
+BioSync/
++- biosync-launcher/
 +- Jogos/
    +- autorama/
    ?  +- index.html
@@ -93,7 +93,7 @@ The base URL comes from `electron-store` settings (`storage.js`) and defaults to
 - **Blank screen (dev):** ensure Vite compiled without errors and `npm run dev` prints the local URL.
 - **Blank screen (start/build):** run `npm run build` to regenerate `dist/`.
 - **CORS error during login:** add `http://localhost:5174` to `CORS_ORIGIN` in the backend `.env`.
-- **"Failed to load game" message:** confirm `Jogos/<folder>/index.html` exists and the `folder_path` stored no Supabase matches the directory name.
+- **"Failed to load game" message:** confirm `Jogos/<folder>/index.html` exists and the `folder_path` stored in Supabase matches the directory name.
 
 ## License
 
@@ -110,4 +110,3 @@ node protect-games.js ./Jogos/nome-do-jogo
 ```
 
 Opcionalmente mova o arquivo para um diretorio `scripts/` junto com outros utilitarios de automacao.
-

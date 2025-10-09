@@ -19,7 +19,7 @@ import {
 import { PersonAdd, Payment, CheckCircle, Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../services/api';
 import { setStoredToken, setStoredUser } from '../services/storage';
-import logoUrl from '../assets/logo-branca.png';
+import logoUrl from '../assets/logo-azul.png';
 
 const steps = ['Criar Conta', 'Escolher Plano', 'Pagamento'];
 

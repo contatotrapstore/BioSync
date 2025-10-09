@@ -6,7 +6,7 @@
 echo "Preparando instalador macOS..."
 
 # Dar permissão de execução ao script de instalação
-chmod +x "build/Instalar NeuroGame.command"
+chmod +x "build/Instalar biosync.command"
 chmod +x "build/install-macos.sh"
 
 echo "✅ Arquivos preparados com sucesso!"

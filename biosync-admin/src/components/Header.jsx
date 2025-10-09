@@ -72,7 +72,7 @@ const Header = ({ onMenuClick, drawerWidth }) => {
 
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, gap: 2 }}>
           <img
-            src="/logo-branca.png"
+            src="/logo-azul.png"
             alt="BioSync"
             style={{ height: 42, display: 'block' }}
           />

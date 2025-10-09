@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo NeuroGame Launcher - Installation
+echo biosync Launcher - Installation
 echo ========================================
 echo.
 

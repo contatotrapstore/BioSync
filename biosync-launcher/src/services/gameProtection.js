@@ -71,7 +71,7 @@ export const getProtectionScript = (gameId) => `
 <script>
 (function() {
   const GAME_ID = '${gameId}';
-  const SESSION_KEY = 'neurogame_game_session';
+  const SESSION_KEY = 'biosync_game_session';
 
   const renderErrorScreen = (title, message, code) => {
     document.body.innerHTML =
@@ -86,8 +86,8 @@ export const getProtectionScript = (gameId) => `
     try {
       const sessionStr = localStorage.getItem(SESSION_KEY);
       if (!sessionStr) {
-        renderErrorScreen('Acesso negado', 'Este jogo deve ser iniciado pelo NeuroGame Launcher.', 'NO_SESSION');
-        alert('Erro: este jogo deve ser iniciado pelo NeuroGame Launcher.');
+        renderErrorScreen('Acesso negado', 'Este jogo deve ser iniciado pelo biosync Launcher.', 'NO_SESSION');
+        alert('Erro: este jogo deve ser iniciado pelo biosync Launcher.');
         return;
       }
 
@@ -107,7 +107,7 @@ export const getProtectionScript = (gameId) => `
       }
 
       localStorage.removeItem(SESSION_KEY);
-      console.log('[Launcher] Jogo autorizado pelo NeuroGame Launcher');
+      console.log('[Launcher] Jogo autorizado pelo biosync Launcher');
     } catch (error) {
       console.error('Erro na validacao da sessao do jogo:', error);
       renderErrorScreen('Erro de validacao', 'Nao foi possivel validar o acesso ao jogo.', 'VALIDATION_ERROR');
@@ -116,7 +116,7 @@ export const getProtectionScript = (gameId) => `
   });
 
   if (window.opener || window.parent !== window) {
-    renderErrorScreen('Acesso negado', 'Este jogo deve ser aberto diretamente pelo NeuroGame Launcher.', 'INVALID_CONTEXT');
+    renderErrorScreen('Acesso negado', 'Este jogo deve ser aberto diretamente pelo biosync Launcher.', 'INVALID_CONTEXT');
   }
 })();
 </script>

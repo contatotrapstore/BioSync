@@ -124,7 +124,7 @@ function PaymentAlert() {
             {isExpired ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  Seu acesso ao NeuroGame expirou.
+                  Seu acesso ao biosync expirou.
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                   Para continuar jogando, renove seu pagamento mensal de R$ 149,90.

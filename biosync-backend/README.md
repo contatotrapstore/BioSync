@@ -1,27 +1,27 @@
-# NeuroGame Backend API
+# BioSync Backend API
 
-API REST em Node.js/Express respons·vel pela autenticaÁ„o, cat·logo de jogos e gest„o de assinaturas da plataforma NeuroGame.
+API REST em Node.js/Express respons√°vel pela autentica√ß√£o, cat√°logo de jogos e gest√£o de assinaturas da plataforma BioSync.
 
 ## Tecnologias
 
 - Node.js 18+
 - Express.js
 - Supabase (PostgreSQL gerenciado)
-- JWT para autenticaÁ„o
+- JWT para autentica√ß√£o
 - Bcrypt para hash de senhas
-- Helmet, CORS e rate limiting para seguranÁa
+- Helmet, CORS e rate limiting para seguran√ßa
 
-## PrÈ-requisitos
+## Pr√©-requisitos
 
 1. Conta e projeto ativo no [Supabase](https://supabase.com)
 2. Node.js 18 ou superior instalado
-3. Clonar este repositÛrio e instalar dependÍncias
+3. Clonar este reposit√≥rio e instalar depend√™ncias
 
 ```bash
 npm install
 ```
 
-## ConfiguraÁ„o
+## Configura√ß√£o
 
 1. Copie o arquivo de exemplo e preencha com as credenciais do Supabase e chaves JWT:
 
@@ -32,9 +32,9 @@ cp .env.example .env
 2. Abra `.env` e informe:
    - `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_KEY`
    - `JWT_SECRET` e `JWT_REFRESH_SECRET`
-   - Ajuste `CORS_ORIGIN` se necess·rio (j· inclui o dashboard em `http://localhost:3001` e o launcher em `http://localhost:5174`)
+   - Ajuste `CORS_ORIGIN` se necess√°rio (j√° inclui o dashboard em `http://localhost:3001` e o launcher em `http://localhost:5174`)
 
-3. No painel do Supabase, execute os arquivos `supabase-schema.sql` e `supabase-seeds.sql` (pasta raiz do projeto) usando o SQL Editor para criar tabelas, polÌticas RLS e dados iniciais (admin, demo, jogos e planos).
+3. No painel do Supabase, execute os arquivos `supabase-schema.sql` e `supabase-seeds.sql` (pasta raiz do projeto) usando o SQL Editor para criar tabelas, pol√≠ticas RLS e dados iniciais (admin, demo, jogos e planos).
 
 ## Executando
 
@@ -44,30 +44,30 @@ cp .env.example .env
 npm run dev
 ```
 
-### ProduÁ„o
+### Produ√ß√£o
 
 ```bash
 npm start
 ```
 
-Por padr„o o servidor escuta em `http://localhost:3000` e expıe os jogos est·ticos via `/games` apontando para `../Jogos`.
+Por padr√£o o servidor escuta em `http://localhost:3000` e exp√µe os jogos est√°ticos via `/games` apontando para `../Jogos`.
 
 ## Principais Endpoints
 
-| MÈtodo | Endpoint | DescriÁ„o | AutenticaÁ„o |
+| M√©todo | Endpoint | Descri√ß√£o | Autentica√ß√£o |
 |--------|----------|-----------|--------------|
-| POST   | `/api/v1/auth/login`         | Login de usu·rio | N„o |
-| POST   | `/api/v1/auth/refresh-token` | Renovar token    | N„o |
-| GET    | `/api/v1/auth/profile`       | Perfil do usu·rio autenticado | JWT |
+| POST   | `/api/v1/auth/login`         | Login de usu√°rio | N√£o |
+| POST   | `/api/v1/auth/refresh-token` | Renovar token    | N√£o |
+| GET    | `/api/v1/auth/profile`       | Perfil do usu√°rio autenticado | JWT |
 | GET    | `/api/v1/games`              | Lista de jogos (admin) | JWT |
-| GET    | `/api/v1/games/user/games`   | Jogos acessÌveis ao usu·rio atual | JWT |
+| GET    | `/api/v1/games/user/games`   | Jogos acess√≠veis ao usu√°rio atual | JWT |
 | GET    | `/api/v1/games/:id/validate` | Valida acesso a um jogo | JWT |
-| GET    | `/api/v1/users`              | Gest„o de usu·rios (admin) | JWT + admin |
-| GET    | `/api/v1/subscriptions`      | Gest„o de assinaturas (admin) | JWT + admin |
+| GET    | `/api/v1/users`              | Gest√£o de usu√°rios (admin) | JWT + admin |
+| GET    | `/api/v1/subscriptions`      | Gest√£o de assinaturas (admin) | JWT + admin |
 
-A pasta `src/controllers` contÈm o detalhamento de cada operaÁ„o.
+A pasta `src/controllers` cont√©m o detalhamento de cada opera√ß√£o.
 
-## Teste r·pido da API
+## Teste r√°pido da API
 
 ```bash
 curl http://localhost:3000/api/v1/health
@@ -78,22 +78,22 @@ Resposta esperada:
 ```json
 {
   "success": true,
-  "message": "NeuroGame API is running",
+  "message": "BioSync API is running",
   "timestamp": "2025-10-03T12:34:56.789Z"
 }
 ```
 
-## Scripts disponÌveis
+## Scripts dispon√≠veis
 
-- `npm start` ñ inicia o servidor
-- `npm run dev` ñ inicia com recarga autom·tica via nodemon
-- `npm test` ñ executa testes (placeholder)
+- `npm start` ‚Äì inicia o servidor
+- `npm run dev` ‚Äì inicia com recarga autom√°tica via nodemon
+- `npm test` ‚Äì executa testes (placeholder)
 
 ## Credenciais de exemplo
 
-As seeds criam dois usu·rios padr„o (lembre-se de trocar em produÁ„o):
+As seeds criam dois usu√°rios padr√£o (lembre-se de trocar em produ√ß√£o):
 
-| Perfil | Usu·rio | Senha |
+| Perfil | Usu√°rio | Senha |
 |--------|---------|-------|
 | Admin  | `admin` | `Admin@123456` |
 | Demo   | `demo`  | `Demo@123456`  |
@@ -113,27 +113,27 @@ server.js
 ```
 
 - `config/supabase.js` inicializa clientes com service/anon key
-- `controllers` concentram a lÛgica de negÛcio usando Supabase
-- `middleware/auth.js` valida tokens JWT e privilÈgios de admin
+- `controllers` concentram a l√≥gica de neg√≥cio usando Supabase
+- `middleware/auth.js` valida tokens JWT e privil√©gios de admin
 
-## SeguranÁa
+## Seguran√ßa
 
-- JWT com expiraÁ„o (24h) e refresh tokens (7 dias)
-- Rate limiting (100 requisiÁıes / 15 min)
-- Helmet para headers de seguranÁa
-- CORS configur·vel via `.env`
+- JWT com expira√ß√£o (24h) e refresh tokens (7 dias)
+- Rate limiting (100 requisi√ß√µes / 15 min)
+- Helmet para headers de seguran√ßa
+- CORS configur√°vel via `.env`
 - Criptografia de senha com bcrypt (salt rounds = 10)
 
 ## Supabase
 
 Scripts auxiliares na raiz:
 
-- `supabase-schema.sql` ñ cria tabelas, RLS e funÁıes
-- `supabase-seeds.sql` ñ popula dados iniciais
-- `generate-password-hashes.js` / `update-passwords.js` ñ utilidades para ajustar hashes no Supabase
+- `supabase-schema.sql` ‚Äì cria tabelas, RLS e fun√ß√µes
+- `supabase-seeds.sql` ‚Äì popula dados iniciais
+- `generate-password-hashes.js` / `update-passwords.js` ‚Äì utilidades para ajustar hashes no Supabase
 
-Execute-os conforme necess·rio pelo SQL Editor ou via script `node update-passwords.js` apÛs definir as credenciais.
+Execute-os conforme necess√°rio pelo SQL Editor ou via script `node update-passwords.js` ap√≥s definir as credenciais.
 
-## LicenÁa
+## Licen√ßa
 
 MIT

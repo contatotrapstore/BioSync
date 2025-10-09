@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PROTECTION_MARKER = '<!-- NEUROGAME_PROTECTION_INJECTED -->';
+const PROTECTION_MARKER = '<!-- biosync_PROTECTION_INJECTED -->';
 
 const getProtectionScript = (gameId) => {
   return `
@@ -17,21 +17,21 @@ ${PROTECTION_MARKER}
 <script>
 (function() {
   const GAME_ID = '${gameId}';
-  const SESSION_KEY = 'neurogame_game_session';
+  const SESSION_KEY = 'biosync_game_session';
 
   window.addEventListener('DOMContentLoaded', function() {
     try {
       const sessionStr = localStorage.getItem(SESSION_KEY);
 
       if (!sessionStr) {
-        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>🔒 Acesso Negado</h1><p>Este jogo deve ser aberto através do NeuroGame Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: NO_SESSION</p></div>';
+        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>🔒 Acesso Negado</h1><p>Este jogo deve ser aberto através do biosync Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: NO_SESSION</p></div>';
         return;
       }
 
       const session = JSON.parse(sessionStr);
 
       if (Date.now() > session.expiresAt) {
-        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>⏱️ Sessão Expirada</h1><p>Por favor, abra o jogo novamente através do NeuroGame Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: SESSION_EXPIRED</p></div>';
+        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>⏱️ Sessão Expirada</h1><p>Por favor, abra o jogo novamente através do biosync Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: SESSION_EXPIRED</p></div>';
         localStorage.removeItem(SESSION_KEY);
         return;
       }
@@ -42,7 +42,7 @@ ${PROTECTION_MARKER}
       }
 
       localStorage.removeItem(SESSION_KEY);
-      console.log('✅ Jogo autorizado pelo NeuroGame Launcher');
+      console.log('✅ Jogo autorizado pelo biosync Launcher');
     } catch (error) {
       console.error('Erro na validação:', error);
       document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>❌ Erro de Validação</h1><p>Não foi possível validar o acesso ao jogo.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: VALIDATION_ERROR</p></div>';
@@ -50,7 +50,7 @@ ${PROTECTION_MARKER}
   });
 
   if (window.opener || window.parent !== window) {
-    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>🔒 Acesso Negado</h1><p>Este jogo deve ser aberto através do NeuroGame Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: INVALID_CONTEXT</p></div>';
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:Arial,sans-serif;flex-direction:column;"><h1>🔒 Acesso Negado</h1><p>Este jogo deve ser aberto através do biosync Launcher.</p><p style="color:#666;font-size:12px;margin-top:20px;">Código de erro: INVALID_CONTEXT</p></div>';
   }
 })();
 </script>

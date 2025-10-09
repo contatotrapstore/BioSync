@@ -1,202 +1,194 @@
-# 🚀 Deploy do Admin Panel na Vercel
+# 🚀 Deploy BioSync Admin no Vercel
 
-## ❗ CORREÇÃO APLICADA
-
-O código foi corrigido para adicionar automaticamente `/api/v1` ao final da URL do backend.
-
-**Antes:** Você precisava configurar `VITE_API_URL=https://neurogame.onrender.com/api/v1`
-**Agora:** Configure apenas `VITE_API_URL=https://neurogame.onrender.com`
+**Data:** 2025-10-09
+**Backend:** https://biosync-jlfh.onrender.com ✅ Online
 
 ---
 
-## ⚙️ Configuração na Vercel
+## ✅ Correções Aplicadas
 
-### 1. Acesse o Dashboard da Vercel
-1. Vá para [vercel.com](https://vercel.com)
-2. Selecione seu projeto do admin
-3. Clique em **Settings** (no menu superior)
-4. Clique em **Environment Variables** (menu lateral)
+### 1. **Vite movido para dependencies**
+- ❌ Antes: `devDependencies` (não instalado em produção)
+- ✅ Agora: `dependencies` (instalado em produção)
 
-### 2. Configure a Variável de Ambiente
-
-Adicione a seguinte variável:
-
-**Nome da Variável:**
-```
-VITE_API_URL
-```
-
-**Valor da Variável (IMPORTANTE - SEM /api/v1):**
-```
-https://neurogame.onrender.com
-```
-
-**Environment:** Production (e Development, se quiser)
-
-### 3. Clique em "Save"
-
-### 4. Faça um Redeploy
-
-Após salvar a variável, você DEVE fazer um novo deploy:
-
-**Opção A - Via Dashboard:**
-1. Vá em **Deployments**
-2. Clique nos 3 pontinhos do último deployment
-3. Clique em **Redeploy**
-
-**Opção B - Via Git:**
-```bash
-cd neurogame-admin
-git add .
-git commit -m "fix: corrigir URL da API para produção"
-git push
-```
+### 2. **URL da API atualizada**
+- ❌ Antes: `https://biosync.onrender.com`
+- ✅ Agora: `https://biosync-jlfh.onrender.com`
 
 ---
 
-## ✅ Como Verificar se Funcionou
+## 📋 Passo a Passo - Deploy no Vercel
 
-### 1. Abra o DevTools do Navegador
-- Pressione `F12` no Chrome/Edge
-- Vá na aba **Network**
+### 1. **Acesse o Vercel**
+https://vercel.com/dashboard
 
-### 2. Tente Fazer Login
-- Usuário: `admin`
-- Senha: `Admin123`
+### 2. **Crie Novo Projeto**
+1. Clique em **"Add New..."** → **"Project"**
+2. Selecione repositório: `contatotrapstore/BioSync`
+3. Clique em **"Import"**
 
-### 3. Veja a Requisição
-Você deve ver uma requisição para:
+### 3. **Configurar Build**
+
+#### Framework Preset:
 ```
-POST https://neurogame.onrender.com/api/v1/auth/login
+Vite
 ```
 
-**Status esperado:** `200 OK` ✅
+#### Root Directory:
+```
+biosync-admin
+```
+
+#### Build Command:
+```
+npm run build
+```
+
+#### Output Directory:
+```
+dist
+```
+
+#### Install Command:
+```
+npm install
+```
+
+### 4. **Variáveis de Ambiente**
+
+Clique em **"Environment Variables"** e adicione:
+
+| Nome | Valor | Ambiente |
+|------|-------|----------|
+| `VITE_API_URL` | `https://biosync-jlfh.onrender.com` | Production |
+
+**IMPORTANTE:** NÃO incluir `/api/v1` no final!
+
+### 5. **Deploy**
+
+Clique em **"Deploy"**
+
+O Vercel vai:
+1. ✅ Clonar o repositório
+2. ✅ Instalar dependências (incluindo Vite agora!)
+3. ✅ Rodar `vite build`
+4. ✅ Fazer deploy da pasta `dist/`
+
+---
+
+## 🔍 Verificar Deploy
+
+Após deploy, teste:
+
+### 1. **Acessar URL**
+```
+https://seu-projeto.vercel.app
+```
+
+### 2. **Testar Login**
+```
+Email: admin@biosync.com
+Senha: Admin@123456
+```
+
+### 3. **Verificar API**
+Abra DevTools (F12) → Network
+
+Deve mostrar requisições para:
+```
+https://biosync-jlfh.onrender.com/api/v1/auth/login
+```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Erro 404 - Not Found
-❌ **Problema:** `POST https://neurogame.onrender.com/auth/login 404`
-✅ **Solução:** Você configurou a URL COM `/api/v1` no final. Remova!
+### Erro: "vite: command not found"
+**Solução:** ✅ Já corrigido! Vite está em `dependencies` agora.
 
-**Configuração ERRADA:**
-```
-VITE_API_URL=https://neurogame.onrender.com/api/v1  ❌
-```
+### Erro: "Failed to connect to backend"
+**Verificar:**
+1. Backend está online? https://biosync-jlfh.onrender.com/api/v1/health
+2. Variável `VITE_API_URL` está configurada no Vercel?
+3. CORS permitindo domínio do Vercel no backend?
 
-**Configuração CORRETA:**
-```
-VITE_API_URL=https://neurogame.onrender.com  ✅
-```
-
-### Erro CORS
-❌ **Problema:** `Access to fetch at '...' has been blocked by CORS policy`
-✅ **Solução:** Configure a variável `CORS_ORIGIN` no backend (Render)
-
-No **Render Dashboard** > Backend Service > Environment:
-```
-CORS_ORIGIN=https://seu-admin.vercel.app,https://neurogame.onrender.com
-```
-
-### Erro 401 - Unauthorized
-❌ **Problema:** Login retorna 401
-✅ **Soluções possíveis:**
-1. Verifique se o backend está rodando (acesse `https://neurogame.onrender.com/api/v1/health`)
-2. Verifique se as credenciais estão corretas: `admin` / `Admin123`
-3. Verifique se o JWT_SECRET está configurado no backend (Render)
-
-### Erro 500 - Internal Server Error
-❌ **Problema:** Servidor retorna erro 500
-✅ **Solução:** Verifique os logs do backend no Render:
-- Render Dashboard > seu serviço backend > Logs
-- Procure por erros de conexão com Supabase ou JWT
+### Erro: "404 Not Found" ao recarregar página
+**Solução:** ✅ Já configurado! `vercel.json` tem rewrites.
 
 ---
 
-## 📋 Checklist de Deploy
+## 🔄 Redeploy (Após mudanças)
 
-- [ ] Código do admin atualizado com correção de URL
-- [ ] Variável `VITE_API_URL` configurada na Vercel (SEM /api/v1)
-- [ ] Redeploy feito na Vercel
-- [ ] Backend rodando no Render (`/api/v1/health` retorna 200)
-- [ ] CORS configurado no backend (incluindo URL da Vercel)
-- [ ] Teste de login funcionando
-
----
-
-## 🔗 URLs Importantes
-
-**Admin na Vercel:**
-```
-https://seu-projeto-admin.vercel.app
-```
-
-**Backend no Render:**
-```
-https://neurogame.onrender.com
-```
-
-**API Health Check:**
-```
-https://neurogame.onrender.com/api/v1/health
-```
-
-**API Login:**
-```
-https://neurogame.onrender.com/api/v1/auth/login
-```
-
----
-
-## 💡 Dicas Extras
-
-### Teste Local Antes de Deploy
+### Opção 1: Automático (Push Git)
 ```bash
-# No terminal
-cd neurogame-admin
-
-# Configure URL de produção
-echo "VITE_API_URL=https://neurogame.onrender.com" > .env.local
-
-# Rode em modo de produção local
-npm run build
-npm run preview
+git add .
+git commit -m "fix: update admin for BioSync"
+git push origin master
 ```
+Vercel detecta push e faz redeploy automático.
 
-### Ver Logs em Tempo Real (Vercel)
-```bash
-npm i -g vercel
-vercel login
-vercel logs --follow
-```
+### Opção 2: Manual (Dashboard)
+1. Acesse projeto no Vercel
+2. Vá em **"Deployments"**
+3. Clique em **"..."** no último deploy
+4. Selecione **"Redeploy"**
 
 ---
 
-## 📞 Suporte
+## ✅ Checklist Pré-Deploy
 
-Se o erro persistir:
-1. Verifique os logs do backend no Render
-2. Verifique as variáveis de ambiente na Vercel
-3. Teste a API diretamente com curl:
+- [x] ✅ Vite em `dependencies`
+- [x] ✅ URL do backend atualizada
+- [x] ✅ vercel.json configurado
+- [x] ✅ Backend online (Render)
+- [ ] ⏳ Variável `VITE_API_URL` no Vercel
+- [ ] ⏳ Deploy realizado
+- [ ] ⏳ Teste de login funcionando
 
-```bash
-curl -X POST https://neurogame.onrender.com/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"Admin123"}'
-```
+---
 
-Deve retornar:
+## 📦 Arquivos Importantes
+
+### package.json
 ```json
 {
-  "success": true,
-  "data": {
-    "token": "...",
-    "user": { ... }
+  "dependencies": {
+    "vite": "^5.0.8",
+    "@vitejs/plugin-react": "^4.2.1"
   }
 }
 ```
 
+### vercel.json
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
+}
+```
+
+### .env (local)
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+### Environment Variables (Vercel)
+```env
+VITE_API_URL=https://biosync-jlfh.onrender.com
+```
+
 ---
 
-**Desenvolvido com Claude Code**
+## 🎯 URLs Finais
+
+| Serviço | URL |
+|---------|-----|
+| **Backend** | https://biosync-jlfh.onrender.com |
+| **Admin** | https://seu-projeto.vercel.app |
+| **Repositório** | https://github.com/contatotrapstore/BioSync |
+
+---
+
+**Gerado em:** 2025-10-09
+**Status:** ✅ Pronto para deploy

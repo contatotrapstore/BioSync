@@ -164,7 +164,7 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 -- 8. Inserir configurações padrão
 INSERT INTO games (name, description, slug, category, folder_path, is_active, created_at)
 VALUES
-  ('Bem-vindo ao NeuroGame', 'Tutorial inicial', 'tutorial', 'Tutorial', 'tutorial', true, NOW())
+  ('Bem-vindo ao biosync', 'Tutorial inicial', 'tutorial', 'Tutorial', 'tutorial', true, NOW())
 ON CONFLICT (slug) DO NOTHING;
 
 COMMIT;

@@ -23,7 +23,7 @@ import {
 } from '@mui/icons-material';
 import { getStoredUser } from '../services/storage';
 import { logout } from '../utils/auth';
-import logoUrl from '../assets/logo-branca.png';
+import logoUrl from '../assets/logo-azul.png';
 
 const NAV_LINKS = [
   { label: 'BIBLIOTECA', path: '/library', disabled: false }

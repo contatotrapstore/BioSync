@@ -80,7 +80,7 @@ const Sidebar = ({ mobileOpen, onDrawerToggle, drawerWidth }) => {
         }}
       >
         <img
-          src="/logo-branca.png"
+          src="/logo-azul.png"
           alt="BioSync"
           style={{ width: '70%', maxWidth: 160 }}
         />

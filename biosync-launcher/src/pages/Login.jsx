@@ -16,7 +16,7 @@ import {
 import { Login as LoginIcon, VpnKey } from '@mui/icons-material';
 import api from '../services/api';
 import { setStoredToken, setStoredUser } from '../services/storage';
-import logoUrl from '../assets/logo-branca.png';
+import logoUrl from '../assets/logo-azul.png';
 
 function Login({ onLogin }) {
   const theme = useTheme();
