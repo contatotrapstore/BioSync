@@ -375,7 +375,7 @@ const Dashboard = () => {
 
         {/* Ações Rápidas */}
         <Grid item xs={12}>
-          <Paper elevation={2} sx={{ p: 3, background: 'linear-gradient(135deg, #0f2916 0%, #1f7a34 55%, #47b36b 100%)' }}>
+          <Paper elevation={2} sx={{ p: 3, background: 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)' }}>
             <Typography variant="h6" fontWeight="bold" color="white" gutterBottom>
               Ações Rápidas
             </Typography>

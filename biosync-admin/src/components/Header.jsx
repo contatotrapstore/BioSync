@@ -45,7 +45,7 @@ const Header = ({ onMenuClick, drawerWidth }) => {
     navigate('/login')
   }
 
-  const gradient = theme.palette?.gradient?.primary || 'linear-gradient(135deg, #0f2916 0%, #1f7a34 55%, #47b36b 100%)'
+  const gradient = theme.palette?.gradient?.primary || 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)'
 
   return (
     <AppBar

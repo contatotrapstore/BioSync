@@ -66,7 +66,7 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0D1BA6 0%, #1E3DD9 100%)' // Azul da marca BioSync
+        background: 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)' // Azul da marca BioSync
       }}
     >
       <Container maxWidth="sm">
@@ -78,7 +78,7 @@ const Login = () => {
                 alt="BioSync"
                 style={{ width: '200px', marginBottom: '16px' }}
               />
-              <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ color: '#0D1BA6' }}>
+              <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ color: '#1565c0' }}>
                 Painel Administrativo
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -143,9 +143,9 @@ const Login = () => {
                   mt: 3,
                   mb: 2,
                   py: 1.5,
-                  bgcolor: '#2D5F2E', // Verde da marca
+                  bgcolor: '#1565c0', // Azul da marca BioSync
                   '&:hover': {
-                    bgcolor: '#3A7D3C'
+                    bgcolor: '#1976d2'
                   }
                 }}
               >

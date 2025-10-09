@@ -21,7 +21,7 @@ const Layout = () => {
         minHeight: '100vh',
         backgroundColor: theme.palette.background.default,
         backgroundImage:
-          'radial-gradient(circle at 15% 20%, rgba(15,41,22,0.12), transparent 42%), radial-gradient(circle at 85% 10%, rgba(71,179,107,0.16), transparent 45%)',
+          'radial-gradient(circle at 15% 20%, rgba(13,31,61,0.12), transparent 42%), radial-gradient(circle at 85% 10%, rgba(66,165,245,0.16), transparent 45%)',
       }}
     >
       <Header onMenuClick={handleDrawerToggle} drawerWidth={DRAWER_WIDTH} />
@@ -44,7 +44,7 @@ const Layout = () => {
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(241,246,243,0.9) 40%, rgba(241,246,243,0.6) 100%)',
+              'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(245,247,250,0.9) 40%, rgba(245,247,250,0.6) 100%)',
             zIndex: 0,
           },
         }}
