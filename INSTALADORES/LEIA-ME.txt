@@ -1,17 +1,15 @@
 ╔════════════════════════════════════════════════════════════════╗
-║             NEUROGAME LAUNCHER - INSTALADOR v1.0.1            ║
+║             BIOSYNC LAUNCHER - INSTALADOR v2.0.0              ║
 ╚════════════════════════════════════════════════════════════════╝
 
 📦 ARQUIVOS NESTA PASTA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ NeuroGame Launcher Setup 1.0.1.exe (82MB) ⭐ VERSÃO MAIS RECENTE
-   → Instalador completo do NeuroGame Launcher
+✅ BioSync Launcher-Setup-2.0.0.exe (262MB) ⭐ VERSÃO MAIS RECENTE
+   → Instalador completo do BioSync Launcher
    → Inclui Electron + React + todos os componentes necessários
    → Conecta automaticamente ao servidor de produção
-
-⚠️ NeuroGame Launcher Setup 1.0.0.exe (82MB) - VERSÃO ANTIGA
-   → Manter para referência ou deletar
+   → Nova identidade visual azul
 
 ✅ latest.yml
    → Arquivo de metadados para sistema de auto-atualização
@@ -21,7 +19,7 @@
 🚀 COMO INSTALAR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Dê duplo clique em "NeuroGame Launcher Setup 1.0.1.exe"
+1. Dê duplo clique em "BioSync Launcher-Setup-2.0.0.exe"
 
 2. O instalador irá:
    ✓ Permitir escolher o local de instalação
@@ -31,7 +29,7 @@
 
 3. Após a instalação, o launcher será aberto automaticamente
 
-4. Faça login com suas credenciais NeuroGame
+4. Faça login com suas credenciais BioSync
 
 
 💡 IMPORTANTE:
@@ -47,34 +45,46 @@
     • Instalar na pasta de Programas (se escolhido)
 
 ⚠️  Após instalar, você pode mover ou deletar este arquivo .exe
-    O NeuroGame Launcher já estará instalado no seu computador
+    O BioSync Launcher já estará instalado no seu computador
 
 
 📋 REQUISITOS DO SISTEMA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-• Sistema Operacional: Windows 7 ou superior
-• Memória RAM: Mínimo 2GB (recomendado 4GB)
-• Espaço em Disco: 200MB para o launcher + espaço para jogos
+• Sistema Operacional: Windows 7 ou superior (64-bit)
+• Memória RAM: Mínimo 4GB (recomendado 8GB)
+• Espaço em Disco: 500MB para o launcher + espaço para jogos
 • Internet: Conexão estável para download de jogos
+• Resolução: 1280x720 ou superior
 
 
 🎮 APÓS A INSTALAÇÃO:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. O NeuroGame Launcher ficará disponível em:
+1. O BioSync Launcher ficará disponível em:
    • Atalho na Área de Trabalho
-   • Menu Iniciar → NeuroGame Launcher
-   • C:\Users\[SeuUsuário]\AppData\Local\Programs\neurogame-launcher
+   • Menu Iniciar → BioSync Launcher
+   • C:\Users\[SeuUsuário]\AppData\Local\Programs\biosync-launcher
 
 2. Na primeira execução:
    • Faça login com seu usuário e senha
-   • Navegue pela biblioteca de jogos
-   • Clique em um jogo para baixar e instalar
+   • Navegue pela biblioteca de 13 jogos neuroeducacionais
+   • Clique em um jogo para jogar instantaneamente
 
-3. Os jogos serão instalados em:
-   • Pasta padrão: C:\NeuroGame\Jogos\
-   • Você pode alterar nas configurações
+3. Jogos disponíveis:
+   • 🏎️ Autorama - Corrida
+   • 🎈 Balão - Aventura
+   • 🚁 Batalha de Tanques - Ação
+   • 🚂 Correndo pelos Trilhos - Corrida
+   • ✈️ Desafio Aéreo - Simulação
+   • 🏁 Desafio Automotivo - Corrida
+   • 🏢 Desafio nas Alturas - Aventura
+   • 🌾 Fazendinha - Simulação
+   • 🧩 Labirinto - Puzzle
+   • 🚀 Missão Espacial - Aventura
+   • 🚒 Resgate em Chamas - Ação
+   • 🚕 Taxi City - Simulação
+   • 🌊 Tesouro do Mar - Aventura
 
 
 🔄 ATUALIZAÇÕES AUTOMÁTICAS:
@@ -90,21 +100,31 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Windows 10/11:
-  Configurações → Aplicativos → NeuroGame Launcher → Desinstalar
+  Configurações → Aplicativos → BioSync Launcher → Desinstalar
 
 Windows 7/8:
   Painel de Controle → Programas → Desinstalar um programa
 
 
+🆕 NOVIDADES VERSÃO 2.0.0:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ Nova identidade visual azul
+🎨 Tema completo redesenhado
+⚡ Performance melhorada
+🔒 Segurança aprimorada
+🎮 Interface mais intuitiva
+
+
 📞 SUPORTE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🌐 Site: https://neurogame.com.br
-📧 Email: suporte@neurogame.com.br
-💬 WhatsApp: (XX) XXXXX-XXXX
+🌐 Site: https://biosync.com.br
+📧 Email: suporte@biosync.com.br
+💬 Repositório: github.com/contatotrapstore/BioSync
 
 
 ══════════════════════════════════════════════════════════════════
-         Desenvolvido por NeuroGame Team - 2025
+         Desenvolvido por BioSync Team - 2025
               Todos os direitos reservados
 ══════════════════════════════════════════════════════════════════

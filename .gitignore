@@ -58,8 +58,10 @@ neurogame-launcher/
 neurogame-admin/
 neurogame-backend/
 
-# Instaladores (arquivos grandes - usar GitHub Releases)
+# Instaladores (arquivos grandes - usar GitHub Releases ou hosting externo)
+*.exe
 INSTALADORES/*.exe
+biosync-backend/releases/*.exe
 # Manter metadados
 !INSTALADORES/latest.yml
 !INSTALADORES/LEIA-ME.txt

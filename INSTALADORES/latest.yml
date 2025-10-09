@@ -1,8 +1,8 @@
-version: 1.0.9
+version: 2.0.0
 files:
-  - url: NeuroGame Launcher Setup 1.0.9.exe
-    sha512: 90bbca5c180cac2308a69f4779fa7319824083cb4f7b864dcc3f0e55b37dc5f835683a8d1a5a3104b12b326d3eb1b0e022539be677f800b77ba518546573aef4
-    size: 273842823
-path: NeuroGame Launcher Setup 1.0.9.exe
-sha512: 90bbca5c180cac2308a69f4779fa7319824083cb4f7b864dcc3f0e55b37dc5f835683a8d1a5a3104b12b326d3eb1b0e022539be677f800b77ba518546573aef4
-releaseDate: '2025-10-07T03:51:00.000Z'
+  - url: BioSync Launcher-Setup-2.0.0.exe
+    sha512: z2k3/i1e6Q0Zx8Rp0t7FEqwpAQjG47JDutdUs+6QIRRvl5ut1339ZnrhpVwpAFYvSpTLQbHDoi+ASMLBghQWZQ==
+    size: 273879194
+path: BioSync Launcher-Setup-2.0.0.exe
+sha512: z2k3/i1e6Q0Zx8Rp0t7FEqwpAQjG47JDutdUs+6QIRRvl5ut1339ZnrhpVwpAFYvSpTLQbHDoi+ASMLBghQWZQ==
+releaseDate: '2025-10-09T17:00:00.000Z'

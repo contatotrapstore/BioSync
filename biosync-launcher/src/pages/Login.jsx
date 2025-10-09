@@ -75,9 +75,9 @@ function Login({ onLogin }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#070d0a',
+        backgroundColor: '#0a0d1a',
         backgroundImage:
-          'radial-gradient(circle at 25% 20%, rgba(31,138,76,0.25), transparent 45%), radial-gradient(circle at 80% 0%, rgba(8,15,11,0.8), transparent 55%)',
+          'radial-gradient(circle at 25% 20%, rgba(13,27,166,0.25), transparent 45%), radial-gradient(circle at 80% 0%, rgba(10,13,26,0.8), transparent 55%)',
         px: 2
       }}
     >
@@ -89,7 +89,7 @@ function Login({ onLogin }) {
           borderRadius: 4,
           overflow: 'hidden',
           display: { xs: 'block', md: 'flex' },
-          border: '1px solid rgba(55,126,86,0.25)'
+          border: '1px solid rgba(30,61,217,0.25)'
         }}
       >
         <Box
@@ -153,7 +153,7 @@ function Login({ onLogin }) {
           sx={{
             flex: 1,
             p: { xs: 4, md: 6 },
-            background: 'linear-gradient(160deg, rgba(7,13,10,0.95) 0%, rgba(9,18,14,0.95) 100%)'
+            background: 'linear-gradient(160deg, rgba(10,13,26,0.95) 0%, rgba(13,18,32,0.95) 100%)'
           }}
         >
           <Stack spacing={3}>

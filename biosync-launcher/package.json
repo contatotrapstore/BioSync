@@ -1,6 +1,6 @@
 {
   "name": "biosync-launcher",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "BioSync Desktop Launcher - Game library and player",
   "homepage": "https://github.com/contatotrapstore/biosync",
   "main": "main.js",
