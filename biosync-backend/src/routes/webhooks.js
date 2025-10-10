@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { supabase } = require('../config/supabase');
-const asaasService = require('../services/asaas');
+const asaasService = require('../services/asaas.unified');
 
 /**
  * POST /api/v1/webhooks/asaas
@@ -106,12 +106,28 @@ async function processWebhookEvent(event, webhookId) {
 async function handlePaymentCreated(payment, webhookId) {
   console.log(`[Webhook] Pagamento criado: ${payment.id}`);
 
-  // Buscar subscription pelo asaas_subscription_id
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('asaas_subscription_id', payment.subscription)
-    .single();
+  // Buscar subscription pelo asaas_subscription_id OU asaas_payment_id
+  let subscription = null;
+
+  // Tentar por subscription_id (cartão recorrente)
+  if (payment.subscription) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_subscription_id', payment.subscription)
+      .single();
+    subscription = data;
+  }
+
+  // Se não encontrou, tentar por payment_id (PIX único)
+  if (!subscription && payment.id) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_payment_id', payment.id)
+      .single();
+    subscription = data;
+  }
 
   if (!subscription) {
     console.log('[Webhook] Subscription nao encontrada para payment:', payment.id);
@@ -163,12 +179,26 @@ async function handlePaymentCreated(payment, webhookId) {
 async function handlePaymentConfirmed(payment, webhookId) {
   console.log(`[Webhook] Pagamento confirmado: ${payment.id}`);
 
-  // Buscar subscription
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('asaas_subscription_id', payment.subscription)
-    .single();
+  // Buscar subscription pelo asaas_subscription_id OU asaas_payment_id
+  let subscription = null;
+
+  if (payment.subscription) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_subscription_id', payment.subscription)
+      .single();
+    subscription = data;
+  }
+
+  if (!subscription && payment.id) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_payment_id', payment.id)
+      .single();
+    subscription = data;
+  }
 
   if (!subscription) {
     console.log('[Webhook] Subscription nao encontrada');
@@ -225,11 +255,25 @@ async function handlePaymentOverdue(payment, webhookId) {
   console.log(`[Webhook] Pagamento atrasado: ${payment.id}`);
 
   // Buscar subscription
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('asaas_subscription_id', payment.subscription)
-    .single();
+  let subscription = null;
+
+  if (payment.subscription) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_subscription_id', payment.subscription)
+      .single();
+    subscription = data;
+  }
+
+  if (!subscription && payment.id) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_payment_id', payment.id)
+      .single();
+    subscription = data;
+  }
 
   if (!subscription) return;
 
@@ -269,11 +313,25 @@ async function handlePaymentDeleted(payment, webhookId) {
   console.log(`[Webhook] Pagamento deletado/estornado: ${payment.id}`);
 
   // Buscar subscription
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('asaas_subscription_id', payment.subscription)
-    .single();
+  let subscription = null;
+
+  if (payment.subscription) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_subscription_id', payment.subscription)
+      .single();
+    subscription = data;
+  }
+
+  if (!subscription && payment.id) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('asaas_payment_id', payment.id)
+      .single();
+    subscription = data;
+  }
 
   if (!subscription) return;
 

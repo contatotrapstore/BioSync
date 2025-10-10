@@ -1,4 +1,4 @@
-# 🔔 Configuração do Webhook Asaas - NeuroGame
+# 🔔 Configuração do Webhook Asaas - BioSync
 
 ## 📋 Instruções Passo a Passo
 
@@ -14,8 +14,10 @@ Clique em **"Adicionar Webhook"** ou **"Novo Webhook"**
 
 **URL do Webhook:**
 ```
-https://neurogame-7av9.onrender.com/api/v1/webhooks/asaas
+https://biosync-backend.onrender.com/api/v1/webhooks/asaas
 ```
+
+**Nota:** Substitua `biosync-backend.onrender.com` pela URL real do seu backend no Render.
 
 ### 4. Selecionar Eventos
 
@@ -30,15 +32,12 @@ Marque os seguintes eventos:
 
 ### 5. Configurar Segurança (Opcional mas Recomendado)
 
-Se o Asaas oferecer um campo de **Secret/Token**, use:
+Se o Asaas oferecer um campo de **Secret/Token**, use o mesmo valor configurado no backend `.env`:
 ```
-neurogame_webhook_2025
+ASAAS_WEBHOOK_SECRET=<seu_secret_aqui>
 ```
 
-Este valor já está configurado no backend em `.env`:
-```
-ASAAS_WEBHOOK_SECRET=neurogame_webhook_2025
-```
+**Importante:** Este secret deve ser o mesmo em ambos os lugares (Asaas Dashboard e .env do backend)
 
 ### 6. Salvar Configuração
 
@@ -50,12 +49,13 @@ Clique em **"Salvar"** ou **"Criar Webhook"**
 
 ### Teste Manual via Logs
 
-1. Crie um pagamento de teste no sistema NeuroGame
-2. Monitore os logs do backend em: https://dashboard.render.com/web/neurogame-7av9
+1. Crie um pagamento de teste no sistema BioSync (launcher)
+2. Monitore os logs do backend em: https://dashboard.render.com
 3. Procure por mensagens como:
    ```
-   [Webhook] Recebido evento: PAYMENT_CREATED
-   [Webhook] Pagamento processado com sucesso
+   [Webhook Asaas] Evento recebido: PAYMENT_CREATED
+   [Webhook] Pagamento criado: pay_xxxxx
+   [Webhook] Pagamento confirmado: pay_xxxxx
    ```
 
 ### Teste no Dashboard Asaas
@@ -86,10 +86,26 @@ Clique em **"Salvar"** ou **"Criar Webhook"**
 
 ## 📝 Informações de Referência
 
-**Backend URL:** https://neurogame-7av9.onrender.com
+**Backend URL:** `<sua-url-backend>.onrender.com`
 **Webhook Endpoint:** `/api/v1/webhooks/asaas`
-**Ambiente:** Produção
+**Ambiente:** Verifique `ASAAS_ENVIRONMENT` no `.env` (sandbox ou production)
 **API Key:** Configurada no `.env` (ASAAS_API_KEY)
+
+---
+
+## 🔧 Diferenças entre PIX e Cartão
+
+### PIX (Pagamento Único Mensal)
+- Cada mês cria um novo **pagamento** no Asaas
+- Usuário recebe QR Code para escanear
+- Webhook `PAYMENT_RECEIVED` ativa a assinatura
+- Campo usado no banco: `asaas_payment_id`
+
+### Cartão de Crédito (Assinatura Recorrente)
+- Cria uma **assinatura** no Asaas
+- Cobrança automática todo mês
+- Webhook `PAYMENT_CONFIRMED` ativa a assinatura
+- Campo usado no banco: `asaas_subscription_id`
 
 ---
 

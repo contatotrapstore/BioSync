@@ -1,5 +1,5 @@
 const { supabase } = require('../config/supabase');
-const asaasService = require('../services/asaas');
+const asaasService = require('../services/asaas.unified');
 
 // Get all subscription plans
 exports.getAllPlans = async (req, res, next) => {
@@ -484,6 +484,48 @@ exports.createUserSubscription = async (req, res, next) => {
     const { paymentMethod, creditCard, creditCardHolder } = req.body;
     const userId = req.user.id;
 
+    console.log(`[Subscription] Criando assinatura para usuário ${userId} - Método: ${paymentMethod}`);
+
+    // Validar método de pagamento
+    if (!paymentMethod || !['PIX', 'CREDIT_CARD'].includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Método de pagamento inválido. Use PIX ou CREDIT_CARD'
+      });
+    }
+
+    // Validar dados de cartão se for CREDIT_CARD
+    if (paymentMethod === 'CREDIT_CARD') {
+      if (!creditCard || !creditCardHolder) {
+        return res.status(400).json({
+          success: false,
+          message: 'Dados do cartão e titular são obrigatórios para pagamento com cartão'
+        });
+      }
+
+      // Validar campos obrigatórios do cartão
+      const requiredCardFields = ['holderName', 'number', 'expiryMonth', 'expiryYear', 'ccv'];
+      const missingCardFields = requiredCardFields.filter(field => !creditCard[field]);
+
+      if (missingCardFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Campos obrigatórios do cartão faltando: ${missingCardFields.join(', ')}`
+        });
+      }
+
+      // Validar campos do titular
+      const requiredHolderFields = ['name', 'email', 'cpfCnpj', 'postalCode', 'addressNumber', 'phone'];
+      const missingHolderFields = requiredHolderFields.filter(field => !creditCardHolder[field]);
+
+      if (missingHolderFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Campos obrigatórios do titular faltando: ${missingHolderFields.join(', ')}`
+        });
+      }
+    }
+
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -514,10 +556,13 @@ exports.createUserSubscription = async (req, res, next) => {
     let asaasCustomerId = user.asaas_customer_id;
 
     if (!asaasCustomerId) {
+      console.log('[Subscription] Criando cliente no Asaas...');
       const asaasCustomer = await asaasService.createCustomer({
         id: user.id,
         email: user.email,
-        full_name: user.full_name
+        full_name: user.full_name,
+        cpf: user.cpf,
+        phone: user.phone
       });
 
       asaasCustomerId = asaasCustomer.id;
@@ -526,54 +571,116 @@ exports.createUserSubscription = async (req, res, next) => {
         .from('users')
         .update({ asaas_customer_id: asaasCustomerId })
         .eq('id', userId);
+
+      console.log(`[Subscription] Cliente Asaas criado: ${asaasCustomerId}`);
     }
 
-    const subscriptionData = {
-      userId,
-      paymentMethod: paymentMethod || 'PIX',
-      value: parseFloat(process.env.SUBSCRIPTION_VALUE || 149.90),
-      description: 'BioSync - Assinatura Mensal Completa'
-    };
+    const subscriptionValue = parseFloat(process.env.SUBSCRIPTION_VALUE || 149.90);
 
-    if (paymentMethod === 'CREDIT_CARD' && creditCard) {
-      subscriptionData.creditCard = creditCard;
-      subscriptionData.creditCardHolder = creditCardHolder;
+    // DIFERENCIAÇÃO CRÍTICA: PIX = Payment único, CARTÃO = Subscription recorrente
+    let asaasResponse;
+    let isRecurring = false;
+
+    if (paymentMethod === 'PIX') {
+      // Para PIX, criar pagamento único mensal (não recorrente)
+      console.log('[Subscription] Criando pagamento único PIX...');
+
+      asaasResponse = await asaasService.createPayment(asaasCustomerId, {
+        userId,
+        paymentMethod: 'PIX',
+        value: subscriptionValue,
+        description: 'BioSync - Pagamento Mensal'
+      });
+
+      isRecurring = false;
+    } else {
+      // Para CARTÃO, criar assinatura recorrente
+      console.log('[Subscription] Criando assinatura recorrente com cartão...');
+
+      asaasResponse = await asaasService.createSubscription(asaasCustomerId, {
+        userId,
+        paymentMethod: 'CREDIT_CARD',
+        value: subscriptionValue,
+        description: 'BioSync - Assinatura Mensal',
+        creditCard,
+        creditCardHolder
+      });
+
+      isRecurring = true;
     }
 
-    const asaasSubscription = await asaasService.createSubscription(
-      asaasCustomerId,
-      subscriptionData
-    );
-
+    // Criar registro de subscription no banco
     const { data: newSubscription, error: insertError } = await supabase
       .from('subscriptions')
       .insert([{
         user_id: userId,
-        asaas_subscription_id: asaasSubscription.id,
+        asaas_subscription_id: isRecurring ? asaasResponse.id : null,
+        asaas_payment_id: !isRecurring ? asaasResponse.id : null,
         status: 'pending',
-        plan_value: subscriptionData.value,
+        plan_value: subscriptionValue,
         billing_cycle: 'MONTHLY',
         payment_method: paymentMethod,
-        next_due_date: asaasSubscription.nextDueDate
+        next_due_date: isRecurring ? asaasResponse.nextDueDate : asaasResponse.dueDate
       }])
       .select()
       .single();
 
     if (insertError) throw insertError;
 
-    let pixQrCode = null;
-    let pixCopyPaste = null;
+    console.log(`[Subscription] Subscription criada no banco: ${newSubscription.id}`);
+
+    // Processar resposta específica por método
+    let responseData = {
+      subscription: {
+        id: newSubscription.id,
+        status: newSubscription.status,
+        plan_value: newSubscription.plan_value,
+        payment_method: paymentMethod,
+        next_due_date: newSubscription.next_due_date
+      }
+    };
 
     if (paymentMethod === 'PIX') {
+      // Buscar QR Code PIX
       try {
-        const payments = await asaasService.listPayments(asaasSubscription.id, { limit: 1 });
+        console.log('[Subscription] Buscando QR Code PIX...');
+        const pixData = await asaasService.getPixQrCode(asaasResponse.id);
+
+        responseData.payment = {
+          pixQrCode: pixData.encodedImage,
+          pixCopyPaste: pixData.payload,
+          expiresIn: '1 hora'
+        };
+
+        // Registrar pagamento na tabela payments
+        await supabase
+          .from('payments')
+          .insert([{
+            subscription_id: newSubscription.id,
+            asaas_payment_id: asaasResponse.id,
+            asaas_invoice_url: asaasResponse.invoiceUrl,
+            value: asaasResponse.value,
+            status: 'pending',
+            payment_method: 'PIX',
+            due_date: asaasResponse.dueDate,
+            description: 'Pagamento mensal - BioSync'
+          }]);
+
+        console.log('[Subscription] QR Code PIX gerado com sucesso');
+      } catch (pixError) {
+        console.error('[Subscription] Erro ao buscar QR Code PIX:', pixError.message);
+        responseData.payment = {
+          error: 'Erro ao gerar QR Code. Tente novamente.'
+        };
+      }
+    } else {
+      // Para cartão, buscar primeiro pagamento da subscription
+      try {
+        console.log('[Subscription] Buscando pagamento da assinatura...');
+        const payments = await asaasService.listPayments(asaasResponse.id, { limit: 1 });
 
         if (payments.data && payments.data.length > 0) {
           const firstPayment = payments.data[0];
-
-          const pixData = await asaasService.getPixQrCode(firstPayment.id);
-          pixQrCode = pixData.encodedImage;
-          pixCopyPaste = pixData.payload;
 
           await supabase
             .from('payments')
@@ -582,36 +689,40 @@ exports.createUserSubscription = async (req, res, next) => {
               asaas_payment_id: firstPayment.id,
               asaas_invoice_url: firstPayment.invoiceUrl,
               value: firstPayment.value,
-              status: 'pending',
-              payment_method: 'PIX',
+              status: asaasService.mapPaymentStatus(firstPayment.status),
+              payment_method: 'CREDIT_CARD',
               due_date: firstPayment.dueDate,
               description: 'Primeiro pagamento - BioSync'
             }]);
+
+          responseData.payment = {
+            status: firstPayment.status,
+            invoiceUrl: firstPayment.invoiceUrl
+          };
+
+          console.log(`[Subscription] Pagamento registrado: ${firstPayment.id}`);
         }
-      } catch (pixError) {
-        console.error('Erro ao buscar QR Code PIX:', pixError.message);
+      } catch (paymentError) {
+        console.error('[Subscription] Erro ao buscar pagamentos:', paymentError.message);
       }
     }
 
     return res.status(201).json({
       success: true,
-      message: 'Assinatura criada com sucesso',
-      data: {
-        subscription: {
-          id: newSubscription.id,
-          asaas_subscription_id: asaasSubscription.id,
-          status: newSubscription.status,
-          plan_value: newSubscription.plan_value,
-          payment_method: paymentMethod,
-          next_due_date: newSubscription.next_due_date
-        },
-        payment: paymentMethod === 'PIX'
-          ? { pixQrCode, pixCopyPaste, expiresIn: '15 minutos' }
-          : null
-      }
+      message: paymentMethod === 'PIX'
+        ? 'Pagamento criado! Escaneie o QR Code para pagar'
+        : 'Assinatura criada com sucesso',
+      data: responseData
     });
   } catch (error) {
-    next(error);
+    console.error('[Subscription] Erro ao criar assinatura:', error.message);
+
+    // Retornar erro específico do Asaas se disponível
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Erro ao criar assinatura',
+      details: error.response?.data || null
+    });
   }
 };
 
