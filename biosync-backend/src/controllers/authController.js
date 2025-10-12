@@ -268,9 +268,21 @@ exports.login = async (req, res, next) => {
     }
 
     const storedHash = user.password;
+
+    // DEBUG: Log de verificação de senha
+    console.log('[DEBUG LOGIN]', {
+      email: user.email,
+      passwordReceived: password,
+      passwordLength: password.length,
+      hashLength: storedHash ? storedHash.length : 0,
+      hashPreview: storedHash ? storedHash.substring(0, 20) : 'null'
+    });
+
     const passwordMatch = storedHash
       ? await bcrypt.compare(password, storedHash)
       : false;
+
+    console.log('[DEBUG LOGIN] Password match result:', passwordMatch);
 
     if (!passwordMatch) {
       return res.status(401).json({
