@@ -50,7 +50,7 @@ export const setStoredSettings = async (settings) => {
 export const getStoredSettings = async () => {
   // Use production URL by default
   const defaultSettings = {
-    apiUrl: 'https://biosync.onrender.com/api/v1'
+    apiUrl: 'https://biosync-jlfh.onrender.com/api/v1'
   };
 
   if (window.electronAPI) {

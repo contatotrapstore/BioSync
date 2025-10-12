@@ -186,7 +186,7 @@ function GameDetail() {
         setError('');
 
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
-        const apiUrl = settings.apiUrl || 'https://biosync.onrender.com/api/v1';
+        const apiUrl = settings.apiUrl || 'https://biosync-jlfh.onrender.com/api/v1';
 
         const downloadResult = await window.electronAPI.downloads.downloadAndExtractGame({
           gameSlug: game.slug,
