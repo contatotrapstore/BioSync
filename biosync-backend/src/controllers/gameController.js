@@ -45,26 +45,17 @@ exports.getUserGames = async (req, res, next) => {
 
     if (gamesError) throw gamesError;
 
-    // Get games from active subscription
-    const { data: activeSubscription } = await supabase
-      .from('user_subscriptions')
-      .select('*, plan_id')
+    // Check Asaas subscription (primary method)
+    const { data: asaasSubscription } = await supabase
+      .from('subscriptions')
+      .select('*')
       .eq('user_id', userId)
-      .eq('is_active', true)
-      .gte('end_date', new Date().toISOString())
+      .eq('status', 'active')
       .single();
 
-    let subscriptionGameIds = [];
-    if (activeSubscription) {
-      const { data: planGames } = await supabase
-        .from('plan_games')
-        .select('game_id')
-        .eq('plan_id', activeSubscription.plan_id);
+    let hasActiveSubscription = !!asaasSubscription;
 
-      subscriptionGameIds = planGames ? planGames.map(pg => pg.game_id) : [];
-    }
-
-    // Get individual game access
+    // Get individual game access (fallback or additional grants)
     const { data: individualAccess } = await supabase
       .from('user_game_access')
       .select('game_id')
@@ -73,11 +64,11 @@ exports.getUserGames = async (req, res, next) => {
 
     const individualGameIds = individualAccess ? individualAccess.map(ug => ug.game_id) : [];
 
-    // Combine and mark accessible games
+    // Mark accessible games
     const gamesWithAccess = allGames.map(game => ({
       ...game,
-      hasAccess: subscriptionGameIds.includes(game.id) || individualGameIds.includes(game.id),
-      accessType: subscriptionGameIds.includes(game.id) ? 'subscription' :
+      hasAccess: hasActiveSubscription || individualGameIds.includes(game.id),
+      accessType: hasActiveSubscription ? 'subscription' :
                    individualGameIds.includes(game.id) ? 'individual' : null
     }));
 
@@ -85,9 +76,10 @@ exports.getUserGames = async (req, res, next) => {
       success: true,
       data: {
         games: gamesWithAccess,
-        subscription: activeSubscription ? {
-          planId: activeSubscription.plan_id,
-          endDate: activeSubscription.end_date
+        subscription: asaasSubscription ? {
+          status: asaasSubscription.status,
+          planValue: asaasSubscription.plan_value,
+          nextDueDate: asaasSubscription.next_due_date
         } : null
       }
     });

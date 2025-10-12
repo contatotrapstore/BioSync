@@ -227,6 +227,36 @@ async function handlePaymentConfirmed(payment, webhookId) {
       .eq('id', subscription.id);
 
     console.log(`[Webhook] Subscription ${subscription.id} ativada!`);
+
+    // AUTO-GRANT: Liberar TODOS os jogos ativos para o usuário
+    const { data: allGames, error: gamesError } = await supabase
+      .from('games')
+      .select('id')
+      .eq('is_active', true);
+
+    if (gamesError) {
+      console.error('[Webhook] Erro ao buscar jogos:', gamesError.message);
+    } else if (allGames && allGames.length > 0) {
+      // Criar entradas em user_game_access para cada jogo
+      const gameAccessRecords = allGames.map(game => ({
+        user_id: subscription.user_id,
+        game_id: game.id,
+        granted_at: new Date().toISOString()
+      }));
+
+      const { error: accessError } = await supabase
+        .from('user_game_access')
+        .upsert(gameAccessRecords, {
+          onConflict: 'user_id,game_id',
+          ignoreDuplicates: false
+        });
+
+      if (accessError) {
+        console.error('[Webhook] Erro ao liberar jogos:', accessError.message);
+      } else {
+        console.log(`[Webhook] ✅ ${allGames.length} jogos liberados para user ${subscription.user_id}`);
+      }
+    }
   } else {
     // Atualizar info de pagamento
     await supabase
