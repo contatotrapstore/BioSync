@@ -1,10 +1,10 @@
 {
-  "name": "biosync-launcher",
+  "name": "neuroone-launcher",
   "version": "2.0.0",
-  "description": "BioSync Desktop Launcher - Game library and player",
-  "homepage": "https://github.com/contatotrapstore/biosync",
+  "description": "NeuroOne Desktop Launcher - Game library and player",
+  "homepage": "https://github.com/contatotrapstore/neuroone",
   "main": "main.js",
-  "author": "BioSync Team",
+  "author": "NeuroOne Team",
   "license": "MIT",
   "scripts": {
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:electron\"",
@@ -40,8 +40,8 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.biosync.launcher",
-    "productName": "BioSync Launcher",
+    "appId": "com.neuroone.launcher",
+    "productName": "NeuroOne Launcher",
     "directories": {
       "output": "dist-electron"
     },
@@ -60,7 +60,7 @@
         }
       ],
       "icon": "build/icon.png",
-      "publisherName": "BioSync",
+      "publisherName": "NeuroOne",
       "verifyUpdateCodeSignature": false,
       "artifactName": "${productName}-Setup-${version}.${ext}"
     },
@@ -83,8 +83,8 @@
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "type": "distribution",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "BioSync needs microphone access for some games.",
-        "NSCameraUsageDescription": "BioSync needs camera access for some games.",
+        "NSMicrophoneUsageDescription": "NeuroOne needs microphone access for some games.",
+        "NSCameraUsageDescription": "NeuroOne needs camera access for some games.",
         "LSApplicationCategoryType": "public.app-category.games"
       }
     },
@@ -101,11 +101,11 @@
       ],
       "icon": "build/icon.png",
       "category": "Game",
-      "executableName": "biosync-launcher",
-      "maintainer": "BioSync Team",
+      "executableName": "neuroone-launcher",
+      "maintainer": "NeuroOne Team",
       "desktop": {
-        "Name": "BioSync Launcher",
-        "Comment": "BioSync Desktop Launcher - Game library and player",
+        "Name": "NeuroOne Launcher",
+        "Comment": "NeuroOne Desktop Launcher - Game library and player",
         "Categories": "Game;"
       },
       "artifactName": "${productName}-${version}.${ext}"
@@ -126,7 +126,7 @@
           "x": 270,
           "y": 340,
           "type": "file",
-          "path": "build/Instalar BioSync.command"
+          "path": "build/Instalar NeuroOne.command"
         }
       ],
       "window": {
@@ -149,3 +149,4 @@
     "publish": null
   }
 }
+

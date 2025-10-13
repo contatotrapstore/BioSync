@@ -117,7 +117,7 @@ function createMenu() {
       label: 'Help',
       submenu: [
         {
-          label: 'About biosync',
+          label: 'About NeuroOne',
           click: () => {
             mainWindow.webContents.send('show-about');
           }
@@ -208,7 +208,7 @@ function registerIpcHandlers() {
 
     const win = BrowserWindow.fromWebContents(event.sender);
     const gamesPath = path.join(app.getPath('userData'), 'Jogos');
-    const tempDir = path.join(app.getPath('temp'), 'biosync-downloads');
+    const tempDir = path.join(app.getPath('temp'), 'neuroone-downloads');
     const zipPath = path.join(tempDir, `${gameSlug}.zip`);
     const extractPath = path.join(gamesPath, folderPath);
 
