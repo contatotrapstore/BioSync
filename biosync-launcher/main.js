@@ -365,6 +365,21 @@ app.whenReady().then(() => {
   // Initialize store after app is ready
   store = new Store();
 
+  // Migração automática: corrigir URL antiga do backend
+  const settings = store.get('settings');
+  if (settings && settings.apiUrl) {
+    const oldUrls = [
+      'https://biosync.onrender.com/api/v1',
+      'https://neurogame.onrender.com/api/v1'
+    ];
+    const newUrl = 'https://biosync-jlfh.onrender.com/api/v1';
+
+    if (oldUrls.includes(settings.apiUrl)) {
+      console.log(`[migration] Updating old API URL (${settings.apiUrl}) to new URL`);
+      store.set('settings', { ...settings, apiUrl: newUrl });
+    }
+  }
+
   // Check if running in development mode
   // Usa app.isPackaged como fonte principal de verdade
   isDev = !app.isPackaged;
