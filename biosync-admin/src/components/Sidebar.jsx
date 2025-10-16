@@ -80,7 +80,7 @@ const Sidebar = ({ mobileOpen, onDrawerToggle, drawerWidth }) => {
         }}
       >
         <img src="/logo-neuroone.png" alt="NeuroOne" style={{ width: '70%', maxWidth: 160 }} />
-        <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.75), letterSpacing: '0.12em' }}>
+        <Typography variant="caption" sx={{ color: alpha('#1a1400', 0.85), fontWeight: 600, letterSpacing: '0.12em' }}>
           Plataforma Educacional
         </Typography>
       </Toolbar>
@@ -154,7 +154,7 @@ const Sidebar = ({ mobileOpen, onDrawerToggle, drawerWidth }) => {
       </List>
       <Box sx={{ flexGrow: 1 }} />
       <Box sx={{ px: 3, pt: 2 }}>
-        <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.5), lineHeight: 1.4 }}>
+        <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.65), lineHeight: 1.4 }}>
           Gerencie jogos e usuários em um só lugar.
         </Typography>
       </Box>

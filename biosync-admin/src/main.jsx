@@ -17,7 +17,8 @@ const queryClient = new QueryClient({
   },
 })
 
-const brandGradient = 'linear-gradient(135deg, #1c1400 0%, #d4a100 55%, #ffd913 100%)'
+// Header gradient: amarelo à direita, preto à esquerda (para contraste com logo preta e textos brancos)
+const brandGradient = 'linear-gradient(135deg, #1c1400 0%, #1c1400 35%, #d4a100 70%, #ffd913 100%)'
 
 const theme = createTheme({
   palette: {
@@ -88,8 +89,8 @@ const theme = createTheme({
       styleOverrides: {
         paper: {
           backgroundImage:
-            'linear-gradient(180deg, rgba(26,20,0,0.95) 0%, rgba(26,20,0,0.88) 65%, rgba(199,163,0,0.9) 100%)',
-          color: '#fff1a6',
+            'linear-gradient(180deg, #ffd913 0%, #d4a100 25%, rgba(60,48,0,0.95) 50%, rgba(26,20,0,0.98) 100%)',
+          color: '#ffffff',
           borderRight: 'none',
         },
       },
@@ -148,7 +149,8 @@ const theme = createTheme({
 
 theme.palette.gradient = {
   primary: brandGradient,
-  sidebar: 'linear-gradient(180deg, rgba(26,20,0,0.95) 0%, rgba(199,163,0,0.92) 60%, rgba(255,217,19,0.9) 100%)',
+  // Sidebar gradient: amarelo no topo (logo preta visível), preto embaixo (texto branco visível)
+  sidebar: 'linear-gradient(180deg, #ffd913 0%, #d4a100 25%, rgba(60,48,0,0.95) 50%, rgba(26,20,0,0.98) 100%)',
 }
 
 theme.customShadows = {

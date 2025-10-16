@@ -73,14 +73,13 @@ const Header = ({ onMenuClick, drawerWidth }) => {
         </IconButton>
 
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, gap: 2 }}>
-          <img src="/logo-neuroone.png" alt="NeuroOne" style={{ height: 42, display: 'block' }} />
           <Box sx={{ lineHeight: 1.2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#ffffff' }}>
               NeuroOne Admin
             </Typography>
             <Typography
               variant="caption"
-              sx={{ color: alpha('#ffffff', 0.8), letterSpacing: '0.04em' }}
+              sx={{ color: alpha('#ffffff', 0.85), letterSpacing: '0.04em' }}
             >
               Controle total da plataforma educacional
             </Typography>
