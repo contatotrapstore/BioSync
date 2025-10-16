@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Payment, Pix, CreditCard, CheckCircle, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
-import logoUrl from '../assets/logo-azul.png';
+import logoUrl from '../assets/logo-neuroone.png';
 
 function RenewPayment() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function RenewPayment() {
   const [error, setError] = useState('');
   const [paymentData, setPaymentData] = useState(null);
 
-  // Dados do cartão
+  // Dados do cartÃ£o
   const [cardData, setCardData] = useState({
     holderName: '',
     number: '',
@@ -57,12 +57,12 @@ function RenewPayment() {
         paymentMethod
       };
 
-      // Se for cartão, adicionar dados
+      // Se for cartÃ£o, adicionar dados
       if (paymentMethod === 'CREDIT_CARD') {
-        // Validar dados do cartão
+        // Validar dados do cartÃ£o
         if (!cardData.holderName || !cardData.number || !cardData.expiryMonth ||
             !cardData.expiryYear || !cardData.ccv) {
-          setError('Preencha todos os dados do cartão');
+          setError('Preencha todos os dados do cartÃ£o');
           setLoading(false);
           return;
         }
@@ -77,7 +77,7 @@ function RenewPayment() {
 
         payload.creditCardHolderInfo = {
           name: cardData.holderName,
-          email: '', // Será preenchido pelo backend com email do usuário
+          email: '', // SerÃ¡ preenchido pelo backend com email do usuÃ¡rio
           cpfCnpj: '', // Opcional
           postalCode: '', // Opcional
           addressNumber: '', // Opcional
@@ -112,16 +112,16 @@ function RenewPayment() {
         <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#070d0a', px: 2 }}>
           <Paper sx={{ maxWidth: 600, width: '100%', p: 4, borderRadius: 4 }}>
             <Stack spacing={3} alignItems="center">
-              <img src={logoUrl} alt="BioSync" style={{ height: 48 }} />
+              <img src={logoUrl} alt="NeuroOne" style={{ height: 48 }} />
 
-              <CheckCircle sx={{ fontSize: 64, color: '#1f8a4c' }} />
+              <CheckCircle sx={{ fontSize: 64, color: '#c7a300' }} />
 
               <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
                 Pagamento Criado!
               </Typography>
 
               <Typography variant="body1" align="center" color="text.secondary">
-                Escaneie o QR Code ou copie o código PIX para concluir o pagamento
+                Escaneie o QR Code ou copie o cÃ³digo PIX para concluir o pagamento
               </Typography>
 
               {paymentData.pixQrCode && (
@@ -129,14 +129,14 @@ function RenewPayment() {
                   component="img"
                   src={paymentData.pixQrCode}
                   alt="QR Code PIX"
-                  sx={{ width: 250, height: 250, border: '2px solid #1f8a4c', borderRadius: 2 }}
+                  sx={{ width: 250, height: 250, border: '2px solid #c7a300', borderRadius: 2 }}
                 />
               )}
 
               {paymentData.pixCopyPaste && (
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Código PIX Copia e Cola:
+                    CÃ³digo PIX Copia e Cola:
                   </Typography>
                   <Paper
                     sx={{
@@ -158,13 +158,13 @@ function RenewPayment() {
                       navigator.clipboard.writeText(paymentData.pixCopyPaste);
                     }}
                   >
-                    Copiar Código
+                    Copiar CÃ³digo
                   </Button>
                 </Box>
               )}
 
               <Alert severity="info" sx={{ width: '100%' }}>
-                Após o pagamento, sua conta será reativada automaticamente e você terá acesso por mais 30 dias!
+                ApÃ³s o pagamento, sua conta serÃ¡ reativada automaticamente e vocÃª terÃ¡ acesso por mais 30 dias!
               </Alert>
 
               <Button
@@ -172,7 +172,7 @@ function RenewPayment() {
                 variant="contained"
                 onClick={() => navigate('/library')}
                 sx={{
-                  background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+                  background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
                   }
@@ -186,14 +186,14 @@ function RenewPayment() {
       );
     }
 
-    // Cartão aprovado
+    // CartÃ£o aprovado
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#070d0a', px: 2 }}>
         <Paper sx={{ maxWidth: 600, width: '100%', p: 4, borderRadius: 4 }}>
           <Stack spacing={3} alignItems="center">
-            <img src={logoUrl} alt="biosync" style={{ height: 48 }} />
+            <img src={logoUrl} alt="NeuroOne" style={{ height: 48 }} />
 
-            <CheckCircle sx={{ fontSize: 64, color: '#1f8a4c' }} />
+            <CheckCircle sx={{ fontSize: 64, color: '#c7a300' }} />
 
             <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
               Pagamento Aprovado!
@@ -208,7 +208,7 @@ function RenewPayment() {
               variant="contained"
               onClick={() => navigate('/library')}
               sx={{
-                background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+                background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
                 }
@@ -222,7 +222,7 @@ function RenewPayment() {
     );
   }
 
-  // Formulário de pagamento
+  // FormulÃ¡rio de pagamento
   return (
     <Box
       sx={{
@@ -237,12 +237,12 @@ function RenewPayment() {
         py: 4
       }}
     >
-      <Paper sx={{ maxWidth: 600, width: '100%', p: 4, borderRadius: 4, border: '1px solid rgba(55,126,86,0.25)' }}>
+      <Paper sx={{ maxWidth: 600, width: '100%', p: 4, borderRadius: 4, border: '1px solid rgba(255,217,19,0.18)' }}>
         <Stack spacing={3}>
-          {/* Logo e título */}
+          {/* Logo e tÃ­tulo */}
           <Box sx={{ textAlign: 'center' }}>
-            <img src={logoUrl} alt="biosync" style={{ height: 48, marginBottom: 16 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: '#1f8a4c' }}>
+            <img src={logoUrl} alt="NeuroOne" style={{ height: 48, marginBottom: 16 }} />
+            <Typography variant="h5" sx={{ fontWeight: 600, color: '#c7a300' }}>
               Renovar Acesso
             </Typography>
           </Box>
@@ -252,25 +252,25 @@ function RenewPayment() {
             elevation={0}
             sx={{
               p: 3,
-              border: '2px solid #1f8a4c',
+              border: '2px solid #c7a300',
               borderRadius: 2,
               background: 'linear-gradient(135deg, rgba(31,138,76,0.1) 0%, rgba(55,126,86,0.1) 100%)'
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" sx={{ color: '#1f8a4c', fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ color: '#c7a300', fontWeight: 600 }}>
                 Plano Mensal
               </Typography>
-              <Typography variant="h4" sx={{ color: '#1f8a4c', fontWeight: 700 }}>
+              <Typography variant="h4" sx={{ color: '#c7a300', fontWeight: 700 }}>
                 R$ 149,90
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              ✓ Acesso por 30 dias • Todos os jogos • Suporte prioritário
+              âœ“ Acesso por 30 dias â€¢ Todos os jogos â€¢ Suporte prioritÃ¡rio
             </Typography>
           </Paper>
 
-          {/* Método de pagamento */}
+          {/* MÃ©todo de pagamento */}
           <Box>
             <Typography variant="body1" sx={{ mb: 2, fontWeight: 600 }}>
               Escolha a forma de pagamento:
@@ -290,18 +290,18 @@ function RenewPayment() {
               <ToggleButton value="CREDIT_CARD" sx={{ py: 2 }}>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <CreditCard />
-                  <Typography>Cartão</Typography>
+                  <Typography>CartÃ£o</Typography>
                 </Stack>
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {/* Formulário de cartão */}
+          {/* FormulÃ¡rio de cartÃ£o */}
           {paymentMethod === 'CREDIT_CARD' && (
             <Stack spacing={2}>
               <TextField
                 fullWidth
-                label="Nome no Cartão"
+                label="Nome no CartÃ£o"
                 name="holderName"
                 value={cardData.holderName}
                 onChange={handleCardDataChange}
@@ -309,7 +309,7 @@ function RenewPayment() {
               />
               <TextField
                 fullWidth
-                label="Número do Cartão"
+                label="NÃºmero do CartÃ£o"
                 name="number"
                 value={cardData.number}
                 onChange={handleCardDataChange}
@@ -320,7 +320,7 @@ function RenewPayment() {
                 <Grid item xs={4}>
                   <TextField
                     fullWidth
-                    label="Mês"
+                    label="MÃªs"
                     name="expiryMonth"
                     value={cardData.expiryMonth}
                     onChange={handleCardDataChange}
@@ -356,14 +356,14 @@ function RenewPayment() {
 
           {error && <Alert severity="error">{error}</Alert>}
 
-          {/* Botões */}
+          {/* BotÃµes */}
           <Stack direction="row" spacing={2}>
             <Button
               fullWidth
               variant="outlined"
               startIcon={<ArrowBack />}
               onClick={() => navigate('/library')}
-              sx={{ borderColor: '#1f8a4c', color: '#1f8a4c' }}
+              sx={{ borderColor: '#c7a300', color: '#c7a300' }}
             >
               Voltar
             </Button>
@@ -374,7 +374,7 @@ function RenewPayment() {
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : <Payment />}
               sx={{
-                background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+                background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
                 }
@@ -390,3 +390,4 @@ function RenewPayment() {
 }
 
 export default RenewPayment;
+

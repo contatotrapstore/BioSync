@@ -186,3 +186,4 @@ function GameCard({ game }) {
 }
 
 export default GameCard
+

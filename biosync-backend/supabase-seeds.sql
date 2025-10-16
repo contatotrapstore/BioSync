@@ -1,4 +1,4 @@
--- BioSync Platform - Supabase Seeds
+﻿-- NeuroOne Platform - Supabase Seeds
 -- Execute este script após executar supabase-schema-complete.sql
 
 -- =======================
@@ -89,7 +89,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO users (username, email, password, full_name, is_admin, is_active) VALUES
 (
   'admin',
-  'admin@biosync.com',
+  'admin@NeuroOne.com',
   '$2b$10$rKvVXz8YQZ5m5fY5.5QXPeJ5vZJ5kZJ5lZJ5mZJ5nZJ5oZJ5pZJ5q', -- Placeholder: substitua com hash real
   'Administrator',
   true,
@@ -105,7 +105,7 @@ ON CONFLICT (username) DO NOTHING;
 INSERT INTO users (username, email, password, full_name, is_admin, is_active) VALUES
 (
   'demo',
-  'demo@biosync.com',
+  'demo@NeuroOne.com',
   '$2b$10$rKvVXz8YQZ5m5fY5.5QXPeJ5vZJ5kZJ5lZJ5mZJ5nZJ5oZJ5pZJ5q', -- Placeholder: substitua com hash real
   'Demo User',
   false,
@@ -140,3 +140,4 @@ SELECT 'Users', COUNT(*) FROM users;
 -- 3. Configure as variáveis de ambiente no backend (.env)
 -- 4. Execute npm install no backend
 -- 5. Inicie o backend: npm run dev
+

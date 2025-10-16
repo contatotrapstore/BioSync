@@ -1,4 +1,4 @@
-# 🔧 Correções Implementadas - Sistema de Assinatura BioSync
+﻿# 🔧 Correções Implementadas - Sistema de Assinatura NeuroOne
 
 **Data:** 10 de Janeiro de 2025
 **Versão:** 1.1.0
@@ -23,9 +23,9 @@
 - ✅ Suporte completo para PIX e Cartão
 
 **Arquivos alterados:**
-- `biosync-backend/src/services/asaas.unified.js` (novo)
-- `biosync-backend/src/controllers/subscriptionController.js` (importação atualizada)
-- `biosync-backend/src/routes/webhooks.js` (importação atualizada)
+- `NeuroOne-backend/src/services/asaas.unified.js` (novo)
+- `NeuroOne-backend/src/controllers/subscriptionController.js` (importação atualizada)
+- `NeuroOne-backend/src/routes/webhooks.js` (importação atualizada)
 
 ---
 
@@ -57,7 +57,7 @@ if (paymentMethod === 'PIX') {
 ```
 
 **Arquivos alterados:**
-- `biosync-backend/src/controllers/subscriptionController.js` (função `createUserSubscription` reescrita)
+- `NeuroOne-backend/src/controllers/subscriptionController.js` (função `createUserSubscription` reescrita)
 
 ---
 
@@ -84,7 +84,7 @@ ON subscriptions(asaas_payment_id);
 ```
 
 **Arquivos criados:**
-- `biosync-backend/migrations/add_asaas_payment_id.sql`
+- `NeuroOne-backend/migrations/add_asaas_payment_id.sql`
 
 ---
 
@@ -115,7 +115,7 @@ if (!subscription && payment.id) {
 ```
 
 **Arquivos alterados:**
-- `biosync-backend/src/routes/webhooks.js` (todas as funções de handler atualizadas)
+- `NeuroOne-backend/src/routes/webhooks.js` (todas as funções de handler atualizadas)
 
 ---
 
@@ -133,7 +133,7 @@ if (!subscription && payment.id) {
 - ✅ Logs de aviso quando secret não está configurado
 
 **Arquivos alterados:**
-- `biosync-backend/src/services/asaas.unified.js` (função `validateWebhook`)
+- `NeuroOne-backend/src/services/asaas.unified.js` (função `validateWebhook`)
 
 ---
 
@@ -145,7 +145,7 @@ if (!subscription && payment.id) {
 - Não havia guia de teste
 
 **Solução:**
-- ✅ Documentação atualizada para "BioSync"
+- ✅ Documentação atualizada para "NeuroOne"
 - ✅ URLs genéricas substituindo URLs hardcoded
 - ✅ Seção explicando diferenças PIX vs Cartão
 - ✅ Guia completo de teste criado
@@ -186,27 +186,27 @@ if (missingCardFields.length > 0) {
 ```
 
 **Arquivos alterados:**
-- `biosync-backend/src/controllers/subscriptionController.js`
-- `biosync-backend/src/services/asaas.unified.js`
+- `NeuroOne-backend/src/controllers/subscriptionController.js`
+- `NeuroOne-backend/src/services/asaas.unified.js`
 
 ---
 
 ## 📊 Resumo de Arquivos
 
 ### Arquivos Novos
-- ✅ `biosync-backend/src/services/asaas.unified.js` - Serviço Asaas unificado
-- ✅ `biosync-backend/migrations/add_asaas_payment_id.sql` - Migração SQL
+- ✅ `NeuroOne-backend/src/services/asaas.unified.js` - Serviço Asaas unificado
+- ✅ `NeuroOne-backend/migrations/add_asaas_payment_id.sql` - Migração SQL
 - ✅ `TESTE_FLUXO_ASSINATURA.md` - Guia completo de teste
 - ✅ `CORRECOES_ASSINATURA.md` - Este arquivo
 
 ### Arquivos Modificados
-- ✅ `biosync-backend/src/controllers/subscriptionController.js` - Fluxo PIX vs Cartão
-- ✅ `biosync-backend/src/routes/webhooks.js` - Suporte para ambos os métodos
+- ✅ `NeuroOne-backend/src/controllers/subscriptionController.js` - Fluxo PIX vs Cartão
+- ✅ `NeuroOne-backend/src/routes/webhooks.js` - Suporte para ambos os métodos
 - ✅ `CONFIGURACAO_ASAAS_WEBHOOK.md` - Documentação atualizada
 
 ### Arquivos a Deprecar (NÃO DELETAR ainda)
-- ⚠️ `biosync-backend/src/services/asaasService.js` - Usar `asaas.unified.js`
-- ⚠️ `biosync-backend/src/services/asaas.js` - Substituído por `asaas.unified.js`
+- ⚠️ `NeuroOne-backend/src/services/asaasService.js` - Usar `asaas.unified.js`
+- ⚠️ `NeuroOne-backend/src/services/asaas.js` - Substituído por `asaas.unified.js`
 
 ---
 
@@ -215,7 +215,7 @@ if (missingCardFields.length > 0) {
 ### 1. Aplicar Migração SQL
 ```bash
 # Executar no Supabase SQL Editor
-cat biosync-backend/migrations/add_asaas_payment_id.sql
+cat NeuroOne-backend/migrations/add_asaas_payment_id.sql
 ```
 
 ### 2. Atualizar Variáveis de Ambiente
@@ -279,5 +279,6 @@ Siga o guia: `TESTE_FLUXO_ASSINATURA.md`
 
 ---
 
-**Desenvolvido por:** BioSync Dev Team
+**Desenvolvido por:** NeuroOne Dev Team
 **Última atualização:** 10/01/2025
+

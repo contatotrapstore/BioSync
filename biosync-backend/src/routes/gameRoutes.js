@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 const { authenticate, authorizeAdmin } = require('../middleware/auth');
@@ -18,14 +18,14 @@ router.post('/:id/validate-session', authenticate, validateUUID, async (req, res
     if (!sessionToken) {
       return res.status(400).json({
         success: false,
-        message: 'Token de sessão é obrigatório'
+        message: 'Token de sessÃ£o Ã© obrigatÃ³rio'
       });
     }
 
     // Decrypt and validate session token
     const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';
-    const key = Buffer.from(process.env.GAME_SESSION_SECRET || 'biosync-session-secret-key-32b', 'utf8').slice(0, 32);
+    const key = Buffer.from(process.env.GAME_SESSION_SECRET || 'neuroone-session-secret-key-32b', 'utf8').slice(0, 32);
 
     try {
       const parts = sessionToken.split(':');
@@ -42,14 +42,14 @@ router.post('/:id/validate-session', authenticate, validateUUID, async (req, res
       if (sessionData.gameId !== gameId) {
         return res.status(403).json({
           success: false,
-          message: 'Token de sessão inválido para este jogo'
+          message: 'Token de sessÃ£o invÃ¡lido para este jogo'
         });
       }
 
       if (sessionData.userId !== req.user.id) {
         return res.status(403).json({
           success: false,
-          message: 'Token de sessão não pertence ao usuário atual'
+          message: 'Token de sessÃ£o nÃ£o pertence ao usuÃ¡rio atual'
         });
       }
 
@@ -57,7 +57,7 @@ router.post('/:id/validate-session', authenticate, validateUUID, async (req, res
       if (now > sessionData.expiresAt) {
         return res.status(403).json({
           success: false,
-          message: 'Sessão expirada'
+          message: 'SessÃ£o expirada'
         });
       }
 
@@ -72,14 +72,14 @@ router.post('/:id/validate-session', authenticate, validateUUID, async (req, res
       console.error('Session token decryption error:', error);
       return res.status(403).json({
         success: false,
-        message: 'Token de sessão inválido'
+        message: 'Token de sessÃ£o invÃ¡lido'
       });
     }
   } catch (error) {
     console.error('Error validating game session:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro ao validar sessão do jogo'
+      message: 'Erro ao validar sessÃ£o do jogo'
     });
   }
 });
@@ -123,7 +123,7 @@ router.get('/updates', authenticate, async (req, res) => {
     console.error('Error checking for game updates:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro ao verificar atualizações de jogos'
+      message: 'Erro ao verificar atualizaÃ§Ãµes de jogos'
     });
   }
 });

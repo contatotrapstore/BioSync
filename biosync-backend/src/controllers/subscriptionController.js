@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');
+﻿const { supabase } = require('../config/supabase');
 const asaasService = require('../services/asaas.unified');
 
 // Get all subscription plans
@@ -589,7 +589,7 @@ exports.createUserSubscription = async (req, res, next) => {
         userId,
         paymentMethod: 'PIX',
         value: subscriptionValue,
-        description: 'BioSync - Pagamento Mensal'
+        description: 'NeuroOne - Pagamento Mensal'
       });
 
       isRecurring = false;
@@ -601,7 +601,7 @@ exports.createUserSubscription = async (req, res, next) => {
         userId,
         paymentMethod: 'CREDIT_CARD',
         value: subscriptionValue,
-        description: 'BioSync - Assinatura Mensal',
+        description: 'NeuroOne - Assinatura Mensal',
         creditCard,
         creditCardHolder
       });
@@ -663,7 +663,7 @@ exports.createUserSubscription = async (req, res, next) => {
             status: 'pending',
             payment_method: 'PIX',
             due_date: asaasResponse.dueDate,
-            description: 'Pagamento mensal - BioSync'
+            description: 'Pagamento mensal - NeuroOne'
           }]);
 
         console.log('[Subscription] QR Code PIX gerado com sucesso');
@@ -692,7 +692,7 @@ exports.createUserSubscription = async (req, res, next) => {
               status: asaasService.mapPaymentStatus(firstPayment.status),
               payment_method: 'CREDIT_CARD',
               due_date: firstPayment.dueDate,
-              description: 'Primeiro pagamento - BioSync'
+              description: 'Primeiro pagamento - NeuroOne'
             }]);
 
           responseData.payment = {
@@ -904,3 +904,4 @@ exports.listSubscriptionPayments = async (req, res, next) => {
     next(error);
   }
 };
+

@@ -151,7 +151,7 @@ const Dashboard = () => {
           Painel de Controle
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Visão geral da plataforma BioSync
+          Visão geral da plataforma NeuroOne
         </Typography>
       </Box>
 
@@ -375,7 +375,10 @@ const Dashboard = () => {
 
         {/* Ações Rápidas */}
         <Grid item xs={12}>
-          <Paper elevation={2} sx={{ p: 3, background: 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)' }}>
+          <Paper
+            elevation={2}
+            sx={{ p: 3, background: 'linear-gradient(135deg, #1c1400 0%, #d4a100 55%, #ffd913 100%)' }}
+          >
             <Typography variant="h6" fontWeight="bold" color="white" gutterBottom>
               Ações Rápidas
             </Typography>

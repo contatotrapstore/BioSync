@@ -1,7 +1,7 @@
-# 📋 Instruções de Configuração do Supabase - BioSync
+﻿# 📋 Instruções de Configuração do Supabase - NeuroOne
 
 ## 🎯 Projeto Supabase
-- **Nome:** BioSync
+- **Nome:** NeuroOne
 - **ID:** uszmhhukjohjarplnlmp
 - **Região:** sa-east-1
 - **Host:** db.uszmhhukjohjarplnlmp.supabase.co
@@ -14,14 +14,14 @@
 
 ### 2. Executar o Schema Completo
 1. Crie uma nova query
-2. Copie todo o conteúdo do arquivo: `biosync-backend/supabase-schema-complete.sql`
+2. Copie todo o conteúdo do arquivo: `NeuroOne-backend/supabase-schema-complete.sql`
 3. Cole no SQL Editor
 4. Clique em **Run** ou pressione `Ctrl+Enter`
 5. Aguarde a execução (pode levar ~30 segundos)
 
 ### 3. Inserir Dados Iniciais (Seeds)
 1. Após o schema ser criado com sucesso
-2. Execute o arquivo: `biosync-backend/supabase-seeds.sql`
+2. Execute o arquivo: `NeuroOne-backend/supabase-seeds.sql`
 3. Isso criará:
    - Usuário admin padrão
    - Catálogo de 13 jogos
@@ -111,3 +111,4 @@ Em caso de erros:
 
 **Status:** 🟢 Pronto para configuração
 **Data:** 2025-10-09
+

@@ -1,4 +1,4 @@
-# Migração NeuroGame → BioSync
+﻿# Migração NeuroGame → NeuroOne
 
 **Data:** 09/10/2025
 **Autor:** Sistema de Migração Automatizada
@@ -16,7 +16,7 @@
 | raul@neurowork.com.br | Raul Arcangelo | user | ✅ Migrado |
 | psicologavivianewis@gmail.com | Viviane Wisnievski | admin | ✅ Migrado |
 
-**Nota:** O usuário admin@neurogame.com não foi migrado pois já existe admin@biosync.com equivalente.
+**Nota:** O usuário admin@neurogame.com não foi migrado pois já existe admin@NeuroOne.com equivalente.
 
 ---
 
@@ -61,7 +61,7 @@ Todos os 4 usuários migrados receberam acesso completo aos **13 jogos** da plat
 - **ID:** btsarxzpiroprpdcrpcx
 
 ### Banco de Dados Destino
-- **Projeto:** BioSync (Supabase)
+- **Projeto:** NeuroOne (Supabase)
 - **ID:** uszmhhukjohjarplnlmp
 
 ### Dados Preservados
@@ -75,8 +75,8 @@ Todos os 4 usuários migrados receberam acesso completo aos **13 jogos** da plat
 
 ## 📝 Próximos Passos
 
-1. ✅ Notificar usuários sobre a migração para BioSync
-2. ✅ Solicitar que façam login no novo launcher BioSync
+1. ✅ Notificar usuários sobre a migração para NeuroOne
+2. ✅ Solicitar que façam login no novo launcher NeuroOne
 3. ✅ Verificar se as cobranças recorrentes estão configuradas corretamente
 4. ⏳ Monitorar acessos e uso dos jogos na primeira semana
 5. ⏳ Considerar desativar projeto NeuroGame após validação completa
@@ -93,3 +93,4 @@ Todos os 4 usuários migrados receberam acesso completo aos **13 jogos** da plat
 ---
 
 **Migração concluída com sucesso! 🎉**
+

@@ -1,7 +1,7 @@
-# 🚀 Deploy BioSync Admin no Vercel
+﻿# 🚀 Deploy NeuroOne Admin no Vercel
 
 **Data:** 2025-10-09
-**Backend:** https://biosync-jlfh.onrender.com ✅ Online
+**Backend:** https://NeuroOne-jlfh.onrender.com ✅ Online
 
 ---
 
@@ -12,8 +12,8 @@
 - ✅ Agora: `dependencies` (instalado em produção)
 
 ### 2. **URL da API atualizada**
-- ❌ Antes: `https://biosync.onrender.com`
-- ✅ Agora: `https://biosync-jlfh.onrender.com`
+- ❌ Antes: `https://NeuroOne.onrender.com`
+- ✅ Agora: `https://NeuroOne-jlfh.onrender.com`
 
 ---
 
@@ -24,7 +24,7 @@ https://vercel.com/dashboard
 
 ### 2. **Crie Novo Projeto**
 1. Clique em **"Add New..."** → **"Project"**
-2. Selecione repositório: `contatotrapstore/BioSync`
+2. Selecione repositório: `contatotrapstore/NeuroOne`
 3. Clique em **"Import"**
 
 ### 3. **Configurar Build**
@@ -36,7 +36,7 @@ Vite
 
 #### Root Directory:
 ```
-biosync-admin
+NeuroOne-admin
 ```
 
 #### Build Command:
@@ -60,7 +60,7 @@ Clique em **"Environment Variables"** e adicione:
 
 | Nome | Valor | Ambiente |
 |------|-------|----------|
-| `VITE_API_URL` | `https://biosync-jlfh.onrender.com` | Production |
+| `VITE_API_URL` | `https://NeuroOne-jlfh.onrender.com` | Production |
 
 **IMPORTANTE:** NÃO incluir `/api/v1` no final!
 
@@ -87,7 +87,7 @@ https://seu-projeto.vercel.app
 
 ### 2. **Testar Login**
 ```
-Email: admin@biosync.com
+Email: admin@NeuroOne.com
 Senha: Admin@123456
 ```
 
@@ -96,7 +96,7 @@ Abra DevTools (F12) → Network
 
 Deve mostrar requisições para:
 ```
-https://biosync-jlfh.onrender.com/api/v1/auth/login
+https://NeuroOne-jlfh.onrender.com/api/v1/auth/login
 ```
 
 ---
@@ -108,7 +108,7 @@ https://biosync-jlfh.onrender.com/api/v1/auth/login
 
 ### Erro: "Failed to connect to backend"
 **Verificar:**
-1. Backend está online? https://biosync-jlfh.onrender.com/api/v1/health
+1. Backend está online? https://NeuroOne-jlfh.onrender.com/api/v1/health
 2. Variável `VITE_API_URL` está configurada no Vercel?
 3. CORS permitindo domínio do Vercel no backend?
 
@@ -122,7 +122,7 @@ https://biosync-jlfh.onrender.com/api/v1/auth/login
 ### Opção 1: Automático (Push Git)
 ```bash
 git add .
-git commit -m "fix: update admin for BioSync"
+git commit -m "fix: update admin for NeuroOne"
 git push origin master
 ```
 Vercel detecta push e faz redeploy automático.
@@ -175,7 +175,7 @@ VITE_API_URL=http://localhost:3000
 
 ### Environment Variables (Vercel)
 ```env
-VITE_API_URL=https://biosync-jlfh.onrender.com
+VITE_API_URL=https://NeuroOne-jlfh.onrender.com
 ```
 
 ---
@@ -184,11 +184,12 @@ VITE_API_URL=https://biosync-jlfh.onrender.com
 
 | Serviço | URL |
 |---------|-----|
-| **Backend** | https://biosync-jlfh.onrender.com |
+| **Backend** | https://NeuroOne-jlfh.onrender.com |
 | **Admin** | https://seu-projeto.vercel.app |
-| **Repositório** | https://github.com/contatotrapstore/BioSync |
+| **Repositório** | https://github.com/contatotrapstore/NeuroOne |
 
 ---
 
 **Gerado em:** 2025-10-09
 **Status:** ✅ Pronto para deploy
+

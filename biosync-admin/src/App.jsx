@@ -11,6 +11,8 @@ import Games from './pages/Games';
 import Users from './pages/Users';
 import Requests from './pages/Requests';
 import Subscriptions from './pages/Subscriptions';
+import PsychologistDashboard from './pages/PsychologistDashboard';
+import PatientDetail from './pages/PatientDetail';
 
 // Layout
 import Layout from './components/Layout';
@@ -60,6 +62,8 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="requests" element={<Requests />} />
+          <Route path="psychologists" element={<PsychologistDashboard />} />
+          <Route path="psychologists/patients/:id" element={<PatientDetail />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,15 +1,15 @@
-╔════════════════════════════════════════════════════════════════╗
-║             BIOSYNC LAUNCHER - INSTALADOR v2.0.0              ║
+﻿╔════════════════════════════════════════════════════════════════╗
+║             NeuroOne LAUNCHER - INSTALADOR v2.0.0              ║
 ╚════════════════════════════════════════════════════════════════╝
 
 📦 ARQUIVOS NESTA PASTA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ BioSync Launcher-Setup-2.0.0.exe (262MB) ⭐ VERSÃO MAIS RECENTE
-   → Instalador completo do BioSync Launcher
+✅ NeuroOne Launcher-Setup-2.0.0.exe (262MB) ⭐ VERSÃO MAIS RECENTE
+   → Instalador completo do NeuroOne Launcher
    → Inclui Electron + React + todos os componentes necessários
    → Conecta automaticamente ao servidor de produção
-   → Nova identidade visual azul
+   → Nova identidade visual amarela
 
 ✅ latest.yml
    → Arquivo de metadados para sistema de auto-atualização
@@ -19,7 +19,7 @@
 🚀 COMO INSTALAR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Dê duplo clique em "BioSync Launcher-Setup-2.0.0.exe"
+1. Dê duplo clique em "NeuroOne Launcher-Setup-2.0.0.exe"
 
 2. O instalador irá:
    ✓ Permitir escolher o local de instalação
@@ -29,7 +29,7 @@
 
 3. Após a instalação, o launcher será aberto automaticamente
 
-4. Faça login com suas credenciais BioSync
+4. Faça login com suas credenciais NeuroOne
 
 
 💡 IMPORTANTE:
@@ -45,7 +45,7 @@
     • Instalar na pasta de Programas (se escolhido)
 
 ⚠️  Após instalar, você pode mover ou deletar este arquivo .exe
-    O BioSync Launcher já estará instalado no seu computador
+    O NeuroOne Launcher já estará instalado no seu computador
 
 
 📋 REQUISITOS DO SISTEMA:
@@ -61,10 +61,10 @@
 🎮 APÓS A INSTALAÇÃO:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. O BioSync Launcher ficará disponível em:
+1. O NeuroOne Launcher ficará disponível em:
    • Atalho na Área de Trabalho
-   • Menu Iniciar → BioSync Launcher
-   • C:\Users\[SeuUsuário]\AppData\Local\Programs\biosync-launcher
+   • Menu Iniciar → NeuroOne Launcher
+   • C:\Users\[SeuUsuário]\AppData\Local\Programs\NeuroOne-launcher
 
 2. Na primeira execução:
    • Faça login com seu usuário e senha
@@ -100,7 +100,7 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Windows 10/11:
-  Configurações → Aplicativos → BioSync Launcher → Desinstalar
+  Configurações → Aplicativos → NeuroOne Launcher → Desinstalar
 
 Windows 7/8:
   Painel de Controle → Programas → Desinstalar um programa
@@ -109,7 +109,7 @@ Windows 7/8:
 🆕 NOVIDADES VERSÃO 2.0.0:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✨ Nova identidade visual azul
+✨ Nova identidade visual amarela
 🎨 Tema completo redesenhado
 ⚡ Performance melhorada
 🔒 Segurança aprimorada
@@ -119,12 +119,13 @@ Windows 7/8:
 📞 SUPORTE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🌐 Site: https://biosync.com.br
-📧 Email: suporte@biosync.com.br
-💬 Repositório: github.com/contatotrapstore/BioSync
+🌐 Site: https://NeuroOne.com.br
+📧 Email: suporte@NeuroOne.com.br
+💬 Repositório: github.com/contatotrapstore/NeuroOne
 
 
 ══════════════════════════════════════════════════════════════════
-         Desenvolvido por BioSync Team - 2025
+         Desenvolvido por NeuroOne Team - 2025
               Todos os direitos reservados
 ══════════════════════════════════════════════════════════════════
+

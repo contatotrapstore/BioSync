@@ -1,4 +1,4 @@
--- BioSync Platform - Supabase Schema
+﻿-- NeuroOne Platform - Supabase Schema
 -- Execute este script no SQL Editor do Supabase
 
 -- Enable UUID extension
@@ -266,3 +266,4 @@ COMMENT ON TABLE access_history IS 'Histórico de acessos aos jogos';
 -- =======================
 -- Schema criado com sucesso!
 -- Próximo passo: Execute o arquivo supabase-seeds.sql para popular com dados iniciais
+

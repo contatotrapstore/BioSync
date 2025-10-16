@@ -1,6 +1,6 @@
-@echo off
+﻿@echo off
 echo ========================================
-echo biosync Launcher - Installation
+echo NeuroOne Launcher - Installation
 echo ========================================
 echo.
 

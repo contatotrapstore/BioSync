@@ -1,7 +1,7 @@
-# 📊 Relatório de Auditoria - Supabase BioSync
+﻿# 📊 Relatório de Auditoria - Supabase NeuroOne
 
 **Data:** 10 de Janeiro de 2025
-**Projeto:** BioSync (uszmhhukjohjarplnlmp)
+**Projeto:** NeuroOne (uszmhhukjohjarplnlmp)
 **Região:** sa-east-1 (São Paulo)
 **Status:** ACTIVE_HEALTHY ✅
 
@@ -17,7 +17,7 @@
 
 ### 2. TypeScript Types Gerados
 - ✅ Types atualizados com novo campo `asaas_payment_id`
-- ✅ Arquivo salvo em: `biosync-backend/src/types/supabase.ts`
+- ✅ Arquivo salvo em: `NeuroOne-backend/src/types/supabase.ts`
 
 ### 3. Auditoria de Segurança e Performance
 - ✅ Advisors de segurança verificados
@@ -262,3 +262,4 @@ Row: {
 
 **Gerado automaticamente via Supabase MCP**
 **Data:** 2025-01-10
+

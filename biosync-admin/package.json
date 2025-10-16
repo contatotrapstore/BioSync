@@ -1,7 +1,7 @@
 {
-  "name": "biosync-admin",
+  "name": "neuroone-admin",
   "version": "1.0.0",
-  "description": "Dashboard administrativo para BioSync Platform",
+  "description": "Dashboard administrativo para NeuroOne Platform",
   "private": true,
   "type": "module",
   "scripts": {

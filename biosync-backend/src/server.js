@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -123,7 +123,7 @@ app.use('/api/v1', routes);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Welcome to BioSync API',
+    message: 'Welcome to NeuroOne API',
     version: '1.0.0',
     endpoints: {
       health: '/api/v1/health',
@@ -155,7 +155,7 @@ const startServer = async () => {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`\nBioSync API Server`);
+      console.log(`\nNeuroOne API Server`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`API Documentation: http://localhost:${PORT}/api/v1`);
@@ -186,5 +186,6 @@ if (process.env.VERCEL !== '1') {
 }
 
 module.exports = app;
+
 
 

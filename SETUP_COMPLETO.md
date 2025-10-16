@@ -1,4 +1,4 @@
-# ✅ BioSync - Configuração Completa via MCP
+﻿# ✅ NeuroOne - Configuração Completa via MCP
 
 **Data:** 2025-10-09
 **Status:** ✅ Database 100% configurado
@@ -9,7 +9,7 @@
 ## 🎯 Resumo do que foi feito
 
 ### ✅ Fase 1: Rebranding Completo
-- ✅ Renomeado 3 módulos: `neurogame-*` → `biosync-*`
+- ✅ Renomeado 3 módulos: `neurogame-*` → `NeuroOne-*`
 - ✅ Atualizado 50+ arquivos com nova marca
 - ✅ Cores alteradas: Verde → Azul (#0D1BA6, #1E3DD9, #4A6EF2)
 - ✅ Logo atualizado para versão azul
@@ -21,8 +21,8 @@
 - ✅ **3 planos de assinatura** criados (Básico, Premium, Educacional)
 - ✅ **22 associações** plano-jogo configuradas
 - ✅ **2 usuários** criados:
-  - 👤 **admin@biosync.com** (senha: `Admin@123456`)
-  - 👤 **demo@biosync.com** (senha: `Demo@123456`)
+  - 👤 **admin@NeuroOne.com** (senha: `Admin@123456`)
+  - 👤 **demo@NeuroOne.com** (senha: `Demo@123456`)
 - ✅ Triggers e funções aplicados
 - ✅ Índices e RLS policies configurados
 
@@ -33,7 +33,7 @@
 | Propriedade | Valor |
 |------------|-------|
 | **Project ID** | `uszmhhukjohjarplnlmp` |
-| **Project Name** | BioSync |
+| **Project Name** | NeuroOne |
 | **Region** | South America (sa-east-1) |
 | **Status** | ✅ ACTIVE_HEALTHY |
 | **PostgreSQL** | v17.6.1 |
@@ -91,8 +91,8 @@ Para finalizar a configuração, obtenha as chaves do dashboard Supabase:
 3. **Plano Educacional** - R$ 99,90/3 meses (jogos educativos)
 
 #### 👥 2 Usuários:
-- **admin** / admin@biosync.com (Administrador)
-- **demo** / demo@biosync.com (Usuário Demo)
+- **admin** / admin@NeuroOne.com (Administrador)
+- **demo** / demo@NeuroOne.com (Usuário Demo)
 
 ---
 
@@ -107,7 +107,7 @@ https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp/settings/api
 ### 2. Configurar .env Files ⏳
 ```bash
 # Backend
-cd biosync-backend
+cd NeuroOne-backend
 cp .env.example .env
 # Edite .env e adicione:
 # - SUPABASE_ANON_KEY
@@ -116,18 +116,18 @@ cp .env.example .env
 # - ASAAS_API_KEY
 
 # Admin
-cd ../biosync-admin
+cd ../NeuroOne-admin
 cp .env.example .env
 # Edite .env e adicione a URL do backend após deploy
 ```
 
 ### 3. Criar Repositório Git ⏳
 ```bash
-cd "C:\Users\GouveiaRx\Downloads\BioSync Game FN"
+cd "C:\Users\GouveiaRx\Downloads\NeuroOne Game FN"
 git init
 git add .
-git commit -m "feat: initial BioSync platform setup"
-git remote add origin https://github.com/seu-usuario/biosync.git
+git commit -m "feat: initial NeuroOne platform setup"
+git remote add origin https://github.com/seu-usuario/NeuroOne.git
 git push -u origin main
 ```
 
@@ -136,18 +136,18 @@ git push -u origin main
 2. Conectar ao repositório GitHub
 3. Configurar variáveis de ambiente do .env
 4. Deploy automático
-5. Anotar URL gerada (ex: `https://biosync.onrender.com`)
+5. Anotar URL gerada (ex: `https://NeuroOne.onrender.com`)
 
 ### 5. Deploy Admin (Vercel) ⏳
 1. Importar projeto no Vercel
-2. Selecionar pasta `biosync-admin`
+2. Selecionar pasta `NeuroOne-admin`
 3. Configurar `VITE_API_URL` com URL do Render
 4. Deploy automático
-5. Anotar URL gerada (ex: `https://biosync-admin.vercel.app`)
+5. Anotar URL gerada (ex: `https://NeuroOne-admin.vercel.app`)
 
 ### 6. Configurar Webhooks Asaas ⏳
 ```
-URL Webhook: https://biosync.onrender.com/api/v1/webhooks/asaas
+URL Webhook: https://NeuroOne.onrender.com/api/v1/webhooks/asaas
 Eventos: payment.received, payment.confirmed, subscription.created, etc.
 ```
 
@@ -163,20 +163,20 @@ Eventos: payment.received, payment.confirmed, subscription.created, etc.
 ## 📝 Arquivos de Configuração Atualizados
 
 ### Backend:
-- ✅ `biosync-backend/.env.example` - Template atualizado
-- ✅ `biosync-backend/package.json` - Nome e descrição
-- ✅ `biosync-backend/supabase-schema-complete.sql` - Schema completo
-- ✅ `biosync-backend/supabase-seeds.sql` - Dados iniciais com BioSync
+- ✅ `NeuroOne-backend/.env.example` - Template atualizado
+- ✅ `NeuroOne-backend/package.json` - Nome e descrição
+- ✅ `NeuroOne-backend/supabase-schema-complete.sql` - Schema completo
+- ✅ `NeuroOne-backend/supabase-seeds.sql` - Dados iniciais com NeuroOne
 
 ### Admin:
-- ✅ `biosync-admin/.env.example` - Template atualizado
-- ✅ `biosync-admin/package.json` - Nome e descrição
-- ✅ `biosync-admin/src/pages/Login.jsx` - Logo e cores azuis
+- ✅ `NeuroOne-admin/.env.example` - Template atualizado
+- ✅ `NeuroOne-admin/package.json` - Nome e descrição
+- ✅ `NeuroOne-admin/src/pages/Login.jsx` - Logo e cores azuis
 
 ### Launcher:
-- ✅ `biosync-launcher/package.json` - Nome, descrição, appId
-- ✅ `biosync-launcher/src/utils/placeholders.js` - Gradiente azul
-- ✅ `biosync-launcher/src/pages/Login.jsx` - Marca BioSync
+- ✅ `NeuroOne-launcher/package.json` - Nome, descrição, appId
+- ✅ `NeuroOne-launcher/src/utils/placeholders.js` - Gradiente azul
+- ✅ `NeuroOne-launcher/src/pages/Login.jsx` - Marca NeuroOne
 
 ### Documentação:
 - ✅ `README.md` - Completamente reescrito
@@ -185,7 +185,7 @@ Eventos: payment.received, payment.confirmed, subscription.created, etc.
 
 ---
 
-## 🎨 Paleta de Cores BioSync
+## 🎨 Paleta de Cores NeuroOne
 
 ```css
 /* Cores principais */
@@ -206,8 +206,8 @@ background: linear-gradient(to right, #1E3DD9, #4A6EF2);
 
 | Tipo | Email | Senha | Acesso |
 |------|-------|-------|--------|
-| Admin | admin@biosync.com | `Admin@123456` | Painel Admin + API |
-| Demo | demo@biosync.com | `Demo@123456` | Launcher apenas |
+| Admin | admin@NeuroOne.com | `Admin@123456` | Painel Admin + API |
+| Demo | demo@NeuroOne.com | `Demo@123456` | Launcher apenas |
 
 ---
 
@@ -251,7 +251,7 @@ background: linear-gradient(to right, #1E3DD9, #4A6EF2);
 
 ## 🎉 Conclusão
 
-**Database BioSync está 100% pronto!**
+**Database NeuroOne está 100% pronto!**
 
 Todo o setup foi feito via MCP (Model Context Protocol) diretamente no Supabase:
 - ✅ 13 tabelas criadas
@@ -265,5 +265,6 @@ Todo o setup foi feito via MCP (Model Context Protocol) diretamente no Supabase:
 ---
 
 **Gerado em:** 2025-10-09
-**Projeto:** BioSync Game Platform
+**Projeto:** NeuroOne Game Platform
 **Versão:** 1.0.0
+

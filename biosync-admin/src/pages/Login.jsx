@@ -66,7 +66,8 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)' // Azul da marca BioSync
+        background:
+          'linear-gradient(135deg, #1c1400 0%, #d4a100 55%, #ffd913 100%)'
       }}
     >
       <Container maxWidth="sm">
@@ -74,11 +75,17 @@ const Login = () => {
           <CardContent sx={{ p: 4 }}>
             <Box sx={{ textAlign: 'center', mb: 3 }}>
               <img
-                src="/logo-azul.png"
-                alt="BioSync"
+                src="/logo-neuroone.png"
+                alt="NeuroOne"
                 style={{ width: '200px', marginBottom: '16px' }}
               />
-              <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ color: '#1565c0' }}>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                fontWeight="bold"
+                sx={{ color: '#c7a300' }}
+              >
                 Painel Administrativo
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -143,9 +150,9 @@ const Login = () => {
                   mt: 3,
                   mb: 2,
                   py: 1.5,
-                  bgcolor: '#1565c0', // Azul da marca BioSync
+                  bgcolor: '#ffd913',
                   '&:hover': {
-                    bgcolor: '#1976d2'
+                    bgcolor: '#e6c700'
                   }
                 }}
               >

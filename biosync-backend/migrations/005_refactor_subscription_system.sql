@@ -1,4 +1,4 @@
--- Migration: Refatorar sistema para assinatura independente via Asaas
+﻿-- Migration: Refatorar sistema para assinatura independente via Asaas
 -- Data: 2025-10-03
 
 -- 1. Modificar tabela users (simplificar para email/senha)
@@ -7,7 +7,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS asaas_customer_id VARCHAR(255) UNIQUE
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(255);
 
--- Tornar email obrigatório e único
+-- Tornar email obrigatÃ³rio e Ãºnico
 ALTER TABLE users ALTER COLUMN email SET NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
@@ -74,7 +74,7 @@ CREATE INDEX idx_payments_subscription_id ON payments(subscription_id);
 CREATE INDEX idx_payments_asaas_id ON payments(asaas_payment_id);
 CREATE INDEX idx_payments_status ON payments(status);
 
--- 4. Criar tabela de sessões do launcher
+-- 4. Criar tabela de sessÃµes do launcher
 CREATE TABLE IF NOT EXISTS launcher_sessions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -130,13 +130,13 @@ CREATE INDEX idx_asaas_webhooks_event_type ON asaas_webhooks(event_type);
 CREATE INDEX idx_asaas_webhooks_processed ON asaas_webhooks(processed);
 CREATE INDEX idx_asaas_webhooks_user_id ON asaas_webhooks(user_id);
 
--- 6. Remover tabelas antigas não utilizadas
+-- 6. Remover tabelas antigas nÃ£o utilizadas
 DROP TABLE IF EXISTS subscription_plans CASCADE;
 DROP TABLE IF EXISTS user_subscriptions CASCADE;
 DROP TABLE IF EXISTS game_requests CASCADE;
 DROP TABLE IF EXISTS user_game_access CASCADE;
 
--- 7. Função para atualizar updated_at automaticamente
+-- 7. FunÃ§Ã£o para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -161,10 +161,10 @@ CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 8. Inserir configurações padrão
+-- 8. Inserir configuraÃ§Ãµes padrÃ£o
 INSERT INTO games (name, description, slug, category, folder_path, is_active, created_at)
 VALUES
-  ('Bem-vindo ao biosync', 'Tutorial inicial', 'tutorial', 'Tutorial', 'tutorial', true, NOW())
+  ('Bem-vindo ao NeuroOne', 'Tutorial inicial', 'tutorial', 'Tutorial', 'tutorial', true, NOW())
 ON CONFLICT (slug) DO NOTHING;
 
 COMMIT;

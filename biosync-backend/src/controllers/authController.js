@@ -20,6 +20,7 @@ const sanitizeUser = (user) => {
     full_name,
     is_admin,
     is_active,
+    is_psychologist,
     asaas_customer_id,
     ...rest
   } = user;
@@ -35,6 +36,8 @@ const sanitizeUser = (user) => {
     isAdmin: is_admin,
     is_active,
     isActive: is_active,
+    is_psychologist,
+    isPsychologist: is_psychologist || false,
     asaas_customer_id,
     asaasCustomerId: asaas_customer_id,
     last_login: user.last_login,
@@ -71,6 +74,7 @@ const buildAuthResponse = async (user) => {
     userId: user.id,
     email: user.email,
     isAdmin: user.is_admin,
+    isPsychologist: user.is_psychologist || false,
     hasActiveSubscription: Boolean(subscription),
     subscriptionId: subscription?.id || null
   };
@@ -323,7 +327,7 @@ exports.refreshToken = async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, is_admin')
+      .select('id, email, is_admin, is_psychologist')
       .eq('id', decoded.userId)
       .single();
 
@@ -337,7 +341,8 @@ exports.refreshToken = async (req, res) => {
     const payload = {
       userId: user.id,
       email: user.email,
-      isAdmin: user.is_admin
+      isAdmin: user.is_admin,
+      isPsychologist: user.is_psychologist || false
     };
 
     return res.json({
@@ -359,7 +364,7 @@ exports.validateToken = async (req, res, next) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, username, full_name, is_admin, is_active, asaas_customer_id')
+      .select('id, email, username, full_name, is_admin, is_active, is_psychologist, asaas_customer_id')
       .eq('id', req.user.id)
       .single();
 

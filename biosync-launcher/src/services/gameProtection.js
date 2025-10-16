@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Sistema de Protecao de Jogos
  * Garante que os jogos sejam iniciados apenas pelo launcher autenticado.
  */
 
-const GAME_SESSION_KEY = 'biosync_game_session';
+const GAME_SESSION_KEY = 'neuroone_game_session';
 const TOKEN_EXPIRY_MS = 5 * 60 * 1000; // 5 minutos
 
 /**
@@ -71,7 +71,7 @@ export const getProtectionScript = (gameId) => `
 <script>
 (function() {
   const GAME_ID = '${gameId}';
-  const SESSION_KEY = 'biosync_game_session';
+  const SESSION_KEY = 'neuroone_game_session';
 
   const renderErrorScreen = (title, message, code) => {
     document.body.innerHTML =
@@ -86,8 +86,8 @@ export const getProtectionScript = (gameId) => `
     try {
       const sessionStr = localStorage.getItem(SESSION_KEY);
       if (!sessionStr) {
-        renderErrorScreen('Acesso negado', 'Este jogo deve ser iniciado pelo biosync Launcher.', 'NO_SESSION');
-        alert('Erro: este jogo deve ser iniciado pelo biosync Launcher.');
+        renderErrorScreen('Acesso negado', 'Este jogo deve ser iniciado pelo NeuroOne Launcher.', 'NO_SESSION');
+        alert('Erro: este jogo deve ser iniciado pelo NeuroOne Launcher.');
         return;
       }
 
@@ -107,7 +107,7 @@ export const getProtectionScript = (gameId) => `
       }
 
       localStorage.removeItem(SESSION_KEY);
-      console.log('[Launcher] Jogo autorizado pelo biosync Launcher');
+      console.log('[Launcher] Jogo autorizado pelo NeuroOne Launcher');
     } catch (error) {
       console.error('Erro na validacao da sessao do jogo:', error);
       renderErrorScreen('Erro de validacao', 'Nao foi possivel validar o acesso ao jogo.', 'VALIDATION_ERROR');
@@ -116,7 +116,7 @@ export const getProtectionScript = (gameId) => `
   });
 
   if (window.opener || window.parent !== window) {
-    renderErrorScreen('Acesso negado', 'Este jogo deve ser aberto diretamente pelo biosync Launcher.', 'INVALID_CONTEXT');
+    renderErrorScreen('Acesso negado', 'Este jogo deve ser aberto diretamente pelo NeuroOne Launcher.', 'INVALID_CONTEXT');
   }
 })();
 </script>

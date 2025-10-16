@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -16,7 +16,7 @@ import {
 import { Login as LoginIcon, VpnKey } from '@mui/icons-material';
 import api from '../services/api';
 import { setStoredToken, setStoredUser } from '../services/storage';
-import logoUrl from '../assets/logo-azul.png';
+import logoUrl from '../assets/logo-neuroone.png';
 
 function Login({ onLogin }) {
   const theme = useTheme();
@@ -77,7 +77,7 @@ function Login({ onLogin }) {
         justifyContent: 'center',
         backgroundColor: '#0a0d1a',
         backgroundImage:
-          'radial-gradient(circle at 25% 20%, rgba(13,27,166,0.25), transparent 45%), radial-gradient(circle at 80% 0%, rgba(10,13,26,0.8), transparent 55%)',
+          'radial-gradient(circle at 25% 20%, rgba(255,217,19,0.25), transparent 45%), radial-gradient(circle at 80% 0%, rgba(20,15,0,0.7), transparent 55%)',
         px: 2
       }}
     >
@@ -89,7 +89,7 @@ function Login({ onLogin }) {
           borderRadius: 4,
           overflow: 'hidden',
           display: { xs: 'block', md: 'flex' },
-          border: '1px solid rgba(30,61,217,0.25)'
+          border: '1px solid rgba(255,217,19,0.25)'
         }}
       >
         <Box
@@ -108,7 +108,7 @@ function Login({ onLogin }) {
               <Box
                 component="img"
                 src={logoUrl}
-                alt="BioSync Logo"
+                alt="NeuroOne Logo"
                 sx={{ height: 56, width: 'auto', mb: 1.5 }}
               />
               <Typography variant="body2" sx={{ color: alpha('#ffffff', 0.8) }}>
@@ -134,13 +134,13 @@ function Login({ onLogin }) {
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   Monitoramento inteligente
                 </Typography>
-                <Typography variant="caption">Resultados sincronizados com sua conta BioSync</Typography>
+                <Typography variant="caption">Resultados sincronizados com sua conta NeuroOne</Typography>
               </Box>
             </Stack>
           </Box>
 
           <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.65) }}>
-            © {new Date().getFullYear()} BioSync. Todos os direitos reservados.
+            © {new Date().getFullYear()} NeuroOne. Todos os direitos reservados.
           </Typography>
         </Box>
 
@@ -157,7 +157,7 @@ function Login({ onLogin }) {
                 Entrar na conta
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Use seu email e senha para acessar sua conta BioSync
+                Use seu email e senha para acessar sua conta NeuroOne
               </Typography>
             </Box>
 
@@ -232,3 +232,4 @@ function Login({ onLogin }) {
 }
 
 export default Login;
+

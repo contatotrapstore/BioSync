@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -19,7 +19,7 @@ import {
 import { PersonAdd, Payment, CheckCircle, Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../services/api';
 import { setStoredToken, setStoredUser } from '../services/storage';
-import logoUrl from '../assets/logo-azul.png';
+import logoUrl from '../assets/logo-neuroone.png';
 
 const steps = ['Criar Conta', 'Escolher Plano', 'Pagamento'];
 
@@ -223,7 +223,7 @@ function Register({ onLogin }) {
         startIcon={loading ? <CircularProgress size={20} /> : <PersonAdd />}
         sx={{
           py: 1.5,
-          background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+          background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
           '&:hover': {
             background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
           }
@@ -237,7 +237,7 @@ function Register({ onLogin }) {
         <Link
           component="button"
           onClick={() => navigate('/login')}
-          sx={{ color: '#1f8a4c', cursor: 'pointer' }}
+          sx={{ color: '#c7a300', cursor: 'pointer' }}
         >
           Fazer Login
         </Link>
@@ -252,17 +252,17 @@ function Register({ onLogin }) {
         elevation={0}
         sx={{
           p: 3,
-          border: '2px solid #1f8a4c',
+          border: '2px solid #c7a300',
           borderRadius: 2,
           background: 'linear-gradient(135deg, rgba(31,138,76,0.1) 0%, rgba(55,126,86,0.1) 100%)'
         }}
       >
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" sx={{ color: '#1f8a4c', fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ color: '#c7a300', fontWeight: 600 }}>
               {selectedPlan.name}
             </Typography>
-            <Typography variant="h4" sx={{ color: '#1f8a4c', fontWeight: 700 }}>
+            <Typography variant="h4" sx={{ color: '#c7a300', fontWeight: 700 }}>
               R$ {selectedPlan.value.toFixed(2)}
               <Typography component="span" variant="body2" sx={{ ml: 0.5 }}>
                 /mês
@@ -275,16 +275,16 @@ function Register({ onLogin }) {
           </Typography>
 
           <Box sx={{ pt: 1 }}>
-            <Typography variant="body2" sx={{ color: '#1f8a4c', mb: 1 }}>
+            <Typography variant="body2" sx={{ color: '#c7a300', mb: 1 }}>
               ✓ Acesso ilimitado a todos os jogos
             </Typography>
-            <Typography variant="body2" sx={{ color: '#1f8a4c', mb: 1 }}>
+            <Typography variant="body2" sx={{ color: '#c7a300', mb: 1 }}>
               ✓ Novos jogos adicionados mensalmente
             </Typography>
-            <Typography variant="body2" sx={{ color: '#1f8a4c', mb: 1 }}>
+            <Typography variant="body2" sx={{ color: '#c7a300', mb: 1 }}>
               ✓ Suporte prioritário
             </Typography>
-            <Typography variant="body2" sx={{ color: '#1f8a4c' }}>
+            <Typography variant="body2" sx={{ color: '#c7a300' }}>
               ✓ Cancele quando quiser
             </Typography>
           </Box>
@@ -299,7 +299,7 @@ function Register({ onLogin }) {
         startIcon={<Payment />}
         sx={{
           py: 1.5,
-          background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+          background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
           '&:hover': {
             background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
           }
@@ -317,7 +317,7 @@ function Register({ onLogin }) {
       if (paymentData.method === 'PIX') {
         return (
           <Stack spacing={3} alignItems="center">
-            <CheckCircle sx={{ fontSize: 64, color: '#1f8a4c' }} />
+            <CheckCircle sx={{ fontSize: 64, color: '#c7a300' }} />
 
             <Typography variant="h6" align="center">
               Assinatura Criada!
@@ -332,7 +332,7 @@ function Register({ onLogin }) {
                 component="img"
                 src={paymentData.pixQrCode}
                 alt="QR Code PIX"
-                sx={{ width: 250, height: 250, border: '2px solid #1f8a4c', borderRadius: 2 }}
+                sx={{ width: 250, height: 250, border: '2px solid #c7a300', borderRadius: 2 }}
               />
             )}
 
@@ -375,7 +375,7 @@ function Register({ onLogin }) {
               variant="contained"
               onClick={handleFinish}
               sx={{
-                background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+                background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
                 }
@@ -402,10 +402,10 @@ function Register({ onLogin }) {
           onClick={() => setPaymentMethod('PIX')}
           sx={{
             py: 2,
-            borderColor: '#1f8a4c',
-            color: paymentMethod === 'PIX' ? '#fff' : '#1f8a4c',
+            borderColor: '#c7a300',
+            color: paymentMethod === 'PIX' ? '#fff' : '#c7a300',
             ...(paymentMethod === 'PIX' && {
-              background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+              background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
               '&:hover': {
                 background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
               }
@@ -426,7 +426,7 @@ function Register({ onLogin }) {
           startIcon={loading ? <CircularProgress size={20} /> : <Payment />}
           sx={{
             py: 1.5,
-            background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+            background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
             '&:hover': {
               background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
             }
@@ -459,13 +459,13 @@ function Register({ onLogin }) {
           maxWidth: 600,
           p: 4,
           borderRadius: 4,
-          border: '1px solid rgba(55,126,86,0.25)'
+          border: '1px solid rgba(255,217,19,0.18)'
         }}
       >
         {/* Logo */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <img src={logoUrl} alt="BioSync" style={{ height: 56, marginBottom: 16 }} />
-          <Typography variant="h5" sx={{ fontWeight: 600, color: '#1f8a4c' }}>
+          <img src={logoUrl} alt="NeuroOne" style={{ height: 56, marginBottom: 16 }} />
+          <Typography variant="h5" sx={{ fontWeight: 600, color: '#c7a300' }}>
             Criar Conta
           </Typography>
         </Box>
@@ -489,3 +489,5 @@ function Register({ onLogin }) {
 }
 
 export default Register;
+
+

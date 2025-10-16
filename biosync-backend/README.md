@@ -1,6 +1,6 @@
-# BioSync Backend API
+﻿# NeuroOne Backend API
 
-API REST em Node.js/Express responsável pela autenticação, catálogo de jogos e gestão de assinaturas da plataforma BioSync.
+API REST em Node.js/Express responsável pela autenticação, catálogo de jogos e gestão de assinaturas da plataforma NeuroOne.
 
 ## Tecnologias
 
@@ -78,7 +78,7 @@ Resposta esperada:
 ```json
 {
   "success": true,
-  "message": "BioSync API is running",
+  "message": "NeuroOne API is running",
   "timestamp": "2025-10-03T12:34:56.789Z"
 }
 ```
@@ -137,3 +137,4 @@ Execute-os conforme necessário pelo SQL Editor ou via script `node update-passw
 ## Licença
 
 MIT
+

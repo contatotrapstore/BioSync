@@ -5,16 +5,16 @@ import CssBaseline from '@mui/material/CssBaseline';
 import App from './App';
 import './index.css';
 
-const brandGradient = 'linear-gradient(120deg, #0a0d1a 0%, #0D1BA6 45%, #1E3DD9 100%)';
+const brandGradient = 'linear-gradient(120deg, #140f00 0%, #c1a200 45%, #ffd913 100%)';
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#1E3DD9',
-      light: '#4A6EF2',
-      dark: '#0D1BA6',
-      contrastText: '#ffffff'
+      main: '#ffd913',
+      light: '#ffe768',
+      dark: '#c7a300',
+      contrastText: '#130f00'
     },
     secondary: {
       main: '#1d2536',
@@ -26,10 +26,10 @@ const darkTheme = createTheme({
       paper: '#11141c'
     },
     text: {
-      primary: '#e6eeff',
-      secondary: '#8a97c4'
+      primary: '#fff6d6',
+      secondary: '#c9bb7a'
     },
-    divider: 'rgba(74, 110, 242, 0.32)'
+    divider: 'rgba(255,217,19,0.32)'
   },
   typography: {
     fontFamily: '"Inter", "Segoe UI", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -57,8 +57,8 @@ const darkTheme = createTheme({
         body: {
           backgroundColor: '#0a0d1a',
           backgroundImage:
-            'radial-gradient(circle at 20% 20%, rgba(30,61,217,0.18), transparent 45%), radial-gradient(circle at 80% 10%, rgba(13,27,166,0.6), transparent 55%)',
-          color: '#e6eeff'
+            'radial-gradient(circle at 20% 20%, rgba(255,217,19,0.18), transparent 45%), radial-gradient(circle at 80% 10%, rgba(193,162,0,0.4), transparent 55%)',
+          color: '#fff6d6'
         }
       }
     },
@@ -80,9 +80,9 @@ const darkTheme = createTheme({
           paddingRight: 20
         },
         contained: {
-          boxShadow: '0 10px 24px rgba(30,61,217,0.35)',
+          boxShadow: '0 10px 24px rgba(255,217,19,0.35)',
           '&:hover': {
-            boxShadow: '0 16px 36px rgba(30,61,217,0.45)'
+            boxShadow: '0 16px 36px rgba(255,217,19,0.45)'
           }
         }
       }
@@ -91,8 +91,8 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 20,
-          background: 'linear-gradient(160deg, rgba(17,20,36,0.95) 0%, rgba(12,15,26,0.9) 100%)',
-          border: '1px solid rgba(74, 110, 242, 0.18)',
+          background: 'linear-gradient(160deg, rgba(28,24,10,0.95) 0%, rgba(17,15,6,0.9) 100%)',
+          border: '1px solid rgba(255,217,19,0.18)',
           boxShadow: '0 16px 42px rgba(10, 13, 26, 0.55)'
         }
       }
@@ -100,8 +100,8 @@ const darkTheme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(150deg, rgba(16,19,32,0.96) 0%, rgba(10,13,26,0.95) 100%)',
-          border: '1px solid rgba(74,110,242,0.1)'
+          background: 'linear-gradient(150deg, rgba(21,18,7,0.96) 0%, rgba(10,13,26,0.95) 100%)',
+          border: '1px solid rgba(255,217,19,0.14)'
         }
       }
     },
@@ -110,13 +110,13 @@ const darkTheme = createTheme({
         root: {
           backgroundColor: 'rgba(12,15,26,0.85)',
           '& fieldset': {
-            borderColor: 'rgba(74, 110, 242, 0.35)'
+            borderColor: 'rgba(255,217,19,0.35)'
           },
           '&:hover fieldset': {
-            borderColor: 'rgba(74, 110, 242, 0.65)'
+            borderColor: 'rgba(255,217,19,0.65)'
           },
           '&.Mui-focused fieldset': {
-            borderColor: '#4A6EF2'
+            borderColor: '#ffe768'
           }
         }
       }
@@ -126,8 +126,9 @@ const darkTheme = createTheme({
 
 (darkTheme).palette.gradient = {
   primary: brandGradient,
-  secondary: 'linear-gradient(120deg, rgba(10,13,26,0.9) 0%, rgba(13,27,166,0.92) 60%, rgba(30,61,217,0.9) 100%)',
-  card: 'linear-gradient(160deg, rgba(17,20,36,0.88) 0%, rgba(10,13,26,0.9) 100%)'
+  secondary:
+    'linear-gradient(120deg, rgba(20,15,0,0.95) 0%, rgba(193,162,0,0.9) 60%, rgba(255,217,19,0.85) 100%)',
+  card: 'linear-gradient(160deg, rgba(28,24,10,0.88) 0%, rgba(17,15,6,0.9) 100%)'
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -138,3 +139,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </ThemeProvider>
   </React.StrictMode>
 );
+

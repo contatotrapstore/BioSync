@@ -28,12 +28,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1E3DD9 0%, #0D1BA6 100%);
+  background: linear-gradient(180deg, #ffd913 0%, #c7a300 100%);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #4A6EF2 0%, #1E3DD9 100%);
+  background: linear-gradient(180deg, #ffe768 0%, #ffd913 100%);
 }
 
 /* WebView styles */

@@ -1,4 +1,4 @@
-const axios = require('axios');
+﻿const axios = require('axios');
 
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY || '$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmE2Y2JlMWEwLWVjNzctNGUxMC1hODIyLWQzZTNmNWMyYzMxZTo6JGFhY2hfZjgxZWEyMTMtY2NiZC00OTU0LWJjYzEtYjE0NTMyOTBiNWM2';
 const ASAAS_BASE_URL = 'https://api.asaas.com/v3';
@@ -36,7 +36,7 @@ class AsaasService {
         billingType: paymentData.billingType || 'PIX', // PIX, CREDIT_CARD, BOLETO
         value: paymentData.amount,
         dueDate: paymentData.dueDate,
-        description: paymentData.description || 'Assinatura BioSync',
+        description: paymentData.description || 'Assinatura NeuroOne',
         externalReference: paymentData.subscriptionId,
         // Para PIX
         ...(paymentData.billingType === 'PIX' && {
@@ -61,7 +61,7 @@ class AsaasService {
         value: subscriptionData.amount,
         nextDueDate: subscriptionData.nextDueDate,
         cycle: subscriptionData.cycle || 'MONTHLY', // MONTHLY, YEARLY
-        description: subscriptionData.description || 'Assinatura BioSync',
+        description: subscriptionData.description || 'Assinatura NeuroOne',
         externalReference: subscriptionData.userSubscriptionId
       });
       return response.data;
@@ -113,3 +113,4 @@ class AsaasService {
 }
 
 module.exports = new AsaasService();
+

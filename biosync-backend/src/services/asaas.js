@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+﻿const crypto = require('crypto');
 const axios = require('axios');
 
 /**
@@ -89,7 +89,7 @@ const createPayment = async (customerId, paymentData) => {
       billingType: paymentData.paymentMethod || 'PIX',
       value: parseFloat(paymentData.value || process.env.SUBSCRIPTION_VALUE || 149.90),
       dueDate: dueDate.toISOString().split('T')[0],
-      description: paymentData.description || 'BioSync - Mensalidade',
+      description: paymentData.description || 'NeuroOne - Mensalidade',
       creditCard: paymentData.creditCard || undefined,
       creditCardHolderInfo: paymentData.creditCardHolder || undefined,
       externalReference: paymentData.userId,
@@ -114,7 +114,7 @@ const createSubscription = async (customerId, subscriptionData) => {
       value: parseFloat(subscriptionData.value || process.env.SUBSCRIPTION_VALUE || 149.90),
       nextDueDate: subscriptionData.nextDueDate || getNextDueDate(),
       cycle: 'MONTHLY',
-      description: subscriptionData.description || 'BioSync - Assinatura Mensal',
+      description: subscriptionData.description || 'NeuroOne - Assinatura Mensal',
       creditCard: subscriptionData.creditCard || undefined,
       creditCardHolderInfo: subscriptionData.creditCardHolder || undefined,
       updatePaymentValue: false,
@@ -274,4 +274,5 @@ module.exports = {
   mapSubscriptionStatus,
   mapPaymentStatus
 };
+
 

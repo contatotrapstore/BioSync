@@ -1,4 +1,4 @@
-# 🚀 Deploy do Backend no Render - Passo a Passo
+﻿# 🚀 Deploy do Backend no Render - Passo a Passo
 
 ## ✅ Pré-requisitos
 
@@ -59,7 +59,7 @@ service_role key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 1. **No dashboard, clique em:** "New +"
 2. **Selecione:** "Web Service"
 3. **Autorize o Render** a acessar seus repositórios (se ainda não fez)
-4. **Encontre e selecione** o repositório `biosync`
+4. **Encontre e selecione** o repositório `NeuroOne`
 5. **Clique em "Connect"**
 
 ### 2.3 Configurar o Serviço
@@ -70,10 +70,10 @@ Na tela de configuração:
 
 | Campo | Valor |
 |-------|-------|
-| **Name** | `biosync-backend` |
+| **Name** | `NeuroOne-backend` |
 | **Region** | `Oregon (US West)` ou mais próximo |
 | **Branch** | `master` (ou `main`) |
-| **Root Directory** | `biosync-backend` ⚠️ IMPORTANTE! |
+| **Root Directory** | `NeuroOne-backend` ⚠️ IMPORTANTE! |
 | **Runtime** | `Node` (detectado automaticamente) |
 | **Build Command** | `npm install` |
 | **Start Command** | `npm start` |
@@ -161,7 +161,7 @@ Execute 2 vezes para gerar `JWT_SECRET` e `JWT_REFRESH_SECRET` diferentes.
 Após deploy bem-sucedido, o Render gera uma URL:
 
 ```
-https://biosync-backend.onrender.com
+https://NeuroOne-backend.onrender.com
 ```
 
 **Copie essa URL** - você vai precisar dela!
@@ -172,7 +172,7 @@ Abra o navegador ou use curl:
 
 ```bash
 # Health check
-curl https://biosync-backend.onrender.com/api/v1/health
+curl https://NeuroOne-backend.onrender.com/api/v1/health
 
 # Deve retornar:
 {
@@ -188,7 +188,7 @@ curl https://biosync-backend.onrender.com/api/v1/health
 ### 3.3 Testar Login
 
 ```bash
-curl -X POST https://biosync-backend.onrender.com/api/v1/auth/login \
+curl -X POST https://NeuroOne-backend.onrender.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"Admin123"}'
 ```
@@ -208,7 +208,7 @@ A partir de agora, **toda vez que você fizer push no GitHub:**
 
 ```bash
 # No seu computador
-cd biosync-backend
+cd NeuroOne-backend
 # ... faça alterações ...
 git add .
 git commit -m "feat: alguma melhoria"
@@ -230,7 +230,7 @@ Se você tem um domínio próprio:
 5. **Configure DNS** no seu provedor de domínio:
    - Tipo: `CNAME`
    - Nome: `api`
-   - Valor: `biosync-backend.onrender.com`
+   - Valor: `NeuroOne-backend.onrender.com`
 6. **Aguarde propagação** (5-30 minutos)
 7. **Render gera SSL** automaticamente!
 
@@ -273,7 +273,7 @@ Se você tem um domínio próprio:
 **Solução:**
 1. Verifique logs de build
 2. Certifique-se que `package.json` está correto
-3. Verifique se Root Directory é `biosync-backend`
+3. Verifique se Root Directory é `NeuroOne-backend`
 4. Teste localmente: `npm install && npm start`
 
 ### ❌ Application Error - "Cannot connect to Supabase"
@@ -343,7 +343,7 @@ Se você tem um domínio próprio:
 
 ### Uso Estimado
 
-Para BioSync com poucos usuários:
+Para NeuroOne com poucos usuários:
 - **Plano Free:** Suficiente para começar
 - **Upgrade para Starter:** Quando tiver >20 usuários ativos
 
@@ -397,7 +397,7 @@ Após backend deployado, **atualize o Admin Panel:**
 2. **Settings → Environment Variables**
 3. **Edite `VITE_API_URL`:**
    - De: `http://localhost:3000/api/v1`
-   - Para: `https://biosync-backend.onrender.com/api/v1`
+   - Para: `https://NeuroOne-backend.onrender.com/api/v1`
 4. **Save** e **Redeploy** o admin na Vercel
 5. **Teste** o login no admin!
 
@@ -466,12 +466,13 @@ Se você chegou até aqui, seu backend está **em produção** e acessível pela
 
 | Serviço | URL |
 |---------|-----|
-| **Backend API** | https://biosync-backend.onrender.com |
-| **Health Check** | https://biosync-backend.onrender.com/api/v1/health |
+| **Backend API** | https://NeuroOne-backend.onrender.com |
+| **Health Check** | https://NeuroOne-backend.onrender.com/api/v1/health |
 | **Render Dashboard** | https://dashboard.render.com |
 | **Supabase Dashboard** | https://app.supabase.com/project/seu-projeto |
 
 ---
 
-**Desenvolvido com BioSync Platform v1.0.0**
+**Desenvolvido com NeuroOne Platform v1.0.0**
 **Backend em produção no Render! 🚀**
+

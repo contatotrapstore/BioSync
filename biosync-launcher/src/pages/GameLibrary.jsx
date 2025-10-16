@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
@@ -172,16 +172,16 @@ function GameLibrary() {
             BIBLIOTECA
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-            Continue sua jornada BioSync
+            Continue sua jornada NeuroOne
           </Typography>
           <Typography variant="body1" sx={{ color: alpha('#ffffff', 0.78), mb: 3 }}>
-            Explore seus jogos terapêuticos e mantenha o foco nos treinamentos cognitivos.
+            Explore seus jogos terapÃªuticos e mantenha o foco nos treinamentos cognitivos.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Stack direction="row" spacing={1.2} alignItems="center">
               <LibraryBooks fontSize="small" />
               <Typography variant="body2">
-                {games.length} título{games.length !== 1 ? 's' : ''}
+                {games.length} tÃ­tulo{games.length !== 1 ? 's' : ''}
               </Typography>
             </Stack>
             <Stack direction="row" spacing={1.2} alignItems="center">
@@ -307,7 +307,7 @@ function GameLibrary() {
             sx={{
               borderRadius: 999,
               borderColor: 'rgba(82,202,126,0.4)',
-              backgroundColor: selectedCategory === 'all' ? alpha('#1f8a4c', 0.25) : 'transparent',
+              backgroundColor: selectedCategory === 'all' ? alpha('#c7a300', 0.25) : 'transparent',
               color: '#e6f3eb'
             }}
           />
@@ -321,7 +321,7 @@ function GameLibrary() {
               sx={{
                 borderRadius: 999,
                 borderColor: 'rgba(82,202,126,0.4)',
-                backgroundColor: selectedCategory === category ? alpha('#1f8a4c', 0.25) : 'transparent',
+                backgroundColor: selectedCategory === category ? alpha('#c7a300', 0.25) : 'transparent',
                 color: '#e6f3eb'
               }}
             />
@@ -339,7 +339,7 @@ function GameLibrary() {
           <Typography variant="h6" color="text.secondary">
             {searchQuery || selectedCategory !== 'all'
               ? 'Nenhum jogo encontrado com esses filtros'
-              : 'Nenhum jogo disponível'}
+              : 'Nenhum jogo disponÃ­vel'}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {searchQuery || selectedCategory !== 'all'
@@ -361,6 +361,7 @@ function GameLibrary() {
 }
 
 export default GameLibrary;
+
 
 
 

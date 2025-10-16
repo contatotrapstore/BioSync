@@ -1,12 +1,12 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # Script para preparar o instalador do macOS
-# Garante que o arquivo .command tenha permissão de execução
+# Garante que o arquivo .command tenha permissÃ£o de execuÃ§Ã£o
 
 echo "Preparando instalador macOS..."
 
-# Dar permissão de execução ao script de instalação
-chmod +x "build/Instalar biosync.command"
+# Dar permissÃ£o de execuÃ§Ã£o ao script de instalaÃ§Ã£o
+chmod +x "build/Instalar NeuroOne.command"
 chmod +x "build/install-macos.sh"
 
-echo "✅ Arquivos preparados com sucesso!"
+echo "âœ… Arquivos preparados com sucesso!"

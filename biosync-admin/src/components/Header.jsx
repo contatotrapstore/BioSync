@@ -45,7 +45,9 @@ const Header = ({ onMenuClick, drawerWidth }) => {
     navigate('/login')
   }
 
-  const gradient = theme.palette?.gradient?.primary || 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)'
+  const gradient =
+    theme.palette?.gradient?.primary ||
+    'linear-gradient(135deg, #1c1400 0%, #d4a100 55%, #ffd913 100%)'
 
   return (
     <AppBar
@@ -71,14 +73,10 @@ const Header = ({ onMenuClick, drawerWidth }) => {
         </IconButton>
 
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, gap: 2 }}>
-          <img
-            src="/logo-azul.png"
-            alt="BioSync"
-            style={{ height: 42, display: 'block' }}
-          />
+          <img src="/logo-neuroone.png" alt="NeuroOne" style={{ height: 42, display: 'block' }} />
           <Box sx={{ lineHeight: 1.2 }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              BioSync Admin
+              NeuroOne Admin
             </Typography>
             <Typography
               variant="caption"

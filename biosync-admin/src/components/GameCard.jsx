@@ -55,7 +55,7 @@ const GameCard = ({ game, onEdit, onDelete }) => {
           right: 0,
           height: '4px',
           background: game.isActive
-            ? 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)'
+            ? 'linear-gradient(90deg, #c29600 0%, #ffd913 100%)'
             : 'linear-gradient(90deg, #757575 0%, #9e9e9e 100%)'
         }
       }}
@@ -79,7 +79,7 @@ const GameCard = ({ game, onEdit, onDelete }) => {
         <Box
           sx={{
             height: 180,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #ffb300 0%, #ffd913 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

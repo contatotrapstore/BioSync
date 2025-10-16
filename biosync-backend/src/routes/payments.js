@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { supabase } = require('../config/supabase');
 const { authenticate } = require('../middleware/auth');
@@ -64,7 +64,7 @@ const handleCreatePayment = async (req, res) => {
       userId,
       paymentMethod,
       value: subscriptionValue,
-      description: 'BioSync - Mensalidade Mensal'
+      description: 'NeuroOne - Mensalidade Mensal'
     };
 
     if (paymentMethod === 'CREDIT_CARD') {
@@ -260,4 +260,5 @@ router.get('/status', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+
 

@@ -1,8 +1,8 @@
-# 🎮 BioSync - Primeiro Acesso
+﻿# 🎮 NeuroOne - Primeiro Acesso
 
-**Bem-vindo ao BioSync Game Platform!**
+**Bem-vindo ao NeuroOne Game Platform!**
 
-Este projeto foi completamente rebrandizado do NeuroGame para BioSync, com nova identidade visual (azul), novo database Supabase e pronto para novos deploys.
+Este projeto foi completamente rebrandizado do NeuroGame para NeuroOne, com nova identidade visual (azul), novo database Supabase e pronto para novos deploys.
 
 ---
 
@@ -11,12 +11,12 @@ Este projeto foi completamente rebrandizado do NeuroGame para BioSync, com nova 
 ### ✅ Concluído (100%)
 
 1. **✅ Rebranding Completo**
-   - Renomeado: NeuroGame → BioSync
+   - Renomeado: NeuroGame → NeuroOne
    - Cores: Verde → Azul (#0D1BA6, #1E3DD9, #4A6EF2)
    - Logo: Versão azul aplicada
    - 50+ arquivos atualizados
 
-2. **✅ Database Supabase - BioSync**
+2. **✅ Database Supabase - NeuroOne**
    - Project ID: `uszmhhukjohjarplnlmp`
    - 13 tabelas criadas via MCP
    - 13 jogos inseridos
@@ -51,20 +51,20 @@ Este projeto foi completamente rebrandizado do NeuroGame para BioSync, com nova 
 ## 📁 Estrutura do Projeto
 
 ```
-BioSync Game FN/
-├── biosync-backend/         # API Node.js + Express
+NeuroOne Game FN/
+├── NeuroOne-backend/         # API Node.js + Express
 │   ├── .env                 # ✅ Configurado (falta Supabase keys)
 │   ├── supabase-schema-complete.sql  # ✅ Já aplicado via MCP
 │   └── supabase-seeds.sql   # ✅ Já aplicado via MCP
-├── biosync-admin/           # Painel Admin (React + Vite)
+├── NeuroOne-admin/           # Painel Admin (React + Vite)
 │   └── .env                 # ✅ Configurado
-├── biosync-launcher/        # Desktop Launcher (Electron)
+├── NeuroOne-launcher/        # Desktop Launcher (Electron)
 │   └── .env                 # ✅ Configurado
 ├── Jogos/                   # 13 jogos (HTML5 + Three.js)
 │   ├── autorama/
 │   ├── balao/
 │   └── ... (11 outros)
-└── Logo Azul.png            # ✅ Logo oficial BioSync
+└── Logo Azul.png            # ✅ Logo oficial NeuroOne
 ```
 
 ---
@@ -78,21 +78,21 @@ BioSync Game FN/
 Resumo:
 1. Acesse: https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp/settings/api
 2. Copie `anon key` e `service_role key`
-3. Cole em `biosync-backend/.env`
+3. Cole em `NeuroOne-backend/.env`
 
 ### 2️⃣ Instalar Dependências
 
 ```bash
 # Backend
-cd biosync-backend
+cd NeuroOne-backend
 npm install
 
 # Admin
-cd ../biosync-admin
+cd ../NeuroOne-admin
 npm install
 
 # Launcher
-cd ../biosync-launcher
+cd ../NeuroOne-launcher
 npm install
 ```
 
@@ -100,21 +100,21 @@ npm install
 
 #### Terminal 1 - Backend API
 ```bash
-cd biosync-backend
+cd NeuroOne-backend
 npm run dev
 # Servidor: http://localhost:3000
 ```
 
 #### Terminal 2 - Admin Panel
 ```bash
-cd biosync-admin
+cd NeuroOne-admin
 npm run dev
 # Painel: http://localhost:5173
 ```
 
 #### Terminal 3 - Launcher
 ```bash
-cd biosync-launcher
+cd NeuroOne-launcher
 npm run dev
 # Electron app abrirá automaticamente
 ```
@@ -123,11 +123,11 @@ npm run dev
 
 **Admin Panel:**
 - URL: http://localhost:5173
-- Email: `admin@biosync.com`
+- Email: `admin@NeuroOne.com`
 - Senha: `Admin@123456`
 
 **Launcher:**
-- Email: `demo@biosync.com`
+- Email: `demo@NeuroOne.com`
 - Senha: `Demo@123456`
 
 ---
@@ -135,7 +135,7 @@ npm run dev
 ## 📊 Database - Informações
 
 ### Supabase Project
-- **Nome:** BioSync
+- **Nome:** NeuroOne
 - **Project ID:** `uszmhhukjohjarplnlmp`
 - **URL:** https://uszmhhukjohjarplnlmp.supabase.co
 - **Region:** South America (sa-east-1)
@@ -164,7 +164,7 @@ npm run dev
 
 ---
 
-## 🎨 Identidade Visual BioSync
+## 🎨 Identidade Visual NeuroOne
 
 ### Logo
 - **Arquivo:** `Logo Azul.png`
@@ -215,21 +215,21 @@ linear-gradient(to right, #1E3DD9, #4A6EF2)
 
 ### Admin (Painel + API)
 ```
-Email: admin@biosync.com
+Email: admin@NeuroOne.com
 Senha: Admin@123456
 Permissões: Administrador completo
 ```
 
 ### Demo (Launcher)
 ```
-Email: demo@biosync.com
+Email: demo@NeuroOne.com
 Senha: Demo@123456
 Permissões: Usuário regular
 ```
 
 ### Supabase Dashboard
 ```
-Project: BioSync
+Project: NeuroOne
 ID: uszmhhukjohjarplnlmp
 URL: https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp
 ```
@@ -341,7 +341,7 @@ Antes de considerar setup completo:
 
 ## 🎉 Conclusão
 
-**O projeto BioSync está 95% pronto!**
+**O projeto NeuroOne está 95% pronto!**
 
 Falta apenas:
 1. Obter 2 chaves do Supabase (5 minutos)
@@ -354,4 +354,5 @@ Falta apenas:
 
 **Gerado em:** 2025-10-09
 **Versão:** 1.0.0
-**Plataforma:** BioSync Game Platform
+**Plataforma:** NeuroOne Game Platform
+

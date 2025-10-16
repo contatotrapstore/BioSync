@@ -1,4 +1,4 @@
--- BioSync Platform - Complete Supabase Schema
+﻿-- NeuroOne Platform - Complete Supabase Schema
 -- Execute este script no SQL Editor do Supabase para criar todas as tabelas
 
 -- Enable UUID extension
@@ -394,3 +394,4 @@ CREATE POLICY "Service role has full access to access_history"
 -- =======================
 -- Schema criado com sucesso!
 -- Próximo passo: Execute o arquivo supabase-seeds.sql para popular com dados iniciais
+

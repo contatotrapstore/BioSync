@@ -30,26 +30,7 @@ import api from '../services/api';
 import { getGamesPath } from '../services/storage';
 import { gameRequestsApi } from '../services/gameRequestsApi';
 import { generateGameSessionToken } from '../services/gameProtection';
-import { buildGamePlaceholder } from '../utils/placeholders';
-
-const getGameImage = async (slug) => {
-  try {
-    // Tentar importar de assets (desenvolvimento)
-    const image = await import(`../assets/games/${slug}.jpg`);
-    return image.default;
-  } catch {
-    // Fallback: tentar URL direta (produção)
-    try {
-      const response = await fetch(`/assets/games/${slug}.jpg`, { method: 'HEAD' });
-      if (response.ok) {
-        return `/assets/games/${slug}.jpg`;
-      }
-    } catch {
-      // Imagem não encontrada
-    }
-    return null;
-  }
-};
+import { buildGamePlaceholder, getGameImage } from '../utils/placeholders';
 
 const sanitizeFolderPath = (value = '') => {
   if (!value) return '';
@@ -113,24 +94,17 @@ function GameDetail() {
 
   // Carregar imagem do jogo
   useEffect(() => {
-    const loadImage = async () => {
-      if (!game) return;
+    if (!game) return;
 
-      const slug = game.folderPath?.split('/').pop() || game.slug;
-      if (!slug) {
-        setCoverImage(buildGamePlaceholder(game.name, 800, 450));
-        return;
-      }
+    // Usar coverImage que vem do banco (já deve ser URL completa do Supabase ou null)
+    const imageUrl = getGameImage(game.coverImage);
 
-      const image = await getGameImage(slug);
-      if (image) {
-        setCoverImage(image);
-      } else {
-        setCoverImage(buildGamePlaceholder(game.name, 800, 450));
-      }
-    };
-
-    loadImage();
+    if (imageUrl) {
+      setCoverImage(imageUrl);
+    } else {
+      // Se não tem imagem válida, usar placeholder
+      setCoverImage(buildGamePlaceholder(game.name, 800, 450));
+    }
   }, [game]);
 
   const fetchGameDetails = async () => {

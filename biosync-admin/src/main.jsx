@@ -17,33 +17,33 @@ const queryClient = new QueryClient({
   },
 })
 
-const brandGradient = 'linear-gradient(135deg, #0d1f3d 0%, #1565c0 55%, #42a5f5 100%)'
+const brandGradient = 'linear-gradient(135deg, #1c1400 0%, #d4a100 55%, #ffd913 100%)'
 
 const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1565c0',
-      light: '#42a5f5',
-      dark: '#0d1f3d',
-      contrastText: '#ffffff',
+      main: '#ffd913',
+      light: '#ffeb75',
+      dark: '#c7a300',
+      contrastText: '#1a1400',
     },
     secondary: {
-      main: '#90caf9',
-      contrastText: '#0d1f3d',
+      main: '#ffefa3',
+      contrastText: '#1a1400',
     },
     success: {
-      main: '#42a5f5',
+      main: '#c7a300',
     },
     text: {
-      primary: '#0d1f3d',
-      secondary: '#455a64',
+      primary: '#1a1400',
+      secondary: '#5c4a0c',
     },
     background: {
-      default: '#f5f7fa',
+      default: '#fff9da',
       paper: '#ffffff',
     },
-    divider: 'rgba(13,31,61,0.12)',
+    divider: 'rgba(199,163,0,0.24)',
   },
   typography: {
     fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -69,10 +69,10 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#f5f7fa',
+          backgroundColor: '#fff9da',
           backgroundImage:
-            'radial-gradient(circle at 20% 20%, rgba(13,31,61,0.08), transparent 55%), radial-gradient(circle at 80% 0, rgba(21,101,192,0.12), transparent 35%)',
-          color: '#0d1f3d',
+            'radial-gradient(circle at 20% 20%, rgba(255,217,19,0.12), transparent 55%), radial-gradient(circle at 80% 0, rgba(199,163,0,0.16), transparent 35%)',
+          color: '#1a1400',
         },
       },
     },
@@ -88,8 +88,8 @@ const theme = createTheme({
       styleOverrides: {
         paper: {
           backgroundImage:
-            'linear-gradient(180deg, rgba(13,31,61,0.95) 0%, rgba(13,31,61,0.88) 65%, rgba(21,101,192,0.9) 100%)',
-          color: '#e3f2fd',
+            'linear-gradient(180deg, rgba(26,20,0,0.95) 0%, rgba(26,20,0,0.88) 65%, rgba(199,163,0,0.9) 100%)',
+          color: '#fff1a6',
           borderRight: 'none',
         },
       },
@@ -105,7 +105,7 @@ const theme = createTheme({
         contained: {
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 10px 24px rgba(21,101,192,0.25)',
+            boxShadow: '0 10px 24px rgba(199,163,0,0.25)',
           },
         },
       },
@@ -114,7 +114,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 0,
-          boxShadow: '0 18px 40px rgba(13,31,61,0.08)',
+          boxShadow: '0 18px 40px rgba(199,163,0,0.12)',
         },
       },
     },
@@ -124,11 +124,11 @@ const theme = createTheme({
           borderRadius: 0,
           backgroundImage:
             'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(245,247,250,1) 100%)',
-          border: '1px solid rgba(13,31,61,0.06)',
+          border: '1px solid rgba(199,163,0,0.12)',
           transition: 'transform 0.2s, box-shadow 0.2s',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 20px 38px rgba(13,31,61,0.12)',
+            boxShadow: '0 20px 38px rgba(199,163,0,0.16)',
           },
         },
       },
@@ -148,12 +148,12 @@ const theme = createTheme({
 
 theme.palette.gradient = {
   primary: brandGradient,
-  sidebar: 'linear-gradient(180deg, rgba(13,31,61,0.95) 0%, rgba(21,101,192,0.92) 60%, rgba(66,165,245,0.9) 100%)',
+  sidebar: 'linear-gradient(180deg, rgba(26,20,0,0.95) 0%, rgba(199,163,0,0.92) 60%, rgba(255,217,19,0.9) 100%)',
 }
 
 theme.customShadows = {
-  card: '0 18px 40px rgba(13,31,61,0.08)',
-  subtle: '0 10px 24px rgba(13,31,61,0.06)',
+  card: '0 18px 40px rgba(199,163,0,0.12)',
+  subtle: '0 10px 24px rgba(199,163,0,0.08)',
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

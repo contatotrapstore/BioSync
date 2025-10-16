@@ -1,6 +1,6 @@
-services:
+﻿services:
   - type: web
-    name: biosync-backend
+    name: neuroone-backend
     runtime: node
     region: oregon
     plan: free

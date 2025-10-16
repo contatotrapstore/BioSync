@@ -1,6 +1,6 @@
-# 🔑 Como Obter Credenciais do Supabase - BioSync
+﻿# 🔑 Como Obter Credenciais do Supabase - NeuroOne
 
-**Projeto:** BioSync
+**Projeto:** NeuroOne
 **Project ID:** `uszmhhukjohjarplnlmp`
 **Status Database:** ✅ 100% Configurado (13 tabelas + dados)
 
@@ -19,7 +19,7 @@
 
 1. Acesse: https://supabase.com
 2. Faça login com sua conta
-3. Selecione o projeto **"BioSync"**
+3. Selecione o projeto **"NeuroOne"**
 4. Ou acesse diretamente: https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp
 
 ### 2. Obter as API Keys
@@ -62,15 +62,15 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Após copiar as chaves, edite o arquivo:
 
 ```bash
-biosync-backend/.env
+NeuroOne-backend/.env
 ```
 
 Substitua as linhas:
 
 ```env
 # ANTES:
-SUPABASE_ANON_KEY=OBTER_NO_DASHBOARD_BIOSYNC
-SUPABASE_SERVICE_KEY=OBTER_NO_DASHBOARD_BIOSYNC
+SUPABASE_ANON_KEY=OBTER_NO_DASHBOARD_NeuroOne
+SUPABASE_SERVICE_KEY=OBTER_NO_DASHBOARD_NeuroOne
 
 # DEPOIS (com suas chaves reais):
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzem1oaHVrampoamFycGxubG1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg0ODQ2ODIsImV4cCI6MjA0NDA2MDY4Mn0.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -85,7 +85,7 @@ Após atualizar o `.env`, teste se está funcionando:
 
 ```bash
 # 1. Entre na pasta do backend
-cd biosync-backend
+cd NeuroOne-backend
 
 # 2. Instale dependências (se não instalou ainda)
 npm install
@@ -135,7 +135,7 @@ Deve retornar:
 ```json
 {
   "status": "ok",
-  "message": "Welcome to BioSync API",
+  "message": "Welcome to NeuroOne API",
   "timestamp": "2025-10-09T..."
 }
 ```
@@ -145,7 +145,7 @@ Deve retornar:
 curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@biosync.com",
+    "email": "admin@NeuroOne.com",
     "password": "Admin@123456"
   }'
 ```
@@ -157,7 +157,7 @@ Deve retornar um token JWT:
   "user": {
     "id": "...",
     "username": "admin",
-    "email": "admin@biosync.com",
+    "email": "admin@NeuroOne.com",
     "is_admin": true
   }
 }
@@ -187,7 +187,7 @@ Deve retornar array com 13 jogos.
 ### Erro: "Table doesn't exist"
 - ✅ Confirme que todas as 13 tabelas foram criadas
 - ✅ Acesse o Table Editor e verifique
-- ✅ Se necessário, reexecute o script: `biosync-backend/supabase-schema-complete.sql`
+- ✅ Se necessário, reexecute o script: `NeuroOne-backend/supabase-schema-complete.sql`
 
 ---
 
@@ -197,8 +197,8 @@ Após configurar tudo, use estas credenciais para testar:
 
 | Tipo | Email | Senha | Uso |
 |------|-------|-------|-----|
-| **Admin** | admin@biosync.com | `Admin@123456` | Painel Admin + API |
-| **Demo** | demo@biosync.com | `Demo@123456` | Launcher apenas |
+| **Admin** | admin@NeuroOne.com | `Admin@123456` | Painel Admin + API |
+| **Demo** | demo@NeuroOne.com | `Demo@123456` | Launcher apenas |
 
 ---
 
@@ -208,9 +208,9 @@ Antes de fazer deploy, confirme:
 
 - [ ] ✅ Obtive `SUPABASE_ANON_KEY`
 - [ ] ✅ Obtive `SUPABASE_SERVICE_KEY`
-- [ ] ✅ Atualizei `biosync-backend/.env`
+- [ ] ✅ Atualizei `NeuroOne-backend/.env`
 - [ ] ✅ Testei conexão local (`npm run dev`)
-- [ ] ✅ Testei login com admin@biosync.com
+- [ ] ✅ Testei login com admin@NeuroOne.com
 - [ ] ✅ Testei listagem de jogos
 - [ ] ✅ Verifiquei que 13 tabelas existem no Supabase
 - [ ] ✅ Verifiquei que 2 usuários existem (admin + demo)
@@ -221,3 +221,4 @@ Antes de fazer deploy, confirme:
 
 **Gerado em:** 2025-10-09
 **Próximo passo:** Deploy no Render e Vercel
+

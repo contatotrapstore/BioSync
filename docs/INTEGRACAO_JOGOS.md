@@ -1,6 +1,6 @@
-# 🎮 Guia de Integração dos Jogos HTML5
+﻿# 🎮 Guia de Integração dos Jogos HTML5
 
-Este guia explica como os 14 jogos HTML5 existentes são integrados à plataforma BioSync.
+Este guia explica como os 14 jogos HTML5 existentes são integrados à plataforma NeuroOne.
 
 ## 📁 Estrutura dos Jogos
 
@@ -27,7 +27,7 @@ Jogos/
 O backend serve os jogos como arquivos estáticos:
 
 ```javascript
-// biosync-backend/src/server.js
+// NeuroOne-backend/src/server.js
 const path = require('path');
 const gamesDir = process.env.GAMES_DIR || '../Jogos';
 
@@ -51,7 +51,7 @@ Exemplos:
 Os jogos são cadastrados no banco via seed:
 
 ```javascript
-// biosync-backend/src/utils/seed.js
+// NeuroOne-backend/src/utils/seed.js
 const gamesData = [
   {
     name: 'Autorama',
@@ -71,7 +71,7 @@ const gamesData = [
 ### 1. Usuário clica em "Jogar" no Launcher
 
 ```jsx
-// biosync-launcher/src/components/GameCard.jsx
+// NeuroOne-launcher/src/components/GameCard.jsx
 const handlePlay = async () => {
   if (!game.hasAccess) {
     alert('Você não tem acesso a este jogo.');
@@ -84,7 +84,7 @@ const handlePlay = async () => {
 ### 2. Validação de Acesso
 
 ```jsx
-// biosync-launcher/src/components/GamePlayer.jsx
+// NeuroOne-launcher/src/components/GamePlayer.jsx
 const validateAccess = async () => {
   const response = await gamesAPI.validateAccess(game.id);
   if (response.data.data.hasAccess) {
@@ -98,7 +98,7 @@ const validateAccess = async () => {
 ### 3. Backend Valida Permissões
 
 ```javascript
-// biosync-backend/src/controllers/gameController.js
+// NeuroOne-backend/src/controllers/gameController.js
 exports.validateAccess = async (req, res) => {
   const { id: gameId } = req.params;
   const userId = req.user.id;
@@ -123,7 +123,7 @@ exports.validateAccess = async (req, res) => {
 ### 4. Jogo é Carregado no WebView
 
 ```jsx
-// biosync-launcher/src/components/GamePlayer.jsx
+// NeuroOne-launcher/src/components/GamePlayer.jsx
 const gameUrl = `http://localhost:3000/games/${game.folderPath}/index.html`;
 
 return (
@@ -176,7 +176,7 @@ function requestFullscreen() {
 
 ### 4. Adicionar ao Seed
 
-Edite `biosync-backend/src/utils/seed.js`:
+Edite `NeuroOne-backend/src/utils/seed.js`:
 
 ```javascript
 const gamesData = [
@@ -196,7 +196,7 @@ const gamesData = [
 ### 5. Executar Seed
 
 ```bash
-cd biosync-backend
+cd NeuroOne-backend
 npm run seed
 ```
 
@@ -206,7 +206,7 @@ npm run seed
 
 1. Crie pasta para capas:
 ```bash
-mkdir biosync-backend/uploads/covers
+mkdir NeuroOne-backend/uploads/covers
 ```
 
 2. Adicione imagens (formato: `slug.jpg` ou `slug.png`)
@@ -235,7 +235,7 @@ coverImage: 'https://seu-cdn.com/images/autorama.jpg'
 ```html
 <!-- Adicionar no index.html de cada jogo -->
 <div id="game-header">
-  <img src="http://localhost:3000/assets/logo.png" alt="BioSync" />
+  <img src="http://localhost:3000/assets/logo.png" alt="NeuroOne" />
   <button onclick="exitGame()">Sair</button>
 </div>
 
@@ -283,7 +283,7 @@ window.addEventListener('beforeunload', function() {
 
 ```bash
 # Iniciar apenas o backend
-cd biosync-backend
+cd NeuroOne-backend
 npm run dev
 
 # Acessar no navegador
@@ -299,7 +299,7 @@ http://localhost:3000/games/autorama/index.html
 ### Teste no Launcher
 
 ```bash
-cd biosync-launcher
+cd NeuroOne-launcher
 npm start
 # Login e testar cada jogo
 ```
@@ -390,4 +390,5 @@ app.commandLine.appendSwitch('enable-gpu-rasterization');
 
 **Seus 14 jogos estão prontos para serem jogados na plataforma!** 🎉
 
-Se precisar adicionar mais jogos, basta seguir este guia e eles se integrarão perfeitamente ao ecossistema BioSync.
+Se precisar adicionar mais jogos, basta seguir este guia e eles se integrarão perfeitamente ao ecossistema NeuroOne.
+

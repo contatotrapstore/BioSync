@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -23,7 +23,7 @@ import {
 } from '@mui/icons-material';
 import { getStoredUser } from '../services/storage';
 import { logout } from '../utils/auth';
-import logoUrl from '../assets/logo-azul.png';
+import logoUrl from '../assets/logo-neuroone.png';
 
 const NAV_LINKS = [
   { label: 'BIBLIOTECA', path: '/library', disabled: false }
@@ -78,7 +78,9 @@ function Header({ onLogout }) {
 
   const isGamePage = location.pathname.startsWith('/game/');
 
-  const gradient = theme.palette?.gradient?.primary || 'linear-gradient(120deg, #0a1d14 0%, #103822 45%, #1f8a4c 100%)';
+  const gradient =
+    theme.palette?.gradient?.primary ||
+    'linear-gradient(120deg, #140f00 0%, #c1a200 45%, #ffd913 100%)';
 
   const isActivePath = (link) => {
     if (link.path === '/library') {
@@ -88,13 +90,16 @@ function Header({ onLogout }) {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundImage: gradient, borderBottom: '1px solid rgba(71,179,107,0.25)' }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundImage: gradient, borderBottom: '1px solid rgba(255,217,19,0.25)' }}
+    >
       <Toolbar sx={{ minHeight: 68, px: { xs: 2, md: 4 }, display: 'flex', gap: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box
             component="img"
             src={logoUrl}
-            alt="BioSync Logo"
+            alt="NeuroOne Logo"
             sx={{ height: 40, width: 'auto' }}
           />
         </Box>
@@ -204,7 +209,7 @@ function Header({ onLogout }) {
               minWidth: 220,
               borderRadius: 2,
               backgroundColor: theme.palette.background.paper,
-              border: '1px solid rgba(55,126,86,0.25)'
+              border: '1px solid rgba(255,217,19,0.18)'
             }
           }}
         >
@@ -228,3 +233,4 @@ function Header({ onLogout }) {
 }
 
 export default Header;
+

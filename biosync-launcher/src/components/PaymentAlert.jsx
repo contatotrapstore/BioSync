@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Alert,
   AlertTitle,
@@ -115,7 +115,7 @@ function PaymentAlert() {
       <Dialog open={showDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Payment sx={{ color: '#1f8a4c' }} />
+            <Payment sx={{ color: '#c7a300' }} />
             <Typography variant="h6">Renovar Acesso</Typography>
           </Box>
         </DialogTitle>
@@ -124,7 +124,7 @@ function PaymentAlert() {
             {isExpired ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  Seu acesso ao biosync expirou.
+                  Seu acesso ao NeuroOne expirou.
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                   Para continuar jogando, renove seu pagamento mensal de R$ 149,90.
@@ -150,10 +150,10 @@ function PaymentAlert() {
                 border: '1px solid rgba(31,138,76,0.3)'
               }}
             >
-              <Typography variant="h6" sx={{ color: '#1f8a4c', mb: 1 }}>
+              <Typography variant="h6" sx={{ color: '#c7a300', mb: 1 }}>
                 Plano Mensal
               </Typography>
-              <Typography variant="h4" sx={{ color: '#1f8a4c', fontWeight: 700 }}>
+              <Typography variant="h4" sx={{ color: '#c7a300', fontWeight: 700 }}>
                 R$ 149,90
                 <Typography component="span" variant="body2" sx={{ ml: 0.5 }}>
                   /mês
@@ -176,7 +176,7 @@ function PaymentAlert() {
             onClick={handleRenewPayment}
             startIcon={<Payment />}
             sx={{
-              background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+              background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
               '&:hover': {
                 background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
               }
@@ -191,3 +191,4 @@ function PaymentAlert() {
 }
 
 export default PaymentAlert;
+

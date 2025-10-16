@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -98,7 +98,7 @@ function ContentUpdateDialog({ open, onClose }) {
     if (!updates.hasUpdates) {
       return (
         <Box sx={{ textAlign: 'center', py: 4 }}>
-          <CheckCircle sx={{ fontSize: 64, color: '#1f8a4c', mb: 2 }} />
+          <CheckCircle sx={{ fontSize: 64, color: '#c7a300', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
             Tudo atualizado!
           </Typography>
@@ -123,7 +123,7 @@ function ContentUpdateDialog({ open, onClose }) {
                 <ListItem key={result.gameId}>
                   <ListItemIcon>
                     {result.success ? (
-                      <CheckCircle sx={{ color: '#1f8a4c' }} />
+                      <CheckCircle sx={{ color: '#c7a300' }} />
                     ) : (
                       <ErrorIcon color="error" />
                     )}
@@ -150,7 +150,7 @@ function ContentUpdateDialog({ open, onClose }) {
           {updates.games.map((game) => (
             <ListItem key={game.id}>
               <ListItemIcon>
-                <SportsEsports sx={{ color: '#1f8a4c' }} />
+                <SportsEsports sx={{ color: '#c7a300' }} />
               </ListItemIcon>
               <ListItemText
                 primary={game.title}
@@ -171,7 +171,7 @@ function ContentUpdateDialog({ open, onClose }) {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Download sx={{ color: '#1f8a4c' }} />
+          <Download sx={{ color: '#c7a300' }} />
           <Typography variant="h6">Atualizações de Jogos</Typography>
         </Box>
       </DialogTitle>
@@ -190,7 +190,7 @@ function ContentUpdateDialog({ open, onClose }) {
                 onClick={handleDownload}
                 startIcon={<Download />}
                 sx={{
-                  background: 'linear-gradient(135deg, #1f8a4c 0%, #377e56 100%)',
+                  background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
                   }
@@ -207,3 +207,4 @@ function ContentUpdateDialog({ open, onClose }) {
 }
 
 export default ContentUpdateDialog;
+

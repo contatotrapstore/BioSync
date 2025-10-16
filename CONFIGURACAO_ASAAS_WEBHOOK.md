@@ -1,4 +1,4 @@
-# 🔔 Configuração do Webhook Asaas - BioSync
+﻿# 🔔 Configuração do Webhook Asaas - NeuroOne
 
 ## 📋 Instruções Passo a Passo
 
@@ -14,10 +14,10 @@ Clique em **"Adicionar Webhook"** ou **"Novo Webhook"**
 
 **URL do Webhook:**
 ```
-https://biosync-backend.onrender.com/api/v1/webhooks/asaas
+https://NeuroOne-backend.onrender.com/api/v1/webhooks/asaas
 ```
 
-**Nota:** Substitua `biosync-backend.onrender.com` pela URL real do seu backend no Render.
+**Nota:** Substitua `NeuroOne-backend.onrender.com` pela URL real do seu backend no Render.
 
 ### 4. Selecionar Eventos
 
@@ -49,7 +49,7 @@ Clique em **"Salvar"** ou **"Criar Webhook"**
 
 ### Teste Manual via Logs
 
-1. Crie um pagamento de teste no sistema BioSync (launcher)
+1. Crie um pagamento de teste no sistema NeuroOne (launcher)
 2. Monitore os logs do backend em: https://dashboard.render.com
 3. Procure por mensagens como:
    ```
@@ -110,3 +110,4 @@ Clique em **"Salvar"** ou **"Criar Webhook"**
 ---
 
 ✅ **Configuração concluída!** O sistema agora receberá notificações automáticas de pagamentos do Asaas.
+

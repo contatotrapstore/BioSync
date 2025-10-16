@@ -1,4 +1,4 @@
-# 🎮 BioSync - Plataforma de Distribuição de Jogos Educacionais
+﻿# 🎮 NeuroOne - Plataforma de Distribuição de Jogos Educacionais
 
 **Versão:** 1.0.0 | **Status:** 🚧 Em Configuração | **Data:** 09/10/2025
 
@@ -9,10 +9,10 @@ Sistema completo de distribuição e gerenciamento de jogos educacionais com lau
 ## 📦 Estrutura do Projeto
 
 ```
-biosync/
-├── biosync-launcher/     # Launcher Desktop (Electron + React)
-├── biosync-admin/        # Painel Admin (React + Material-UI)
-├── biosync-backend/      # API Backend (Node.js + Express)
+NeuroOne/
+├── NeuroOne-launcher/     # Launcher Desktop (Electron + React)
+├── NeuroOne-admin/        # Painel Admin (React + Material-UI)
+├── NeuroOne-backend/      # API Backend (Node.js + Express)
 ├── Jogos/                # Jogos HTML5 (13 jogos)
 └── SUPABASE_SETUP_INSTRUCTIONS.md
 ```
@@ -26,7 +26,7 @@ Siga as instruções em: [SUPABASE_SETUP_INSTRUCTIONS.md](./SUPABASE_SETUP_INSTR
 
 ### 2. Backend
 ```bash
-cd biosync-backend
+cd NeuroOne-backend
 cp .env.example .env
 # Edite .env com suas credenciais Supabase
 npm install
@@ -35,7 +35,7 @@ npm run dev
 
 ### 3. Admin Panel
 ```bash
-cd biosync-admin
+cd NeuroOne-admin
 cp .env.example .env
 # Configure VITE_API_URL
 npm install
@@ -44,7 +44,7 @@ npm run dev
 
 ### 4. Launcher
 ```bash
-cd biosync-launcher
+cd NeuroOne-launcher
 npm install
 npm run dev
 ```
@@ -100,11 +100,11 @@ npm run dev
 ## 🔐 Credenciais Padrão
 
 ### Admin Panel
-- Email: `admin@biosync.com`
+- Email: `admin@NeuroOne.com`
 - Senha: `Admin123`
 
 ### Demo User
-- Email: `demo@biosync.com`
+- Email: `demo@NeuroOne.com`
 - Senha: `Demo@123456`
 
 ⚠️ **Altere as senhas em produção!**
@@ -117,7 +117,7 @@ npm run dev
 ```yaml
 services:
   - type: web
-    name: biosync-backend
+    name: NeuroOne-backend
     runtime: node
     buildCommand: npm install
     startCommand: npm start
@@ -166,7 +166,7 @@ PORT=10000
 
 ### Admin (.env)
 ```env
-VITE_API_URL=https://biosync-backend.onrender.com
+VITE_API_URL=https://NeuroOne-backend.onrender.com
 ```
 
 ---
@@ -196,8 +196,8 @@ npm run build:linux
 ## 📚 Documentação Adicional
 
 - [Configuração Supabase](./SUPABASE_SETUP_INSTRUCTIONS.md)
-- [Deploy Backend](./biosync-backend/DEPLOY_RENDER.md)
-- [Deploy Admin](./biosync-admin/DEPLOY_VERCEL.md)
+- [Deploy Backend](./NeuroOne-backend/DEPLOY_RENDER.md)
+- [Deploy Admin](./NeuroOne-admin/DEPLOY_VERCEL.md)
 - [Changelog](./CHANGELOG.md)
 
 ---
@@ -226,4 +226,5 @@ MIT License - veja [LICENSE](./LICENSE) para detalhes.
 
 ---
 
-**Desenvolvido com ❤️ pela equipe BioSync**
+**Desenvolvido com ❤️ pela equipe NeuroOne**
+

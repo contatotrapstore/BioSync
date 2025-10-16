@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { Box, IconButton, Tooltip, Alert, Typography, Fade } from '@mui/material';
 import { Close, Fullscreen, FullscreenExit } from '@mui/icons-material';
 
@@ -391,3 +391,4 @@ function GameWebView({ gamePath, onExit }) {
 }
 
 export default GameWebView;
+

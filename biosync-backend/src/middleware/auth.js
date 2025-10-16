@@ -21,7 +21,7 @@ const authenticate = async (req, res, next) => {
       // Fetch user from database
       const { data: user, error } = await supabase
         .from('users')
-        .select('id, email, is_admin, is_active')
+        .select('id, email, is_admin, is_active, is_psychologist')
         .eq('id', decoded.userId)
         .single();
 
@@ -36,7 +36,8 @@ const authenticate = async (req, res, next) => {
       req.user = {
         id: user.id,
         email: user.email,
-        isAdmin: user.is_admin
+        isAdmin: user.is_admin,
+        isPsychologist: user.is_psychologist || false
       };
 
       next();

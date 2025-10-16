@@ -79,11 +79,7 @@ const Sidebar = ({ mobileOpen, onDrawerToggle, drawerWidth }) => {
           gap: 1,
         }}
       >
-        <img
-          src="/logo-azul.png"
-          alt="BioSync"
-          style={{ width: '70%', maxWidth: 160 }}
-        />
+        <img src="/logo-neuroone.png" alt="NeuroOne" style={{ width: '70%', maxWidth: 160 }} />
         <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.75), letterSpacing: '0.12em' }}>
           Plataforma Educacional
         </Typography>

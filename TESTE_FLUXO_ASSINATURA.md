@@ -1,4 +1,4 @@
-# 🧪 Guia de Teste - Fluxo de Assinatura BioSync
+﻿# 🧪 Guia de Teste - Fluxo de Assinatura NeuroOne
 
 ## 📋 Pré-requisitos
 
@@ -19,7 +19,7 @@ Antes de testar, execute a migração no Supabase:
 
 1. Acesse: https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp/editor
 2. Abra o SQL Editor
-3. Execute o arquivo: `biosync-backend/migrations/add_asaas_payment_id.sql`
+3. Execute o arquivo: `NeuroOne-backend/migrations/add_asaas_payment_id.sql`
 4. Verifique se a coluna foi criada:
    ```sql
    SELECT column_name, data_type
@@ -34,9 +34,9 @@ Antes de testar, execute a migração no Supabase:
 
 ### 2.1. Criar Conta no Launcher
 
-1. Abra o launcher BioSync
+1. Abra o launcher NeuroOne
 2. Crie uma nova conta de teste:
-   - Email: `teste.pix@biosync.com`
+   - Email: `teste.pix@NeuroOne.com`
    - Senha: `Teste123!`
    - Nome completo: `Teste PIX Usuario`
 
@@ -86,7 +86,7 @@ SELECT
   payment_method,
   plan_value
 FROM subscriptions
-WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@biosync.com')
+WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@NeuroOne.com')
 ORDER BY created_at DESC
 LIMIT 1;
 
@@ -101,7 +101,7 @@ SELECT
 FROM payments
 WHERE subscription_id = (
   SELECT id FROM subscriptions
-  WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@biosync.com')
+  WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@NeuroOne.com')
   ORDER BY created_at DESC
   LIMIT 1
 );
@@ -146,7 +146,7 @@ SELECT
   last_payment_date,
   last_payment_status
 FROM subscriptions
-WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@biosync.com')
+WHERE user_id = (SELECT id FROM users WHERE email = 'teste.pix@NeuroOne.com')
 ORDER BY created_at DESC
 LIMIT 1;
 ```
@@ -163,9 +163,9 @@ LIMIT 1;
 
 ### 3.1. Criar Conta no Launcher
 
-1. Abra o launcher BioSync
+1. Abra o launcher NeuroOne
 2. Crie uma nova conta de teste:
-   - Email: `teste.cartao@biosync.com`
+   - Email: `teste.cartao@NeuroOne.com`
    - Senha: `Teste123!`
    - Nome completo: `Teste Cartão Usuario`
 
@@ -219,7 +219,7 @@ SELECT
   payment_method,
   plan_value
 FROM subscriptions
-WHERE user_id = (SELECT id FROM users WHERE email = 'teste.cartao@biosync.com')
+WHERE user_id = (SELECT id FROM users WHERE email = 'teste.cartao@NeuroOne.com')
 ORDER BY created_at DESC
 LIMIT 1;
 ```
@@ -371,3 +371,4 @@ Após todos os testes:
 **Data do teste:** _____/_____/_____
 **Testado por:** _________________________
 **Ambiente:** [ ] Sandbox [ ] Production
+

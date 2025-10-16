@@ -1,6 +1,6 @@
-# BioSync Launcher
+﻿# NeuroOne Launcher
 
-Desktop application for browsing and playing the BioSync library.
+Desktop application for browsing and playing the NeuroOne library.
 
 ## Features
 
@@ -34,8 +34,8 @@ VITE_GAMES_PATH=../Jogos
 The default expects the folder structure:
 
 ```
-BioSync/
-+- biosync-launcher/
+NeuroOne/
++- neuroone-launcher/
 +- Jogos/
    +- autorama/
    ?  +- index.html
