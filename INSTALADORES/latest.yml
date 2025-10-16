@@ -1,8 +1,8 @@
-﻿version: 2.0.0
+version: 2.2.0
 files:
-  - url: NeuroOne Launcher-Setup-2.0.0.exe
-    sha512: z2k3/i1e6Q0Zx8Rp0t7FEqwpAQjG47JDutdUs+6QIRRvl5ut1339ZnrhpVwpAFYvSpTLQbHDoi+ASMLBghQWZQ==
-    size: 273879194
-path: NeuroOne Launcher-Setup-2.0.0.exe
-sha512: z2k3/i1e6Q0Zx8Rp0t7FEqwpAQjG47JDutdUs+6QIRRvl5ut1339ZnrhpVwpAFYvSpTLQbHDoi+ASMLBghQWZQ==
-releaseDate: '2025-10-09T17:00:00.000Z'
+  - url: NeuroOne Launcher-Setup-2.2.0.exe
+    sha512: aa06b7a1d8da91c684fd14e9e44e4ebcf77c476207cee04535e82d49d7738105c95b50fb326de6bfa79fb2fd04babbb54ac2f01984db7a3c98dd49dd7a3891f5
+    size: 273918990
+path: NeuroOne Launcher-Setup-2.2.0.exe
+sha512: aa06b7a1d8da91c684fd14e9e44e4ebcf77c476207cee04535e82d49d7738105c95b50fb326de6bfa79fb2fd04babbb54ac2f01984db7a3c98dd49dd7a3891f5
+releaseDate: '2025-10-16T15:17:00.000Z'

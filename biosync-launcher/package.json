@@ -1,6 +1,6 @@
 {
   "name": "neuroone-launcher",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "NeuroOne Desktop Launcher - Game library and player",
   "homepage": "https://github.com/contatotrapstore/neuroone",
   "main": "main.js",
