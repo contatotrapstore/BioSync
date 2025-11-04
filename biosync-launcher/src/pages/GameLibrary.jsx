@@ -249,7 +249,7 @@ function GameLibrary() {
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'radial-gradient(circle at 85% 15%, rgba(82, 202, 126, 0.25), transparent 55%)',
+            background: 'radial-gradient(circle at 85% 15%, rgba(255, 217, 19, 0.25), transparent 55%)',
             opacity: 0.6,
             pointerEvents: 'none'
           }}

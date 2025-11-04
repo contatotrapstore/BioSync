@@ -178,7 +178,7 @@ function PaymentAlert() {
             sx={{
               background: 'linear-gradient(135deg, #c7a300 0%, #ffd913 100%)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #1a7340 0%, #2d6847 100%)'
+                background: 'linear-gradient(135deg, #a88b00 0%, #c7a300 100%)'
               }
             }}
           >
