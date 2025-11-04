@@ -2,10 +2,58 @@ const { supabase } = require('../config/supabase');
 const path = require('path');
 const fs = require('fs').promises;
 
+const VALID_PLATFORMS = ['pc', 'mobile', 'web'];
+
+const normalizeSupportedPlatforms = (input, { defaultOnEmpty = true, returnNullOnUndefined = false } = {}) => {
+  if (input === undefined) {
+    return returnNullOnUndefined ? null : (defaultOnEmpty ? ['pc', 'mobile'] : null);
+  }
+
+  if (input === null || input === '') {
+    return defaultOnEmpty ? ['pc', 'mobile'] : null;
+  }
+
+  let platforms = input;
+
+  if (typeof platforms === 'string') {
+    const trimmed = platforms.trim();
+    if (!trimmed) {
+      return defaultOnEmpty ? ['pc', 'mobile'] : null;
+    }
+
+    try {
+      platforms = JSON.parse(trimmed);
+    } catch (error) {
+      platforms = trimmed
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+    }
+  }
+
+  if (!Array.isArray(platforms)) {
+    platforms = [platforms];
+  }
+
+  const sanitized = [...new Set(
+    platforms
+      .map((value) => (typeof value === 'string' ? value.trim().toLowerCase() : ''))
+      .filter(Boolean)
+  )].filter((platform) => VALID_PLATFORMS.includes(platform));
+
+  if (sanitized.length === 0) {
+    return defaultOnEmpty ? ['pc', 'mobile'] : null;
+  }
+
+  return sanitized;
+};
+
 // Get all games
 exports.getAllGames = async (req, res, next) => {
   try {
     const { category, isActive, search, platform } = req.query;
+
+    const platformFilter = platform ? platform.toLowerCase() : null;
 
     let query = supabase
       .from('games')
@@ -17,8 +65,8 @@ exports.getAllGames = async (req, res, next) => {
       query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
     }
     // Filter by platform if specified
-    if (platform) {
-      query = query.contains('supported_platforms', [platform]);
+    if (platformFilter && VALID_PLATFORMS.includes(platformFilter)) {
+      query = query.contains('supported_platforms', [platformFilter]);
     }
 
     const { data: games, error } = await query.order('order', { ascending: true }).order('name', { ascending: true });
@@ -40,6 +88,8 @@ exports.getUserGames = async (req, res, next) => {
     const userId = req.user.id;
     const { platform } = req.query;
 
+    const platformFilter = platform ? platform.toLowerCase() : null;
+
     // Get all active games
     let query = supabase
       .from('games')
@@ -47,8 +97,8 @@ exports.getUserGames = async (req, res, next) => {
       .eq('is_active', true);
 
     // Filter by platform if specified
-    if (platform) {
-      query = query.contains('supported_platforms', [platform]);
+    if (platformFilter && VALID_PLATFORMS.includes(platformFilter)) {
+      query = query.contains('supported_platforms', [platformFilter]);
     }
 
     const { data: allGames, error: gamesError } = await query
@@ -284,6 +334,8 @@ exports.createGame = async (req, res, next) => {
       supportedPlatforms
     } = req.body;
 
+    const platformList = normalizeSupportedPlatforms(supportedPlatforms);
+
     const { data: game, error } = await supabase
       .from('games')
       .insert({
@@ -301,7 +353,7 @@ exports.createGame = async (req, res, next) => {
         checksum,
         installer_type: installerType || 'exe',
         minimum_disk_space: minimumDiskSpace,
-        supported_platforms: supportedPlatforms || ['pc', 'mobile']
+        supported_platforms: platformList
       })
       .select()
       .single();
@@ -340,6 +392,11 @@ exports.updateGame = async (req, res, next) => {
       isActive, order, supportedPlatforms
     } = req.body;
 
+    const platformList = normalizeSupportedPlatforms(supportedPlatforms, {
+      defaultOnEmpty: false,
+      returnNullOnUndefined: true
+    });
+
     const updateData = {};
     if (name) updateData.name = name;
     if (slug) updateData.slug = slug;
@@ -356,7 +413,7 @@ exports.updateGame = async (req, res, next) => {
     if (minimumDiskSpace !== undefined) updateData.minimum_disk_space = minimumDiskSpace;
     if (isActive !== undefined) updateData.is_active = isActive;
     if (order !== undefined) updateData.order = order;
-    if (supportedPlatforms !== undefined) updateData.supported_platforms = supportedPlatforms;
+    if (platformList) updateData.supported_platforms = platformList;
 
     const { data: updatedGame, error } = await supabase
       .from('games')

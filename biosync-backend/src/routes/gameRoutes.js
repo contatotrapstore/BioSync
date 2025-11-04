@@ -5,6 +5,8 @@ const { authenticate, authorizeAdmin } = require('../middleware/auth');
 const { validateCreateGame, validateUpdateGame, validateUUID } = require('../middleware/validator');
 const { supabase } = require('../config/supabase');
 
+const VALID_PLATFORMS = ['pc', 'mobile', 'web'];
+
 // Protected user routes
 router.get('/user/games', authenticate, gameController.getUserGames);
 router.get('/:id/validate', authenticate, validateUUID, gameController.validateAccess);
@@ -87,12 +89,19 @@ router.post('/:id/validate-session', authenticate, validateUUID, async (req, res
 // Update checking routes
 router.get('/updates', authenticate, async (req, res) => {
   try {
-    const { lastSyncVersion } = req.query;
+    const { lastSyncVersion, platform } = req.query;
+    const platformFilter = platform ? platform.toLowerCase() : 'pc';
 
-    const { data: games, error } = await supabase
+    let query = supabase
       .from('games')
       .select('*')
-      .eq('is_active', true)
+      .eq('is_active', true);
+
+    if (VALID_PLATFORMS.includes(platformFilter)) {
+      query = query.contains('supported_platforms', [platformFilter]);
+    }
+
+    const { data: games, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -130,10 +139,19 @@ router.get('/updates', authenticate, async (req, res) => {
 
 router.get('/manifest', authenticate, async (req, res) => {
   try {
-    const { data: games, error } = await supabase
+    const { platform } = req.query;
+    const platformFilter = platform ? platform.toLowerCase() : 'pc';
+
+    let query = supabase
       .from('games')
       .select('id, name, slug, version, download_url, file_size, checksum, installer_type, created_at, updated_at, cover_image, cover_image_local, category, description, folder_path')
-      .eq('is_active', true)
+      .eq('is_active', true);
+
+    if (VALID_PLATFORMS.includes(platformFilter)) {
+      query = query.contains('supported_platforms', [platformFilter]);
+    }
+
+    const { data: games, error } = await query
       .order('name', { ascending: true });
 
     if (error) throw error;
@@ -162,7 +180,8 @@ router.get('/manifest', authenticate, async (req, res) => {
           category: game.category,
           description: game.description,
           folderPath: game.folder_path,
-          updatedAt: game.updated_at || game.created_at
+          updatedAt: game.updated_at || game.created_at,
+          supportedPlatforms: game.supported_platforms || ['pc', 'mobile']
         }))
       }
     });

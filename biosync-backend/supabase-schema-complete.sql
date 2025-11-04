@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS games (
   cover_image VARCHAR(255),
   folder_path VARCHAR(255) NOT NULL,
   category VARCHAR(100),
+  supported_platforms VARCHAR(50)[] DEFAULT ARRAY['pc', 'mobile'],
   is_active BOOLEAN DEFAULT true,
   "order" INTEGER DEFAULT 0,
   version VARCHAR(50) DEFAULT '1.0.0',
@@ -61,6 +62,9 @@ COMMENT ON COLUMN games.checksum IS 'SHA256 do arquivo para validação de integ
 COMMENT ON COLUMN games.installer_type IS 'Tipo de instalador (exe, msi, zip)';
 COMMENT ON COLUMN games.minimum_disk_space IS 'Espaço mínimo em disco necessário (bytes)';
 COMMENT ON COLUMN games.cover_image_local IS 'Caminho local da capa no launcher (assets/covers/...)';
+COMMENT ON COLUMN games.supported_platforms IS 'Array de plataformas suportadas: pc, mobile, web';
+
+CREATE INDEX IF NOT EXISTS idx_games_supported_platforms ON games USING GIN (supported_platforms);
 
 -- =======================
 -- SUBSCRIPTION_PLANS TABLE

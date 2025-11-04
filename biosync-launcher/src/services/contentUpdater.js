@@ -41,7 +41,7 @@ class ContentUpdater {
       const lastSyncVersion = await this.getLastSyncVersion();
 
       const response = await api.get('/games/updates', {
-        params: { lastSyncVersion }
+        params: { lastSyncVersion, platform: 'pc' }
       });
 
       const { hasUpdates, contentVersion, newGames, games } = response.data.data;
