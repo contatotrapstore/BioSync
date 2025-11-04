@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "android": {
+      "icon": {
+        "source": "resources/icon.png",
+        "backgroundColor": "#0a0d1a"
+      }
+    }
+  }
+}

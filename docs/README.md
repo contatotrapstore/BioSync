@@ -1,6 +1,6 @@
 # 📚 Documentação NeuroOne Platform
 
-Bem-vindo à documentação completa da plataforma NeuroOne - Sistema completo de jogos cognitivos com dashboard administrativo e launcher desktop.
+Bem-vindo à documentação completa da plataforma NeuroOne - Sistema completo de jogos cognitivos com dashboard administrativo, launcher desktop e aplicativo mobile.
 
 ---
 
@@ -54,15 +54,35 @@ Documentação histórica e de referência.
   - Visualização de pontuações (Recharts)
   - Análise de solicitações de acesso
 
-### Launcher (biosync-launcher/)
+### Launcher PC (biosync-launcher/)
 - **Tecnologia:** Electron + React 18
+- **Plataforma:** Windows/Linux Desktop
 - **Features:**
-  - Biblioteca de jogos
-  - Sistema de autenticação
+  - Biblioteca de jogos (filtrada por plataforma PC)
+  - Sistema de autenticação JWT
   - Validação de assinaturas
   - Download e instalação de jogos
   - Proteção de conteúdo
-  - Sistema de atualizações
+  - Sistema de atualizações automáticas
+  - Interface Material-UI
+
+### Mobile App (neuroone-mobile/)
+- **Tecnologia:** React 18 + TypeScript + Capacitor 7
+- **Plataforma:** Android 7.0+ (API Level 24+)
+- **Features:**
+  - Biblioteca de jogos (filtrada por plataforma Mobile)
+  - Sistema de autenticação JWT
+  - Download e execução local de jogos
+  - Sistema de pontuação e progresso
+  - Interface Material-UI responsiva
+  - Modo offline após download
+
+### 🎮 Sistema de Distribuição Multiplataforma
+- **Filtro automático** por plataforma (PC/Mobile)
+- **Admin:** Seleção de plataformas suportadas ao criar/editar jogos
+- **Backend:** Filtragem via query parameter `?platform=pc|mobile`
+- **Database:** Campo `supported_platforms` (array VARCHAR)
+- **Performance:** Índice GIN para queries otimizadas
 
 ---
 
@@ -162,19 +182,32 @@ Ver [setup/PRIMEIRO_ACESSO.md](setup/PRIMEIRO_ACESSO.md) para troubleshooting.
 
 ## 📝 Changelog e Versões
 
-### v2.1.0 (Atual) - NeuroOne
+### v2.3.0 (Atual) - 2025-11-04
+- ✨ **Sistema de distribuição multiplataforma** (PC/Mobile)
+- ✨ Admin: Seleção de plataformas ao criar/editar jogos
+- ✨ Filtragem automática de jogos por launcher
+- ✨ Mobile App Android compilado (Capacitor 7)
+- 🎨 **Rebrand visual**: NeuroWork → NeuroOne (cores verde → dourado)
+- 🎨 Telas de carregamento atualizadas com identidade NeuroOne
+- 🗄️ Database: Campo `supported_platforms` com índice GIN
+- 📚 Documentação completa atualizada
+
+### v2.2.0 - 2025-10-16
 - Sistema de psicólogos e pontuações
 - Dashboard de análise de pacientes
 - Gráficos de evolução (Recharts)
 - Validação rigorosa de imagens
 - Rebrand completo NeuroGame → NeuroOne
 
-### v2.0.0 - BioSync
+### v2.1.0 - BioSync Evolution
 - Sistema de assinaturas (PIX + Cartão)
 - Integração Asaas completa
 - Webhooks automáticos
+
+### v2.0.0 - BioSync Foundation
 - Launcher desktop (Electron)
 - Admin panel completo
+- Backend API Node.js + Supabase
 
 ---
 
@@ -194,5 +227,5 @@ Para contribuir com o projeto:
 
 ---
 
-**Última atualização:** 16 de Outubro de 2025
-**Versão da documentação:** 2.1.0
+**Última atualização:** 04 de Novembro de 2025
+**Versão da documentação:** 2.3.0

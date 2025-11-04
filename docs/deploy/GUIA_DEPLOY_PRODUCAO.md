@@ -1,4 +1,4 @@
-# 🚀 Guia de Deploy em Produção - NeuroGame Platform
+# 🚀 Guia de Deploy em Produção - NeuroOne Platform
 
 ## 📋 Visão Geral da Arquitetura
 
@@ -28,22 +28,29 @@
 ## 🎯 O Que Precisa Ir Para o Servidor
 
 ### ✅ BACKEND (API) - **OBRIGATÓRIO NO SERVIDOR**
-- **Pasta:** `neurogame-backend/`
+- **Pasta:** `biosync-backend/`
 - **Tecnologia:** Node.js + Express
-- **Função:** Servir API REST para Admin e Launcher
+- **Função:** Servir API REST para Admin, Launcher PC e Mobile
 - **Porta:** 3000 (configurável)
+- **Deploy atual:** Render.com
 
 ### ✅ ADMIN PANEL - **OBRIGATÓRIO NO SERVIDOR**
-- **Pasta:** `neurogame-admin/`
-- **Tecnologia:** React (build estático)
-- **Função:** Interface web de administração
-- **Hospedagem:** Pode ser Vercel, Netlify, ou servidor próprio
+- **Pasta:** `biosync-admin/`
+- **Tecnologia:** React + Vite (build estático)
+- **Função:** Interface web de administração de jogos e usuários
+- **Hospedagem:** Vercel (deploy automático)
 
-### ❌ LAUNCHER - **NÃO VAI PARA O SERVIDOR**
-- **Pasta:** `neurogame-launcher/`
+### ❌ LAUNCHER PC - **NÃO VAI PARA O SERVIDOR**
+- **Pasta:** `biosync-launcher/`
 - **Tecnologia:** Electron (Desktop App)
-- **Distribuição:** Instalador (.exe) para usuários finais
-- **Local:** Pasta `INSTALADORES/` (já gerado)
+- **Distribuição:** Instalador (.exe) para download por usuários
+- **Local:** Pasta `biosync-launcher/dist-electron/` após build
+
+### ❌ MOBILE APP - **NÃO VAI PARA O SERVIDOR**
+- **Pasta:** `neuroone-mobile/`
+- **Tecnologia:** React + Capacitor (Android App)
+- **Distribuição:** APK para instalação em dispositivos Android
+- **Local:** `neuroone-mobile/android/app/build/outputs/apk/` após build
 
 ---
 
@@ -58,7 +65,7 @@
 
 #### Arquivos Necessários:
 ```
-neurogame-backend/
+biosync-backend/
 ├── src/
 │   ├── config/
 │   ├── controllers/
@@ -100,13 +107,13 @@ FRONTEND_URL=https://admin.neurogame.com.br
 #### Comandos de Deploy:
 ```bash
 # No servidor
-cd neurogame-backend
+cd biosync-backend
 npm install --production
 npm start
 
 # Ou com PM2 (recomendado)
 npm install -g pm2
-pm2 start src/server.js --name neurogame-api
+pm2 start src/server.js --name biosync-api
 pm2 save
 pm2 startup
 ```
@@ -122,8 +129,8 @@ pm2 startup
 # Instalar Vercel CLI
 npm i -g vercel
 
-# Na pasta neurogame-admin
-cd neurogame-admin
+# Na pasta biosync-admin
+cd biosync-admin
 vercel
 
 # Configurar variáveis de ambiente no dashboard:
@@ -136,7 +143,7 @@ VITE_API_URL=https://api.neurogame.com.br
 npm i -g netlify-cli
 
 # Build e deploy
-cd neurogame-admin
+cd biosync-admin
 npm run build
 netlify deploy --prod
 ```
@@ -144,7 +151,7 @@ netlify deploy --prod
 ##### Opção C: Servidor Próprio (Nginx)
 ```bash
 # Build local
-cd neurogame-admin
+cd biosync-admin
 npm run build
 
 # Upload da pasta dist/ para o servidor
@@ -165,7 +172,7 @@ server {
 ```
 
 #### Variáveis de Ambiente (Build):
-Criar arquivo `.env.production` em `neurogame-admin/`:
+Criar arquivo `.env.production` em `biosync-admin/`:
 ```env
 VITE_API_URL=https://api.neurogame.com.br
 ```
@@ -175,7 +182,7 @@ VITE_API_URL=https://api.neurogame.com.br
 ### 3️⃣ Launcher (Distribuição para Usuários)
 
 #### ✅ Já Está Pronto!
-- **Local:** `INSTALADORES/NeuroGame Launcher Setup 1.0.0.exe`
+- **Local:** `INSTALADORES/NeuroOne Launcher Setup 1.0.0.exe`
 - **Tamanho:** 82MB
 - **O que fazer:** Disponibilizar para download no site
 
@@ -184,8 +191,8 @@ VITE_API_URL=https://api.neurogame.com.br
 ##### Opção A: Download Direto no Site
 ```html
 <!-- No site neurogame.com.br -->
-<a href="/downloads/NeuroGame-Launcher-Setup-1.0.0.exe" download>
-  Baixar NeuroGame Launcher (82MB)
+<a href="/downloads/NeuroOne-Launcher-Setup-1.0.0.exe" download>
+  Baixar NeuroOne Launcher (82MB)
 </a>
 ```
 
@@ -194,14 +201,14 @@ Hospedar os arquivos da pasta `INSTALADORES/` no backend:
 
 ```bash
 # No servidor backend, criar pasta releases
-mkdir -p /var/www/neurogame-releases
+mkdir -p /var/www/biosync-releases
 
 # Upload dos arquivos
-scp INSTALADORES/* user@servidor:/var/www/neurogame-releases/
+scp INSTALADORES/* user@servidor:/var/www/biosync-releases/
 
 # Estrutura:
-/var/www/neurogame-releases/
-├── NeuroGame Launcher Setup 1.0.0.exe
+/var/www/biosync-releases/
+├── NeuroOne Launcher Setup 1.0.0.exe
 └── latest.yml
 ```
 
@@ -209,6 +216,63 @@ O backend já tem as rotas configuradas:
 - `GET /api/v1/downloads/` - Lista releases
 - `GET /api/v1/downloads/latest.yml` - Metadata para updates
 - `GET /api/v1/downloads/:filename` - Download de arquivos
+
+---
+
+## 🎮 Sistema de Distribuição Multiplataforma
+
+### Como Funciona
+
+A plataforma NeuroOne suporta distribuição específica de jogos por plataforma (PC e/ou Mobile).
+
+#### Configuração no Admin Panel
+
+Ao criar ou editar um jogo no admin, você pode selecionar:
+- ✅ **PC (Windows/Linux)** - Jogo aparecerá no launcher desktop
+- ✅ **Mobile (Android)** - Jogo aparecerá no app mobile
+
+**Exemplo de uso:**
+- Jogos com controles complexos → Apenas PC
+- Jogos touch-friendly → PC + Mobile
+- Jogos mobile-first → Apenas Mobile
+
+#### Como o Backend Filtra
+
+Quando o launcher/app solicita a lista de jogos:
+
+```http
+GET /api/v1/games/user/games?platform=pc
+GET /api/v1/games/user/games?platform=mobile
+```
+
+O backend:
+1. Verifica o parâmetro `platform`
+2. Filtra jogos usando: `WHERE supported_platforms @> ARRAY['pc']`
+3. Retorna apenas jogos compatíveis com aquela plataforma
+
+#### Banco de Dados
+
+```sql
+-- Campo na tabela games
+supported_platforms VARCHAR(50)[] DEFAULT ARRAY['pc', 'mobile']
+
+-- Índice GIN para performance
+CREATE INDEX idx_games_platforms ON games USING GIN (supported_platforms);
+
+-- Exemplos de queries
+WHERE supported_platforms @> ARRAY['pc']::VARCHAR[]      -- Jogos PC
+WHERE supported_platforms @> ARRAY['mobile']::VARCHAR[]  -- Jogos Mobile
+```
+
+#### Jogos Existentes
+
+Por padrão, todos os 13 jogos atuais suportam ambas as plataformas:
+- Autorama, Balão, Batalha de Tanques, Correndo pelos Trilhos
+- Desafio Aéreo, Desafio Automotivo, Desafio nas Alturas
+- Fazendinha, Labirinto, Missão Espacial
+- Resgate em Chamas, Taxi City, Tesouro do Mar
+
+Para alterar, edite no admin e desmarque a plataforma que não se aplica.
 
 ---
 
@@ -231,7 +295,7 @@ O backend já tem as rotas configuradas:
   ```bash
   # Clone ou upload do código
   git clone seu-repo.git
-  cd neurogame-backend
+  cd biosync-backend
 
   # Instalar dependências
   npm install --production
@@ -243,7 +307,7 @@ O backend já tem as rotas configuradas:
   npm start
 
   # Iniciar com PM2
-  pm2 start src/server.js --name neurogame-api
+  pm2 start src/server.js --name biosync-api
   pm2 save
   pm2 startup
   ```
@@ -293,14 +357,14 @@ O backend já tem as rotas configuradas:
 
   **Se Vercel:**
   ```bash
-  cd neurogame-admin
+  cd biosync-admin
   vercel --prod
   ```
 
   **Se servidor próprio:**
   ```bash
   # Local
-  cd neurogame-admin
+  cd biosync-admin
   npm run build
 
   # Upload
@@ -327,8 +391,8 @@ O backend já tem as rotas configuradas:
 - [ ] **2. Criar Página de Download**
   ```html
   <!-- site principal -->
-  <a href="/downloads/NeuroGame-Launcher-Setup-1.0.0.exe">
-    Baixar NeuroGame Launcher
+  <a href="/downloads/NeuroOne-Launcher-Setup-1.0.0.exe">
+    Baixar NeuroOne Launcher
   </a>
   ```
 
@@ -359,13 +423,13 @@ CNAME   www        @                         3600
 ### Logs do Backend (PM2)
 ```bash
 # Ver logs em tempo real
-pm2 logs neurogame-api
+pm2 logs biosync-api
 
 # Ver status
 pm2 status
 
 # Reiniciar se necessário
-pm2 restart neurogame-api
+pm2 restart biosync-api
 ```
 
 ### Métricas
@@ -421,13 +485,18 @@ pm2 web
 ### ✅ Pronto para Produção
 - [x] Backend API completo
 - [x] Admin Panel funcional
-- [x] Launcher desktop compilado
-- [x] Sistema de autenticação
+- [x] Launcher desktop (PC) compilado
+- [x] Mobile App (Android) compilado
+- [x] Sistema de autenticação JWT
 - [x] Sistema de jogos (CRUD)
+- [x] **Sistema de distribuição multiplataforma** (PC/Mobile)
+- [x] Filtragem automática de jogos por plataforma
+- [x] Admin: Seleção de plataformas suportadas por jogo
 - [x] Sistema de assinaturas
 - [x] Sistema de pagamentos (Asaas)
 - [x] Auto-atualização do launcher
 - [x] Proteção de jogos (session tokens)
+- [x] Sistema de pontuação (scores) para psicólogos
 
 ### ⚠️ Recomendações Antes do Deploy
 - [ ] Configurar backup automático do Supabase
@@ -450,4 +519,4 @@ pm2 web
 
 ---
 
-**Desenvolvido por NeuroGame Team - 2025**
+**Desenvolvido por NeuroOne Team - 2025**
