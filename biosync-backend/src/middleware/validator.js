@@ -106,6 +106,21 @@ const validateCreateGame = [
     .trim()
     .isLength({ max: 50 })
     .withMessage('Category must not exceed 50 characters'),
+  body('supportedPlatforms')
+    .optional()
+    .isArray()
+    .withMessage('supportedPlatforms must be an array')
+    .custom((value) => {
+      const validPlatforms = ['pc', 'mobile', 'web'];
+      if (!value || value.length === 0) {
+        throw new Error('At least one platform must be selected');
+      }
+      const invalid = value.filter(p => !validPlatforms.includes(p));
+      if (invalid.length > 0) {
+        throw new Error(`Invalid platforms: ${invalid.join(', ')}. Valid options: ${validPlatforms.join(', ')}`);
+      }
+      return true;
+    }),
   validate
 ];
 
@@ -132,6 +147,23 @@ const validateUpdateGame = [
     .optional()
     .isBoolean()
     .withMessage('isActive must be a boolean'),
+  body('supportedPlatforms')
+    .optional()
+    .isArray()
+    .withMessage('supportedPlatforms must be an array')
+    .custom((value) => {
+      const validPlatforms = ['pc', 'mobile', 'web'];
+      if (value && value.length === 0) {
+        throw new Error('At least one platform must be selected');
+      }
+      if (value) {
+        const invalid = value.filter(p => !validPlatforms.includes(p));
+        if (invalid.length > 0) {
+          throw new Error(`Invalid platforms: ${invalid.join(', ')}. Valid options: ${validPlatforms.join(', ')}`);
+        }
+      }
+      return true;
+    }),
   validate
 ];
 

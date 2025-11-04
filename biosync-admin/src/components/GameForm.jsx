@@ -15,7 +15,11 @@ import {
   Box,
   Typography,
   Alert,
-  LinearProgress
+  LinearProgress,
+  Checkbox,
+  FormGroup,
+  FormControl,
+  FormLabel
 } from '@mui/material';
 import { CloudUpload, Folder } from '@mui/icons-material';
 
@@ -51,6 +55,7 @@ const defaultState = {
   version: '1.0.0',
   order: 0,
   isActive: true,
+  supportedPlatforms: ['pc', 'mobile'],
   gameFolder: null,
   coverImageFile: null
 };
@@ -71,6 +76,7 @@ const GameForm = ({ open, onClose, onSave, game }) => {
         version: game.version || '1.0.0',
         order: game.order ?? 0,
         isActive: game.isActive ?? true,
+        supportedPlatforms: game.supportedPlatforms || ['pc', 'mobile'],
         gameFolder: null,
         coverImageFile: null
       });
@@ -138,6 +144,10 @@ const GameForm = ({ open, onClose, onSave, game }) => {
       nextErrors.slug = 'Use apenas letras minúsculas, números e hífens';
     }
 
+    if (!formData.supportedPlatforms || formData.supportedPlatforms.length === 0) {
+      nextErrors.supportedPlatforms = 'Selecione pelo menos uma plataforma';
+    }
+
     if (!game && !formData.gameFolder) {
       nextErrors.gameFolder = 'Selecione a pasta do jogo';
     }
@@ -163,6 +173,7 @@ const GameForm = ({ open, onClose, onSave, game }) => {
       payload.append('version', formData.version.trim() || '1.0.0');
       payload.append('order', Number(formData.order) || 0);
       payload.append('isActive', formData.isActive);
+      payload.append('supportedPlatforms', JSON.stringify(formData.supportedPlatforms));
 
       // Upload da pasta do jogo (apenas em criação)
       if (!game && formData.gameFolder) {
@@ -292,6 +303,56 @@ const GameForm = ({ open, onClose, onSave, game }) => {
               placeholder="1.0.0"
               disabled={uploading}
             />
+          </Grid>
+
+          {/* Plataformas Suportadas */}
+          <Grid item xs={12}>
+            <FormControl fullWidth error={!!errors.supportedPlatforms}>
+              <FormLabel component="legend">Plataformas Suportadas *</FormLabel>
+              <FormGroup row>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.supportedPlatforms.includes('pc')}
+                      onChange={(e) => {
+                        const platforms = e.target.checked
+                          ? [...formData.supportedPlatforms, 'pc']
+                          : formData.supportedPlatforms.filter(p => p !== 'pc');
+                        setFormData(prev => ({ ...prev, supportedPlatforms: platforms }));
+                        if (errors.supportedPlatforms) {
+                          setErrors(prev => ({ ...prev, supportedPlatforms: '' }));
+                        }
+                      }}
+                      disabled={uploading}
+                    />
+                  }
+                  label="PC (Windows/Linux)"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.supportedPlatforms.includes('mobile')}
+                      onChange={(e) => {
+                        const platforms = e.target.checked
+                          ? [...formData.supportedPlatforms, 'mobile']
+                          : formData.supportedPlatforms.filter(p => p !== 'mobile');
+                        setFormData(prev => ({ ...prev, supportedPlatforms: platforms }));
+                        if (errors.supportedPlatforms) {
+                          setErrors(prev => ({ ...prev, supportedPlatforms: '' }));
+                        }
+                      }}
+                      disabled={uploading}
+                    />
+                  }
+                  label="Mobile (Android)"
+                />
+              </FormGroup>
+              {errors.supportedPlatforms && (
+                <Typography variant="caption" color="error">
+                  {errors.supportedPlatforms}
+                </Typography>
+              )}
+            </FormControl>
           </Grid>
 
           {/* Upload da Pasta do Jogo - apenas em criação */}

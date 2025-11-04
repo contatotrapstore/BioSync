@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 // Get all games
 exports.getAllGames = async (req, res, next) => {
   try {
-    const { category, isActive, search } = req.query;
+    const { category, isActive, search, platform } = req.query;
 
     let query = supabase
       .from('games')
@@ -15,6 +15,10 @@ exports.getAllGames = async (req, res, next) => {
     if (isActive !== undefined) query = query.eq('is_active', isActive === 'true');
     if (search) {
       query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+    // Filter by platform if specified
+    if (platform) {
+      query = query.contains('supported_platforms', [platform]);
     }
 
     const { data: games, error } = await query.order('order', { ascending: true }).order('name', { ascending: true });
@@ -34,12 +38,20 @@ exports.getAllGames = async (req, res, next) => {
 exports.getUserGames = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const { platform } = req.query;
 
     // Get all active games
-    const { data: allGames, error: gamesError } = await supabase
+    let query = supabase
       .from('games')
       .select('*')
-      .eq('is_active', true)
+      .eq('is_active', true);
+
+    // Filter by platform if specified
+    if (platform) {
+      query = query.contains('supported_platforms', [platform]);
+    }
+
+    const { data: allGames, error: gamesError } = await query
       .order('order', { ascending: true })
       .order('name', { ascending: true });
 
@@ -58,18 +70,30 @@ exports.getUserGames = async (req, res, next) => {
     // Get individual game access (fallback or additional grants)
     const { data: individualAccess } = await supabase
       .from('user_game_access')
-      .select('game_id')
+      .select('game_id, expires_at')
       .eq('user_id', userId)
       .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`);
 
-    const individualGameIds = individualAccess ? individualAccess.map(ug => ug.game_id) : [];
+    const individualAccessMap = new Map();
+    if (individualAccess) {
+      individualAccess.forEach((item) => {
+        individualAccessMap.set(item.game_id, item.expires_at || null);
+      });
+    }
+
+    const subscriptionExpiresAt = asaasSubscription
+      ? asaasSubscription.next_due_date || asaasSubscription.nextDueDate || null
+      : null;
 
     // Mark accessible games
     const gamesWithAccess = allGames.map(game => ({
       ...game,
-      hasAccess: hasActiveSubscription || individualGameIds.includes(game.id),
+      hasAccess: hasActiveSubscription || individualAccessMap.has(game.id),
       accessType: hasActiveSubscription ? 'subscription' :
-                   individualGameIds.includes(game.id) ? 'individual' : null
+                   individualAccessMap.has(game.id) ? 'individual' : null,
+      accessExpiresAt: hasActiveSubscription
+        ? subscriptionExpiresAt
+        : (individualAccessMap.get(game.id) || null)
     }));
 
     res.json({
@@ -116,37 +140,21 @@ exports.getGameById = async (req, res, next) => {
       const nowIso = new Date().toISOString();
 
       const { data: activeSubscription, error: subscriptionError } = await supabase
-        .from('user_subscriptions')
-        .select('plan_id, end_date')
+        .from('subscriptions')
+        .select('id, status, next_due_date')
         .eq('user_id', userId)
-        .eq('is_active', true)
-        .gte('end_date', nowIso)
+        .eq('status', 'active')
         .maybeSingle();
 
-      if (subscriptionError) {
+      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
         throw subscriptionError;
       }
 
       if (activeSubscription) {
-        const { data: planGame, error: planError } = await supabase
-          .from('plan_games')
-          .select('game_id')
-          .eq('plan_id', activeSubscription.plan_id)
-          .eq('game_id', game.id)
-          .maybeSingle();
-
-        if (planError) {
-          throw planError;
-        }
-
-        if (planGame) {
-          hasAccess = true;
-          accessType = 'subscription';
-          accessExpiresAt = activeSubscription.end_date;
-        }
-      }
-
-      if (!hasAccess) {
+        hasAccess = true;
+        accessType = 'subscription';
+        accessExpiresAt = activeSubscription.next_due_date || null;
+      } else {
         const { data: individualAccess, error: accessError } = await supabase
           .from('user_game_access')
           .select('expires_at')
@@ -155,14 +163,14 @@ exports.getGameById = async (req, res, next) => {
           .or(`expires_at.is.null,expires_at.gte.${nowIso}`)
           .maybeSingle();
 
-        if (accessError) {
+        if (accessError && accessError.code !== 'PGRST116') {
           throw accessError;
         }
 
         if (individualAccess) {
           hasAccess = true;
           accessType = 'individual';
-          accessExpiresAt = individualAccess.expires_at;
+          accessExpiresAt = individualAccess.expires_at || null;
         }
       }
     }
@@ -205,49 +213,51 @@ exports.validateAccess = async (req, res, next) => {
       });
     }
 
-    // Check subscription access
-    const { data: activeSubscription } = await supabase
-      .from('user_subscriptions')
-      .select('plan_id')
+    const nowIso = new Date().toISOString();
+
+    const { data: activeSubscription, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('id, status, next_due_date')
       .eq('user_id', userId)
-      .eq('is_active', true)
-      .gte('end_date', new Date().toISOString())
-      .single();
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+      throw subscriptionError;
+    }
 
     let hasAccess = false;
+    let accessType: string | null = null;
 
     if (activeSubscription) {
-      const { data: planGame } = await supabase
-        .from('plan_games')
-        .select('*')
-        .eq('plan_id', activeSubscription.plan_id)
-        .eq('game_id', gameId)
-        .single();
-
-      if (planGame) hasAccess = true;
-    }
-
-    // Check individual access
-    if (!hasAccess) {
-      const { data: individualAccess } = await supabase
+      hasAccess = true;
+      accessType = 'subscription';
+    } else {
+      const { data: individualAccess, error: accessError } = await supabase
         .from('user_game_access')
-        .select('*')
+        .select('expires_at')
         .eq('user_id', userId)
         .eq('game_id', gameId)
-        .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`)
-        .single();
+        .or(`expires_at.is.null,expires_at.gte.${nowIso}`)
+        .maybeSingle();
 
-      if (individualAccess) hasAccess = true;
+      if (accessError && accessError.code !== 'PGRST116') {
+        throw accessError;
+      }
+
+      if (individualAccess) {
+        hasAccess = true;
+        accessType = 'individual';
+      }
     }
 
-    // Log access attempt
     if (hasAccess) {
       await supabase
         .from('access_history')
         .insert({
           user_id: userId,
           game_id: gameId,
-          ip_address: req.ip || req.connection.remoteAddress
+          ip_address: req.ip || null
         });
     }
 
@@ -255,6 +265,7 @@ exports.validateAccess = async (req, res, next) => {
       success: true,
       data: {
         hasAccess,
+        accessType,
         game: hasAccess ? game : null,
         message: hasAccess ? 'Access granted' : 'Access denied'
       }
@@ -269,7 +280,8 @@ exports.createGame = async (req, res, next) => {
   try {
     const {
       name, slug, description, folderPath, category, coverImage, order,
-      version, downloadUrl, fileSize, checksum, installerType, minimumDiskSpace, coverImageLocal
+      version, downloadUrl, fileSize, checksum, installerType, minimumDiskSpace, coverImageLocal,
+      supportedPlatforms
     } = req.body;
 
     const { data: game, error } = await supabase
@@ -288,7 +300,8 @@ exports.createGame = async (req, res, next) => {
         file_size: fileSize,
         checksum,
         installer_type: installerType || 'exe',
-        minimum_disk_space: minimumDiskSpace
+        minimum_disk_space: minimumDiskSpace,
+        supported_platforms: supportedPlatforms || ['pc', 'mobile']
       })
       .select()
       .single();
@@ -324,7 +337,7 @@ exports.updateGame = async (req, res, next) => {
     const {
       name, slug, description, folderPath, category, coverImage, coverImageLocal,
       version, downloadUrl, fileSize, checksum, installerType, minimumDiskSpace,
-      isActive, order
+      isActive, order, supportedPlatforms
     } = req.body;
 
     const updateData = {};
@@ -343,6 +356,7 @@ exports.updateGame = async (req, res, next) => {
     if (minimumDiskSpace !== undefined) updateData.minimum_disk_space = minimumDiskSpace;
     if (isActive !== undefined) updateData.is_active = isActive;
     if (order !== undefined) updateData.order = order;
+    if (supportedPlatforms !== undefined) updateData.supported_platforms = supportedPlatforms;
 
     const { data: updatedGame, error } = await supabase
       .from('games')
@@ -415,4 +429,3 @@ exports.getCategories = async (req, res, next) => {
     next(error);
   }
 };
-

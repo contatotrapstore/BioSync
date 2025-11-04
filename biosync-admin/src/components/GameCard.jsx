@@ -21,7 +21,9 @@ import {
   Download as DownloadIcon,
   CloudDownload as CloudIcon,
   Storage as StorageIcon,
-  Speed as VersionIcon
+  Speed as VersionIcon,
+  Computer as ComputerIcon,
+  PhoneAndroid as PhoneIcon
 } from '@mui/icons-material';
 
 const GameCard = ({ game, onEdit, onDelete }) => {
@@ -155,6 +157,27 @@ const GameCard = ({ game, onEdit, onDelete }) => {
               size="small"
               variant="outlined"
               sx={{ fontSize: '0.7rem' }}
+            />
+          )}
+          {/* Platform Badges */}
+          {game.supportedPlatforms && game.supportedPlatforms.includes('pc') && (
+            <Chip
+              icon={<ComputerIcon />}
+              label="PC"
+              size="small"
+              variant="outlined"
+              color="info"
+              sx={{ fontWeight: 500 }}
+            />
+          )}
+          {game.supportedPlatforms && game.supportedPlatforms.includes('mobile') && (
+            <Chip
+              icon={<PhoneIcon />}
+              label="Mobile"
+              size="small"
+              variant="outlined"
+              color="success"
+              sx={{ fontWeight: 500 }}
             />
           )}
         </Stack>

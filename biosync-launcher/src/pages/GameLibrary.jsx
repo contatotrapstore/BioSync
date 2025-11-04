@@ -31,7 +31,8 @@ const normalizeGame = (rawGame) => {
     coverImage: rawGame.cover_image || rawGame.thumbnail_url || '',
     folderPath: rawGame.folder_path || rawGame.folderPath || '',
     hasAccess: rawGame.hasAccess ?? rawGame.has_access ?? false,
-    accessType: rawGame.accessType || rawGame.access_type || null
+    accessType: rawGame.accessType || rawGame.access_type || null,
+    supportedPlatforms: rawGame.supported_platforms || rawGame.supportedPlatforms || ['pc', 'mobile']
   };
 };
 
@@ -71,7 +72,10 @@ function GameLibrary() {
     setError('');
 
     try {
-      const response = await api.get('/games/user/games');
+      // Filter games by PC platform
+      const response = await api.get('/games/user/games', {
+        params: { platform: 'pc' }
+      });
       const payload = response.data?.data || {};
       const gamesData = payload.games || [];
 

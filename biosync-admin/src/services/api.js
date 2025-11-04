@@ -115,7 +115,11 @@ const mapGame = (game) => {
     folderPath: game.folder_path || game.folderPath || '',
     coverImage: game.cover_image || '',
     isActive: game.is_active ?? true,
-    order: game.order ?? 0
+    order: game.order ?? 0,
+    supportedPlatforms: game.supported_platforms || game.supportedPlatforms || ['pc', 'mobile'],
+    version: game.version || '1.0.0',
+    downloadUrl: game.download_url || game.downloadUrl || null,
+    fileSize: game.file_size || game.fileSize || null
   };
 };
 
@@ -245,6 +249,15 @@ export const gamesAPI = {
     return mapGame(response.data?.data?.game);
   },
   create: async (data) => {
+    // Note: For FormData uploads from GameForm, data is already FormData
+    // For JSON API calls, construct the payload object
+    if (data instanceof FormData) {
+      const response = await api.post('/games', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return mapGame(response.data?.data?.game);
+    }
+
     const payload = {
       name: data.name,
       slug: data.slug,
@@ -252,13 +265,25 @@ export const gamesAPI = {
       folderPath: data.folderPath,
       category: data.category,
       coverImage: data.coverImage,
-      order: data.order
+      order: data.order,
+      supportedPlatforms: data.supportedPlatforms || ['pc', 'mobile'],
+      version: data.version,
+      downloadUrl: data.downloadUrl,
+      fileSize: data.fileSize
     };
 
     const response = await api.post('/games', payload);
     return mapGame(response.data?.data?.game);
   },
   update: async (id, data) => {
+    // Note: For FormData uploads from GameForm, data is already FormData
+    if (data instanceof FormData) {
+      const response = await api.put(`/games/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return mapGame(response.data?.data?.game);
+    }
+
     const payload = {
       name: data.name,
       slug: data.slug,
@@ -267,7 +292,11 @@ export const gamesAPI = {
       category: data.category,
       coverImage: data.coverImage,
       isActive: data.isActive,
-      order: data.order
+      order: data.order,
+      supportedPlatforms: data.supportedPlatforms,
+      version: data.version,
+      downloadUrl: data.downloadUrl,
+      fileSize: data.fileSize
     };
 
     const response = await api.put(`/games/${id}`, payload);
