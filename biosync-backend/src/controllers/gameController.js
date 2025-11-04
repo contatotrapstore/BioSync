@@ -227,7 +227,7 @@ exports.validateAccess = async (req, res, next) => {
     }
 
     let hasAccess = false;
-    let accessType: string | null = null;
+    let accessType = null;
 
     if (activeSubscription) {
       hasAccess = true;
