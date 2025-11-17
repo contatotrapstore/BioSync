@@ -16,12 +16,13 @@ import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
 import { StudentGrid } from '../../components/teacher/StudentGrid';
 import { useWebSocketEEG } from '../../hooks/useWebSocketEEG';
-import { supabase } from '../../services/supabase';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function SessionActive() {
   const { sessionId } = useParams();
@@ -54,23 +55,23 @@ export function SessionActive() {
   async function fetchSessionData() {
     setLoading(true);
     try {
-      // Buscar sessão com turma e alunos
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .select(
-          `
-          *,
-          class:classes(
-            id,
-            name,
-            school_year
-          )
-        `
-        )
-        .eq('id', sessionId)
-        .single();
+      // Buscar sessão
+      const sessionResponse = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (sessionError) throw sessionError;
+      if (!sessionResponse.ok) {
+        throw new Error(`HTTP ${sessionResponse.status}: ${sessionResponse.statusText}`);
+      }
+
+      const sessionResult = await sessionResponse.json();
+
+      if (!sessionResult.success) {
+        throw new Error(sessionResult.error || 'Erro ao buscar sessão');
+      }
+
+      const sessionData = sessionResult.data;
 
       // Verificar se sessão pertence ao professor
       if (sessionData.teacher_id !== user.id) {
@@ -85,30 +86,42 @@ export function SessionActive() {
         return;
       }
 
+      // Buscar dados da turma
+      const classResponse = await fetch(`${API_URL}/api/classes/${sessionData.class_id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (classResponse.ok) {
+        const classResult = await classResponse.json();
+        if (classResult.success) {
+          sessionData.class = classResult.data;
+        }
+      }
+
       setSession(sessionData);
 
       // Buscar alunos da turma
-      const { data: classStudents, error: studentsError } = await supabase
-        .from('class_students')
-        .select(
-          `
-          student_id,
-          student:users!student_id(
-            id,
-            name,
-            email
-          )
-        `
-        )
-        .eq('class_id', sessionData.class_id);
+      const studentsResponse = await fetch(`${API_URL}/api/classes/${sessionData.class_id}/students`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (studentsError) throw studentsError;
+      if (!studentsResponse.ok) {
+        throw new Error(`HTTP ${studentsResponse.status}: ${studentsResponse.statusText}`);
+      }
+
+      const studentsResult = await studentsResponse.json();
+
+      if (!studentsResult.success) {
+        throw new Error(studentsResult.error || 'Erro ao buscar alunos');
+      }
 
       // Inicializar array de alunos
-      const studentsArray = (classStudents || []).map((cs) => ({
-        id: cs.student.id,
-        name: cs.student.name,
-        email: cs.student.email,
+      const studentsArray = (studentsResult.data || []).map((student) => ({
+        id: student.id,
+        name: student.name,
+        email: student.email,
         connected: false,
         eegData: null,
       }));
@@ -181,15 +194,24 @@ export function SessionActive() {
     setEnding(true);
     try {
       // Atualizar sessão no banco
-      const { error: updateError } = await supabase
-        .from('sessions')
-        .update({
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           end_time: new Date().toISOString(),
           status: 'completed',
         })
-        .eq('id', sessionId);
+      });
 
-      if (updateError) throw updateError;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao finalizar sessão');
+      }
 
       // Redirecionar para relatório
       setTimeout(() => {

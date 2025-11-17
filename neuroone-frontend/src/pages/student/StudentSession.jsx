@@ -28,6 +28,8 @@ import BluetoothDisabledIcon from '@mui/icons-material/BluetoothDisabled';
 import { ConcentrationGame } from '../../components/games/ConcentrationGame';
 import { BalanceGame } from '../../components/games/BalanceGame';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export function StudentSession() {
   const { sessionId } = useParams();
   const { user } = useAuth();
@@ -67,29 +69,69 @@ export function StudentSession() {
   async function fetchSession() {
     setLoading(true);
     try {
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .select(
-          `
-          *,
-          class:classes(id, name, school_year),
-          teacher:users!teacher_id(id, name)
-        `
-        )
-        .eq('id', sessionId)
-        .single();
+      // Buscar sessão
+      const sessionResponse = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (sessionError) throw sessionError;
+      if (!sessionResponse.ok) {
+        throw new Error(`HTTP ${sessionResponse.status}: ${sessionResponse.statusText}`);
+      }
+
+      const sessionResult = await sessionResponse.json();
+
+      if (!sessionResult.success) {
+        throw new Error(sessionResult.error || 'Erro ao buscar sessão');
+      }
+
+      const sessionData = sessionResult.data;
+
+      // Buscar dados da turma
+      const classResponse = await fetch(`${API_URL}/api/classes/${sessionData.class_id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (classResponse.ok) {
+        const classResult = await classResponse.json();
+        if (classResult.success) {
+          sessionData.class = classResult.data;
+        }
+      }
+
+      // Buscar dados do professor
+      const teacherResponse = await fetch(`${API_URL}/api/users/${sessionData.teacher_id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (teacherResponse.ok) {
+        const teacherResult = await teacherResponse.json();
+        if (teacherResult.success) {
+          sessionData.teacher = teacherResult.data;
+        }
+      }
 
       // Verify student is in this class
-      const { data: enrollment, error: enrollmentError } = await supabase
-        .from('class_students')
-        .select('*')
-        .eq('class_id', sessionData.class_id)
-        .eq('student_id', user.id)
-        .single();
+      const studentsResponse = await fetch(`${API_URL}/api/classes/${sessionData.class_id}/students`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (enrollmentError || !enrollment) {
+      if (!studentsResponse.ok) {
+        throw new Error(`HTTP ${studentsResponse.status}: ${studentsResponse.statusText}`);
+      }
+
+      const studentsResult = await studentsResponse.json();
+
+      if (!studentsResult.success) {
+        throw new Error(studentsResult.error || 'Erro ao verificar matrícula');
+      }
+
+      const isEnrolled = (studentsResult.data || []).some(student => student.id === user.id);
+
+      if (!isEnrolled) {
         setError('Você não está matriculado nesta turma.');
         return;
       }

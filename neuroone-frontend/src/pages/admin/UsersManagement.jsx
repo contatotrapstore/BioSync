@@ -17,8 +17,9 @@ import { UserTable } from '../../components/direction/UserTable';
 import { UserForm } from '../../components/direction/UserForm';
 import { ThemeToggle } from '../../components/atoms/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function UsersManagement() {
   const { signOut } = useAuth();
@@ -46,15 +47,26 @@ export function UsersManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
+      console.log('[UsersManagement] Fetching users from backend API...');
 
-      if (error) throw error;
-      setUsers(data || []);
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`[UsersManagement] Received ${result.data.length} users`);
+
+      setUsers(result.data || []);
     } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
+      console.error('[UsersManagement] Erro ao buscar usuários:', error);
+      alert('Erro ao carregar usuários: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -96,17 +108,27 @@ export function UsersManagement() {
       return;
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ active: false, updated_at: new Date().toISOString() })
-        .eq('id', userId);
+      console.log(`[UsersManagement] Deactivating user ${userId}...`);
 
-      if (error) throw error;
+      const response = await fetch(`${API_URL}/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to deactivate user');
+      }
+
+      const result = await response.json();
+      console.log('[UsersManagement] User deactivated:', result);
 
       alert('Usuário desativado com sucesso!');
       fetchUsers();
     } catch (error) {
-      console.error('Erro ao desativar usuário:', error);
+      console.error('[UsersManagement] Erro ao desativar usuário:', error);
       alert('Erro ao desativar usuário: ' + error.message);
     }
   };

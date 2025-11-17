@@ -7,7 +7,8 @@ import {
   Stack,
 } from '@mui/material';
 import { Button } from '../atoms/Button';
-import { supabase } from '../../services/supabase';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function SessionFilterBar({ filters, onFiltersChange }) {
   const [professors, setProfessors] = useState([]);
@@ -20,15 +21,27 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
 
   async function fetchProfessors() {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name')
-        .eq('user_role', 'professor')
-        .eq('active', true)
-        .order('name');
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
-      setProfessors(data || []);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar professores');
+      }
+
+      // Filtrar apenas professores ativos
+      const activeProfessors = (result.data || [])
+        .filter(user => user.user_role === 'professor' && user.active)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setProfessors(activeProfessors);
     } catch (error) {
       console.error('Erro ao buscar professores:', error);
     }
@@ -36,14 +49,27 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
 
   async function fetchClasses() {
     try {
-      const { data, error } = await supabase
-        .from('classes')
-        .select('id, name')
-        .eq('active', true)
-        .order('name');
+      const response = await fetch(`${API_URL}/api/classes`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
-      setClasses(data || []);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar turmas');
+      }
+
+      // Filtrar apenas turmas ativas
+      const activeClasses = (result.data || [])
+        .filter(cls => cls.active)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setClasses(activeClasses);
     } catch (error) {
       console.error('Erro ao buscar turmas:', error);
     }

@@ -18,11 +18,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../services/supabase';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function SessionCreate() {
   const { user } = useAuth();
@@ -56,31 +57,27 @@ export function SessionCreate() {
   async function fetchMyClasses() {
     setLoading(true);
     try {
-      const { data: classesData, error } = await supabase
-        .from('classes')
-        .select('*, class_students(count)')
-        .eq('created_by', user.id)
-        .eq('active', true)
-        .order('name');
+      const response = await fetch(`${API_URL}/api/classes`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-      // Enriquecer com contagem de alunos
-      const classesWithCount = await Promise.all(
-        (classesData || []).map(async (classItem) => {
-          const { count: studentCount } = await supabase
-            .from('class_students')
-            .select('*', { count: 'exact', head: true })
-            .eq('class_id', classItem.id);
+      const result = await response.json();
 
-          return {
-            ...classItem,
-            student_count: studentCount || 0,
-          };
-        })
-      );
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar turmas');
+      }
 
-      setClasses(classesWithCount);
+      // Filtrar apenas turmas criadas pelo professor atual e ativas
+      const myActiveClasses = (result.data || [])
+        .filter(c => c.created_by === user.id && c.active)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setClasses(myActiveClasses);
     } catch (error) {
       console.error('Erro ao buscar turmas:', error);
       setError('Erro ao carregar turmas. Tente novamente.');
@@ -132,25 +129,31 @@ export function SessionCreate() {
     setError(null);
 
     try {
-      // Criar sessão no Supabase
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .insert([
-          {
-            teacher_id: user.id,
-            class_id: formData.class_id,
-            title: formData.title,
-            description: formData.description || null,
-            session_type: formData.session_type,
-            status: 'scheduled',
-            start_time: new Date().toISOString(),
-            duration_minutes: formData.duration_minutes,
-          },
-        ])
-        .select()
-        .single();
+      // Criar sessão via API
+      const response = await fetch(`${API_URL}/api/sessions/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacher_id: user.id,
+          class_id: formData.class_id,
+          title: formData.title,
+          description: formData.description || null,
+          session_type: formData.session_type,
+          status: 'scheduled',
+          start_time: new Date().toISOString(),
+          duration_minutes: formData.duration_minutes,
+        })
+      });
 
-      if (sessionError) throw sessionError;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao criar sessão');
+      }
 
       // TODO: Salvar configurações de threshold em session_config ou system_settings
       // Por enquanto, vamos usar as configurações globais do sistema
@@ -159,7 +162,7 @@ export function SessionCreate() {
 
       // Navegar para sessão ativa após breve delay
       setTimeout(() => {
-        navigate(`/teacher/session/${sessionData.id}/active`);
+        navigate(`/teacher/session/${result.data.id}/active`);
       }, 1500);
     } catch (error) {
       console.error('Erro ao criar sessão:', error);

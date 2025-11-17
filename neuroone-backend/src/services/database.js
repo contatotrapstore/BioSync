@@ -153,6 +153,21 @@ export async function updateSessionStatus(sessionId, status) {
 }
 
 /**
+ * Generic query function for custom queries
+ * @param {string} text - SQL query text
+ * @param {Array} params - Query parameters
+ * @returns {Promise<Object>} - Query result
+ */
+export async function query(text, params) {
+  try {
+    return await pool.query(text, params);
+  } catch (error) {
+    console.error('❌ Database query error:', error);
+    throw error;
+  }
+}
+
+/**
  * Close database pool
  */
 export async function closePool() {

@@ -19,11 +19,14 @@ import {
 import logger from './utils/logger.js';
 import metricsRouter from './routes/metrics.js';
 import privacyRouter from './routes/privacy.js';
+import usersRouter from './routes/users.js';
+import classesRouter from './routes/classes.js';
+import sessionsRouter from './routes/sessions.js';
 import { socketAuthMiddleware } from './middleware/auth.js';
 import { createRateLimitMiddleware, clearSocketLimits } from './middleware/rateLimit.js';
 
 // Load environment variables
-dotenv.config();
+dotenv.config(); // Reloading after .env update
 
 const PORT = process.env.PORT || 3001;
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
@@ -41,6 +44,9 @@ app.use(express.json());
 // API Routes
 app.use('/api/metrics', metricsRouter);
 app.use('/api/privacy', privacyRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/classes', classesRouter);
+app.use('/api/sessions', sessionsRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

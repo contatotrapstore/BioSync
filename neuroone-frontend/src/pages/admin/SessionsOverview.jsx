@@ -20,7 +20,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
 import { SessionFilterBar } from '../../components/direction/SessionFilterBar';
-import { supabase } from '../../services/supabase';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function SessionsOverview() {
   const navigate = useNavigate();
@@ -55,45 +56,22 @@ export function SessionsOverview() {
   async function fetchSessions() {
     setLoading(true);
     try {
-      // Buscar sessões com JOINs
-      const { data: sessionsData, error: sessionsError } = await supabase
-        .from('sessions')
-        .select(`
-          *,
-          teacher:users!teacher_id(name),
-          class:classes!class_id(name)
-        `)
-        .order('start_time', { ascending: false });
+      const response = await fetch(`${API_URL}/api/sessions`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (sessionsError) throw sessionsError;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-      // Para cada sessão, buscar métricas e participantes
-      const sessionsWithDetails = await Promise.all(
-        (sessionsData || []).map(async (session) => {
-          // Buscar número de participantes
-          const { count: participantsCount } = await supabase
-            .from('session_participants')
-            .select('*', { count: 'exact', head: true })
-            .eq('session_id', session.id);
+      const result = await response.json();
 
-          // Buscar métricas da sessão
-          const { data: metricsData } = await supabase
-            .from('session_metrics')
-            .select('avg_attention')
-            .eq('session_id', session.id)
-            .single();
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar sessões');
+      }
 
-          return {
-            ...session,
-            teacher_name: session.teacher?.name || 'N/A',
-            class_name: session.class?.name || 'N/A',
-            participants_count: participantsCount || 0,
-            avg_attention: metricsData?.avg_attention || 0,
-          };
-        })
-      );
-
-      setSessions(sessionsWithDetails);
+      setSessions(result.data || []);
     } catch (error) {
       console.error('Erro ao buscar sessões:', error);
     } finally {

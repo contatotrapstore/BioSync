@@ -15,7 +15,8 @@ import {
   Alert,
 } from '@mui/material';
 import { Button } from '../atoms/Button';
-import { supabase } from '../../services/supabase';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function UserForm({ user, open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -62,36 +63,35 @@ export function UserForm({ user, open, onClose, onSuccess }) {
 
     try {
       if (user) {
-        // Atualizar usuário existente
+        // UPDATE existing user
+        console.log(`[UserForm] Updating user ${user.id}...`);
+
         const updateData = {
           name: formData.name,
-          email: formData.email,
           user_role: formData.user_role,
           active: formData.active,
-          updated_at: new Date().toISOString(),
         };
 
-        // Se forneceu nova senha, atualizar também
-        if (formData.password) {
-          // Hash da senha com bcrypt
-          const passwordHash = await hashPassword(formData.password);
-          updateData.password_hash = passwordHash;
+        const response = await fetch(`${API_URL}/api/users/${user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        });
 
-          // Atualizar também no auth.users
-          await supabase.rpc('update_user_password', {
-            user_id: user.id,
-            new_password: formData.password,
-          });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to update user');
         }
 
-        const { error: updateError } = await supabase
-          .from('users')
-          .update(updateData)
-          .eq('id', user.id);
+        const result = await response.json();
+        console.log('[UserForm] User updated:', result);
 
-        if (updateError) throw updateError;
       } else {
-        // Criar novo usuário
+        // CREATE new user
+        console.log(`[UserForm] Creating user ${formData.email}...`);
+
         if (!formData.password) {
           setError('Senha é obrigatória para novos usuários');
           setLoading(false);
@@ -104,99 +104,38 @@ export function UserForm({ user, open, onClose, onSuccess }) {
           return;
         }
 
-        // Criar no auth.users primeiro
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        const createData = {
           email: formData.email,
+          name: formData.name,
+          user_role: formData.user_role,
           password: formData.password,
-          email_confirm: true,
-          user_metadata: {
-            name: formData.name,
+        };
+
+        const response = await fetch(`${API_URL}/api/users/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify(createData),
         });
 
-        if (authError) {
-          // Se der erro de permissão, criar diretamente via SQL
-          console.warn('Admin API não disponível, criando via SQL...');
-
-          const userId = crypto.randomUUID();
-          const passwordHash = await hashPassword(formData.password);
-
-          // Criar em auth.users via SQL
-          const { error: authInsertError } = await supabase.rpc('create_auth_user', {
-            user_id: userId,
-            user_email: formData.email,
-            user_password: formData.password,
-            user_name: formData.name,
-          });
-
-          if (authInsertError) {
-            // Se RPC não existir, criar apenas na tabela users
-            console.warn('RPC não disponível, criando apenas perfil...');
-            const { error: profileError } = await supabase
-              .from('users')
-              .insert([{
-                id: userId,
-                email: formData.email,
-                name: formData.name,
-                user_role: formData.user_role,
-                password_hash: passwordHash,
-                active: formData.active,
-              }]);
-
-            if (profileError) throw profileError;
-          } else {
-            // Criar perfil na tabela users
-            const { error: profileError } = await supabase
-              .from('users')
-              .insert([{
-                id: userId,
-                email: formData.email,
-                name: formData.name,
-                user_role: formData.user_role,
-                password_hash: passwordHash,
-                active: formData.active,
-              }]);
-
-            if (profileError) throw profileError;
-          }
-        } else {
-          // Auth user criado com sucesso, criar perfil
-          const passwordHash = await hashPassword(formData.password);
-
-          const { error: profileError } = await supabase
-            .from('users')
-            .insert([{
-              id: authData.user.id,
-              email: formData.email,
-              name: formData.name,
-              user_role: formData.user_role,
-              password_hash: passwordHash,
-              active: formData.active,
-            }]);
-
-          if (profileError) throw profileError;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create user');
         }
+
+        const result = await response.json();
+        console.log('[UserForm] User created:', result);
       }
 
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
+      console.error('[UserForm] Erro ao salvar usuário:', error);
       setError(error.message || 'Erro ao salvar usuário. Tente novamente.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const hashPassword = async (password) => {
-    // Usar crypt do PostgreSQL via RPC (ideal)
-    // Se não houver RPC, usar hash simples
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(hash))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
   };
 
   return (

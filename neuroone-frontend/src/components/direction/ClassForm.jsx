@@ -14,8 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import { Button } from '../atoms/Button';
-import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function ClassForm({ classData, open, onClose, onSuccess }) {
   const { user } = useAuth();
@@ -65,15 +66,27 @@ export function ClassForm({ classData, open, onClose, onSuccess }) {
 
   async function fetchAvailableStudents() {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name, email')
-        .eq('user_role', 'aluno')
-        .eq('active', true)
-        .order('name');
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
-      setAvailableStudents(data || []);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar alunos');
+      }
+
+      // Filtrar apenas alunos ativos
+      const students = (result.data || [])
+        .filter(user => user.user_role === 'aluno' && user.active)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setAvailableStudents(students);
     } catch (err) {
       console.error('Erro ao buscar alunos:', err);
     }
@@ -81,16 +94,22 @@ export function ClassForm({ classData, open, onClose, onSuccess }) {
 
   async function fetchClassStudents(classId) {
     try {
-      const { data, error } = await supabase
-        .from('class_students')
-        .select('student_id, users(id, name, email)')
-        .eq('class_id', classId);
+      const response = await fetch(`${API_URL}/api/classes/${classId}/students`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-      // Mapear para formato esperado
-      const students = data?.map(item => item.users) || [];
-      setSelectedStudents(students);
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar alunos da turma');
+      }
+
+      setSelectedStudents(result.data || []);
     } catch (err) {
       console.error('Erro ao buscar alunos da turma:', err);
     }
@@ -115,40 +134,52 @@ export function ClassForm({ classData, open, onClose, onSuccess }) {
 
       if (classData) {
         // ATUALIZAR turma existente
-        const { error: updateError } = await supabase
-          .from('classes')
-          .update({
+        const response = await fetch(`${API_URL}/api/classes/${classData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             name: formData.name.trim(),
             school_year: formData.school_year.trim() || null,
             description: formData.description.trim() || null,
-            active: formData.active,
-            updated_at: new Date().toISOString(),
+            active: formData.active
           })
-          .eq('id', classData.id);
+        });
 
-        if (updateError) throw updateError;
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Erro ao atualizar turma');
+        }
 
         // Atualizar relação de alunos
         await updateClassStudents(classData.id);
       } else {
         // CRIAR nova turma
-        const { data: newClass, error: insertError } = await supabase
-          .from('classes')
-          .insert([{
+        const response = await fetch(`${API_URL}/api/classes/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             name: formData.name.trim(),
             school_year: formData.school_year.trim() || null,
             description: formData.description.trim() || null,
             created_by: user?.id,
             active: formData.active,
-          }])
-          .select()
-          .single();
+            student_ids: selectedStudents.map(s => s.id)
+          })
+        });
 
-        if (insertError) throw insertError;
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-        // Adicionar alunos à turma
-        if (selectedStudents.length > 0) {
-          await updateClassStudents(newClass.id);
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Erro ao criar turma');
         }
       }
 
@@ -164,24 +195,22 @@ export function ClassForm({ classData, open, onClose, onSuccess }) {
 
   async function updateClassStudents(classId) {
     try {
-      // Remover todos os alunos atuais
-      await supabase
-        .from('class_students')
-        .delete()
-        .eq('class_id', classId);
+      const response = await fetch(`${API_URL}/api/classes/${classId}/students`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_ids: selectedStudents.map(s => s.id)
+        })
+      });
 
-      // Adicionar novos alunos selecionados
-      if (selectedStudents.length > 0) {
-        const enrollments = selectedStudents.map(student => ({
-          class_id: classId,
-          student_id: student.id,
-        }));
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-        const { error } = await supabase
-          .from('class_students')
-          .insert(enrollments);
+      const result = await response.json();
 
-        if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao atualizar alunos');
       }
     } catch (err) {
       console.error('Erro ao atualizar alunos da turma:', err);

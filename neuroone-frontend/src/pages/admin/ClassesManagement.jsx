@@ -16,8 +16,9 @@ import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
 import { ClassTable } from '../../components/direction/ClassTable';
 import { ClassForm } from '../../components/direction/ClassForm';
-import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function ClassesManagement() {
   const navigate = useNavigate();
@@ -47,32 +48,25 @@ export function ClassesManagement() {
   async function fetchClasses() {
     setLoading(true);
     try {
-      // Buscar turmas
-      const { data: classesData, error: classesError } = await supabase
-        .from('classes')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await fetch(`${API_URL}/api/classes`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (classesError) throw classesError;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-      // Para cada turma, buscar quantidade de alunos
-      const classesWithCounts = await Promise.all(
-        (classesData || []).map(async (classItem) => {
-          const { count } = await supabase
-            .from('class_students')
-            .select('*', { count: 'exact', head: true })
-            .eq('class_id', classItem.id);
+      const result = await response.json();
 
-          return {
-            ...classItem,
-            student_count: count || 0,
-          };
-        })
-      );
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao buscar turmas');
+      }
 
-      setClasses(classesWithCounts);
+      setClasses(result.data || []);
     } catch (error) {
       console.error('Erro ao buscar turmas:', error);
+      alert('Erro ao carregar turmas. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -110,17 +104,25 @@ export function ClassesManagement() {
     }
 
     try {
-      const { error } = await supabase
-        .from('classes')
-        .update({ active: false, updated_at: new Date().toISOString() })
-        .eq('id', classId);
+      const response = await fetch(`${API_URL}/api/classes/${classId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao desativar turma');
+      }
 
       fetchClasses();
     } catch (error) {
       console.error('Erro ao desativar turma:', error);
-      alert('Erro ao desativar turma');
+      alert('Erro ao desativar turma. Tente novamente.');
     }
   }
 

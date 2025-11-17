@@ -7,11 +7,12 @@ import { Button } from '../../components/atoms/Button';
 import { AttentionTimelineChart } from '../../components/teacher/AttentionTimelineChart';
 import { AttentionDistributionChart } from '../../components/teacher/AttentionDistributionChart';
 import { StudentPerformanceTable } from '../../components/teacher/StudentPerformanceTable';
-import { supabase } from '../../services/supabase';
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function SessionReport() {
   const { sessionId } = useParams();
@@ -34,16 +35,22 @@ export function SessionReport() {
     setLoading(true);
     try {
       // Buscar sessão
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .select(`
-          *,
-          class:classes(id, name, school_year)
-        `)
-        .eq('id', sessionId)
-        .single();
+      const sessionResponse = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (sessionError) throw sessionError;
+      if (!sessionResponse.ok) {
+        throw new Error(`HTTP ${sessionResponse.status}: ${sessionResponse.statusText}`);
+      }
+
+      const sessionResult = await sessionResponse.json();
+
+      if (!sessionResult.success) {
+        throw new Error(sessionResult.error || 'Erro ao buscar sessão');
+      }
+
+      const sessionData = sessionResult.data;
 
       // Verificar permissão
       if (sessionData.teacher_id !== user.id) {
@@ -55,6 +62,19 @@ export function SessionReport() {
       if (sessionData.status !== 'completed') {
         setError('Esta sessão ainda não foi finalizada.');
         return;
+      }
+
+      // Buscar dados da turma
+      const classResponse = await fetch(`${API_URL}/api/classes/${sessionData.class_id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (classResponse.ok) {
+        const classResult = await classResponse.json();
+        if (classResult.success) {
+          sessionData.class = classResult.data;
+        }
       }
 
       setSession(sessionData);
