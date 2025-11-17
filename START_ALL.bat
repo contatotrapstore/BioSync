@@ -1,32 +1,35 @@
 @echo off
 echo ============================================
-echo   NeuroGame Platform - Inicializacao Rapida
+echo   NeuroOne Educacional - Inicializacao Rapida
 echo ============================================
 echo.
 
-echo [1/3] Iniciando Backend API...
-start "NeuroGame Backend" cmd /k "cd neurogame-backend && npm run dev"
+echo [1/2] Iniciando Backend API...
+start "NeuroOne Backend" cmd /k "cd neuroone-backend && npm run dev"
 timeout /t 5 /nobreak >nul
 
-echo [2/3] Iniciando Admin Dashboard...
-start "NeuroGame Admin" cmd /k "cd neurogame-admin && npm run dev"
-timeout /t 5 /nobreak >nul
-
-echo [3/3] Iniciando Desktop Launcher...
-start "NeuroGame Launcher" cmd /k "cd neurogame-launcher && npm run dev"
+echo [2/2] Iniciando Frontend PWA...
+start "NeuroOne Frontend" cmd /k "cd neuroone-frontend && npm run dev"
 
 echo.
 echo ============================================
 echo   Todos os servicos foram iniciados!
 echo ============================================
 echo.
-echo Backend API:        http://localhost:3000
-echo Admin Dashboard:    http://localhost:5173
-echo Launcher:           Janela Electron
+echo Backend API:        http://localhost:3001
+echo Frontend PWA:       http://localhost:5173
+echo WebSocket:          ws://localhost:3001
 echo.
-echo Credenciais:
-echo   Admin: admin / Admin@123456
-echo   Demo:  demo / Demo@123456
+echo Modulos:
+echo   - Direcao (Admin)
+echo   - Professor (Teacher Dashboard)
+echo   - Aluno (Student PWA)
+echo.
+echo Para servidor Python EEG (opcional):
+echo   cd neuroone-python-eeg
+echo   python server_headless.py
+echo.
+echo Ver documentacao: docs/QUICK-START.md
 echo.
 echo Pressione qualquer tecla para fechar...
 pause >nul

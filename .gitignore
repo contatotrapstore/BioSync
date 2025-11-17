@@ -88,3 +88,7 @@ pids/
 *.pid.lock
 .claude/
 nul
+COMMIT_MESSAGE.txt
+
+# Archive folder (old project artifacts)
+archive/

@@ -1,0 +1,53 @@
+# Render Blueprint para NeuroOne Backend
+# Deploy: Conecte seu repositório GitHub ao Render e ele detectará este arquivo automaticamente
+
+services:
+  # Backend Web Service
+  - type: web
+    name: neuroone-backend
+    runtime: node
+    env: node
+    region: oregon # ou sua região preferida
+    plan: starter # ou free para desenvolvimento
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true # Deploy automático quando houver push no branch
+
+    # Variáveis de ambiente
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 3001
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: neuroone-db
+          property: connectionString
+
+      - key: SUPABASE_URL
+        sync: false # Definir manualmente no dashboard
+
+      - key: SUPABASE_SERVICE_KEY
+        sync: false # Definir manualmente no dashboard
+
+      - key: ALLOWED_ORIGINS
+        sync: false # Definir manualmente (ex: https://your-frontend.vercel.app)
+
+      - key: WS_PING_TIMEOUT
+        value: 30000
+
+      - key: WS_PING_INTERVAL
+        value: 25000
+
+# Opcional: Adicionar banco de dados PostgreSQL do Render
+# Se preferir usar Supabase, pode remover esta seção
+databases:
+  - name: neuroone-db
+    databaseName: neuroone
+    user: neuroone
+    region: oregon
+    plan: starter # ou free
+    # Render criará DATABASE_URL automaticamente

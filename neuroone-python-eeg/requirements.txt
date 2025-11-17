@@ -1,0 +1,11 @@
+# NeuroOne Python EEG Bridge - Dependencies
+# Python 3.8+
+
+# WebSocket client
+websockets==12.0
+
+# Serial communication (for Bluetooth/USB EEG devices)
+pyserial==3.5
+
+# Optional: For better logging
+colorlog==6.8.0
