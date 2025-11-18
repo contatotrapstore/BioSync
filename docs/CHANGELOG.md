@@ -7,6 +7,86 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [2.5.0] - 2025-11-18 🎮 GAMES INTEGRATION
+
+### ✨ Adicionado
+
+#### Jogos de Neurofeedback Integrados
+- **Fazendinha 3D**: Jogo completo com controles via EEG
+  - Engine Three.js para renderização 3D
+  - Controle de trator via níveis de atenção
+  - Web Bluetooth API para conexão com MindWave Mobile
+  - ThinkGear protocol para leitura de dados EEG
+  - Localização: `/games/fazendinha/index.html`
+- **Monitor EEG Standalone**: Interface visual de dados cerebrais
+  - Visualização em tempo real de métricas EEG
+  - Suporte a atenção, meditação e ondas cerebrais
+  - Localização: `/monitor/eeg-monitor.html`
+
+#### Backend - Servidor de Jogos
+- **Express Static Serving**: Middleware para servir jogos
+  - Rota `/games` para jogos neurofeedback
+  - Rota `/monitor` para monitor EEG
+  - Arquivos servidos de `neuroone-backend/public/`
+- **Socket.IO Client**: CDN adicionado aos jogos para futura integração WebSocket
+
+#### Componentes React (Design System v2.5)
+- **LoadingOverlay**: Overlay de carregamento com CircularProgress
+- **Skeletons**: Card, Chart, Table skeletons para loading states
+- **StatusBadge**: Badge customizado para status de sessões
+- **Layout Components**: AppHeader, EmptyState, DashboardLayout
+- **Molecules**: SessionFilterBar com filtros avançados
+- **Atoms**: Button, Card com props otimizados
+
+#### Documentação
+- **JOGOS.md**: Guia completo de integração de jogos
+  - Descrição técnica dos jogos
+  - Arquitetura de integração
+  - Como acessar e desenvolver novos jogos
+  - Referência de dados EEG
+  - Troubleshooting
+- **docs/ARCHIVED/**: Pasta para documentos históricos
+  - Relatórios de testes v2.5.0
+  - Logs de sessões de desenvolvimento
+
+### 🎨 Alterado
+- **README.md**: Atualizado para v2.5.0
+  - Adicionada seção de jogos
+  - Arquitetura atualizada com `public/games` e `public/monitor`
+  - Changelog atualizado
+- **Material-UI**: Temas dinâmicos para gráficos
+- **Charts**: Integração com Recharts e customização de cores por tema
+- **Responsividade**: Melhorias em layouts mobile com Grid v2
+
+### 🗑️ Removido
+- 6 arquivos de documentação obsoletos:
+  - `SISTEMA-PROFISSIONALIZADO.md` (log de desenvolvimento)
+  - `ANALISE-LOGS-E-MELHORIAS.md` (log de debugging)
+  - `GUIA-NOVOS-COMPONENTES.md` (duplicado)
+  - `STATUS-FINAL-COMPLETO.md` (duplicado)
+  - `SETUP-DATABASE-PRODUCAO.md` (duplicado em deployment/)
+  - `TESTE-LAYOUT.bat` (script de teste)
+
+### 📦 Arquivos de Jogos
+- **Fazendinha**: 16 arquivos (HTML, JS, GLTF models, áudio, CSS)
+- **Monitor EEG**: 1 arquivo HTML standalone
+- **Bibliotecas**: Three.js, GLTFLoader, Socket.IO client
+
+### 🚀 Production Ready
+- ✅ Jogos acessíveis via HTTP em produção
+- ✅ Web Bluetooth API funcional em HTTPS
+- ✅ Documentação completa de integração
+- ✅ Componentes React otimizados com skeletons
+- ✅ Repositório organizado e limpo
+
+### 🔧 Tecnologias Adicionadas
+- **Three.js r128**: Renderização 3D
+- **Web Bluetooth API**: Conexão direta com headset EEG
+- **ThinkGear Protocol**: Decodificação de pacotes EEG
+- **Socket.IO Client 4.8.1**: Cliente WebSocket (preparado para uso futuro)
+
+---
+
 ## [2.4.0] - 2025-11-17 🚀 PRODUÇÃO
 
 ### ✨ Adicionado
@@ -292,6 +372,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 **Formato do Changelog**: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/)
 **Versionamento**: [Semantic Versioning](https://semver.org/lang/pt-BR/)
 
-**Última atualização**: 2025-11-04
-**Versão atual**: 2.3.0
+**Última atualização**: 2025-11-18
+**Versão atual**: 2.5.0
 **Plataforma**: NeuroOne

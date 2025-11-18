@@ -444,8 +444,77 @@ export function StudentSession() {
                   </MenuItem>
                   <MenuItem value="concentration">Jogo de Concentração</MenuItem>
                   <MenuItem value="balance">Jogo de Balanço</MenuItem>
+                  <MenuItem value="fazendinha">🎮 Fazendinha 3D (Neurofeedback)</MenuItem>
+                  <MenuItem value="monitor">📊 Monitor EEG Standalone</MenuItem>
                 </Select>
               </FormControl>
+
+              {selectedGame === 'fazendinha' && (
+                <Paper
+                  sx={{
+                    p: 4,
+                    textAlign: 'center',
+                    backgroundColor: 'primary.50',
+                    border: '2px solid',
+                    borderColor: 'primary.main',
+                  }}
+                >
+                  <SportsEsportsIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                  <Typography variant="h2" sx={{ mb: 1 }}>
+                    🎮 Fazendinha 3D
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                    Jogo completo com renderização 3D. Controle o trator com sua atenção!
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary' }}>
+                    O jogo será aberto em uma nova aba. Conecte seu headset EEG via Bluetooth dentro do jogo.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => {
+                      const gameUrl = `${API_URL}/games/fazendinha/index.html?sessionId=${session.id}&studentId=${user.id}&studentName=${encodeURIComponent(user.name)}`;
+                      window.open(gameUrl, '_blank', 'width=1280,height=720');
+                    }}
+                  >
+                    Abrir Fazendinha 3D
+                  </Button>
+                </Paper>
+              )}
+
+              {selectedGame === 'monitor' && (
+                <Paper
+                  sx={{
+                    p: 4,
+                    textAlign: 'center',
+                    backgroundColor: 'info.50',
+                    border: '2px solid',
+                    borderColor: 'info.main',
+                  }}
+                >
+                  <BluetoothIcon sx={{ fontSize: 64, color: 'info.main', mb: 2 }} />
+                  <Typography variant="h2" sx={{ mb: 1 }}>
+                    📊 Monitor EEG Standalone
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                    Interface visual para monitorar suas ondas cerebrais em tempo real.
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary' }}>
+                    Visualize atenção, meditação e todas as bandas de ondas cerebrais (Delta, Theta, Alpha, Beta, Gamma).
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    size="large"
+                    onClick={() => {
+                      const monitorUrl = `${API_URL}/monitor/eeg-monitor.html?sessionId=${session.id}&studentId=${user.id}`;
+                      window.open(monitorUrl, '_blank', 'width=1024,height=768');
+                    }}
+                  >
+                    Abrir Monitor EEG
+                  </Button>
+                </Paper>
+              )}
 
               {selectedGame === 'concentration' && (
                 <ConcentrationGame

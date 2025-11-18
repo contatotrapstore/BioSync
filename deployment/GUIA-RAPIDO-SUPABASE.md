@@ -248,6 +248,14 @@ Após completar todas as migrations:
 3. ⏭️ Próximo: Configurar variáveis de ambiente no backend
 4. ⏭️ Depois: Configurar variáveis no frontend
 
+### 🎮 Novo em v2.5.0: Jogos Neurofeedback
+
+O sistema agora inclui jogos integrados que funcionam com dados EEG:
+- **Fazendinha 3D**: Jogo controlado via níveis de atenção
+- **Monitor EEG**: Interface standalone de visualização
+
+Os jogos são servidos pelo backend em `/games` e `/monitor` e **não requerem tabelas adicionais** no Supabase. Consulte [JOGOS.md](../JOGOS.md) para mais detalhes.
+
 **Continue em**: [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md) - Seção "Tarefa 1.3"
 
 ---
@@ -285,5 +293,6 @@ Compare com a lista esperada e execute apenas as migrations faltantes.
 ---
 
 **Criado em**: 2025-01-17
-**Versão**: 1.0.0
+**Última atualização**: 2025-11-18 (v2.5.0 - Games Integration)
+**Versão**: 1.1.0
 **Tempo total**: ~15 minutos

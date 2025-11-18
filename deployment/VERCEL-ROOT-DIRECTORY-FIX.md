@@ -1,10 +1,12 @@
-# 🚨 CORREÇÃO URGENTE - Erro no Vercel
+# ⚙️ Guia de Configuração - Vercel Root Directory
 
-## Problema Identificado
+## Problema Comum
 
-O Vercel está procurando o diretório `biosync-admin` mas o correto é `      `.
+O Vercel pode buscar um diretório incorreto durante deploy. Se você ver este erro:
 
-**Erro atual**: `The specified Root Directory "biosync-admin" does not exist`
+**Erro**: `The specified Root Directory "biosync-admin" does not exist`
+
+Isso significa que o Root Directory está apontando para um nome antigo. O correto para o projeto NeuroOne é: **`neuroone-frontend`**
 
 ## Solução Rápida (2 minutos)
 
