@@ -2,6 +2,8 @@ import express from 'express';
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 import { readFileSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -31,6 +33,10 @@ dotenv.config(); // Reloading after .env update
 const PORT = process.env.PORT || 3001;
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Create Express app
 const app = express();
 
@@ -40,6 +46,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+
+// Serve static files for games and monitor
+app.use('/games', express.static(path.join(__dirname, '../public/games')));
+app.use('/monitor', express.static(path.join(__dirname, '../public/monitor')));
+logger.info('🎮 Static files serving enabled: /games and /monitor');
 
 // API Routes
 app.use('/api/metrics', metricsRouter);

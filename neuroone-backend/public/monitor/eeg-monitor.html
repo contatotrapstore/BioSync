@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitor Web</title>
+  <style>
+    :root{
+      --bg:#0a0f1e;
+      --panel:#0f1628;
+      --line:#1b2747;
+      --text:#e6eeff;
+      --muted:#9fb0ffaa;
+    }
+	
+	@media (max-width: 700px) {
+		.card {
+			flex-direction:column !important;
+			height:80% !important;
+		}
+		.right{
+			flex: 0 0 40% !important;
+		}
+		#formulario{
+			flex-direction:column !important;
+			padding-top:20px !important;
+			gap:0px !important;
+		}
+		#formulario input{
+			width:100% !important;
+			margin-bottom:10px !important;
+		}
+		#infoAluno h1{
+			font-size:18px !important;
+		}
+	}
+	
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      overflow:hidden;
+    }
+    body::before{content:""; position:fixed; inset:0; pointer-events:none; opacity:.25;
+      background:
+        linear-gradient(transparent 0 98%, #1b264770 98% 100%),
+        linear-gradient(90deg, transparent 0 98%, #1b264770 98% 100%);
+      background-size:36px 36px,36px 36px;
+    }
+
+    /* CARD PRINCIPAL */
+    .app{display:flex; align-items:center; justify-content:center; height:100vh; padding:24px;}
+    .card{
+      position:relative;
+      width:min(1120px, 92vw); height:min(38vh, 340px);
+      background: linear-gradient(180deg, #0f1628, #0b1325);
+      border:1px solid var(--line); border-radius:22px;
+      box-shadow: 0 18px 50px #0008, inset 0 1px 0 #2a3966aa;
+      overflow:hidden; display:flex;
+    }
+    .left{flex: 0 0 30%; padding:28px; display:flex; flex-direction:column; justify-content:flex-start;}
+    .right{flex: 0 0 70%; padding:28px; display:flex; align-items:center; justify-content:center; position:relative;}
+
+    /* STATUS LIGHT (canto superior esquerdo) */
+    .status-wrapper{
+      margin-top:40px; display:flex; flex-direction:column; align-items:center; user-select:none;
+    }
+    .status-light{
+      --size: 200px;
+      width:var(--size); height:var(--size); border-radius:50%; cursor:pointer; position:relative;
+      background:
+        radial-gradient(40% 40% at 30% 28%, #ffffffaa 0%, #ffffff33 22%, #0000 45%),
+        radial-gradient(65% 65% at 50% 50%, currentColor 0%, #0000 70%);
+      box-shadow: 0 0 50px currentColor, inset 0 0 30px rgba(0,0,0,.65);
+      transition: transform .15s ease;
+    }
+    .status-light:active{ transform:scale(.97) }
+    .status-light::after{
+      content:""; position:absolute; inset:-28px; border-radius:inherit;
+      background:currentColor; filter:blur(36px); opacity:.75;
+    }
+    .status-light[data-state="green"]{ color:#00ff88 }
+    .status-light[data-state="red"]{ color:#ff2d55 }
+    .status-light[data-state="gray"]{ color:#AAAAAA }
+    .status-label{
+      margin-top:12px; font-size:14px; letter-spacing:.12em; font-weight:700; color:var(--muted);
+    }
+
+    /* PAINEL DIREITO - INPUT + BOTÃO + NOME */
+    .infoAluno{
+      width:100%; position:relative; height:100%; border-radius:14px; border:1px solid #223055; overflow:hidden; background:#0b1223;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #formulario{
+	  display:flex;
+	  flex-direction:row;
+      margin-bottom:20px;
+	  gap:20px;
+    }
+    #nomeInput{
+      width:80%; max-width:360px; padding:14px 18px;
+      font-size:16px; background:#0f1729; border:1px solid #2a3966;
+      border-radius:12px; color:#e6eeff; outline:none;
+      transition:border .2s;
+    }
+    #nomeInput:focus{ border-color:#00ff88; }
+
+    .mock-gui{
+      display:inline-block; width:240px; border-radius:14px; border:1px solid #2a3966;
+      background:#0c1430; box-shadow:0 10px 30px #000a, inset 0 1px 0 #2a3966;
+      overflow:hidden; cursor:pointer; transition:all .3s;
+    }
+    .mock-gui:hover{
+      box-shadow:0 10px 30px #2ded47, inset 0 1px 0 #2ded47;
+      transform:translateY(-2px);
+    }
+    .mock-gui .bar{
+      height:56px; background:linear-gradient(180deg,#121a36,#0b1124);
+      border-bottom:1px solid #223055; display:flex; align-items:center; justify-content:center;
+      color:#9fb0ff; font-size:15px; letter-spacing:.12em; font-weight:600;
+    }
+
+    #infoAluno h1{
+      font-size:28px; color:#c9d5ff; margin:0;
+    }
+    #nomeAluno{ color:#00ff88; font-weight:700; }
+	
+	/*Estilo Modal*/
+	.modal {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.5);
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+		overflow:hidden;
+	}
+	.modal-content {		
+		text-align:center;
+		background-color: #fff;
+		border-radius: 10px;
+		padding: 20px;
+		width: 90%;
+		max-width: 600px;
+		max-height: 12vh;
+		overflow-y: auto;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);	
+		overflow:hidden;
+	}
+	.modal-content h1 {
+		font-size: 1.5em;
+		margin: 0 0 15px;
+		text-align: center;
+	}
+	.modal-content button {
+		font-family: 'Bowlby One', Arial, sans-serif;
+		padding: 8px 16px;
+		font-size: 18px;
+		font-weight:400;
+		cursor: pointer;
+		background-color: #007bff;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		margin: 5px;
+	}
+	.modal-content button:hover {
+		background-color: #0056b3;
+	}
+	#status {
+		margin: 15px 0;
+		padding: 10px;
+		background-color: #f8f9fa;
+		border-radius: 5px;
+		min-height: 80px;
+		font-size: 14px;
+	}
+	#uuidList {
+		margin: 15px 0;
+		padding: 10px;
+		background-color: #f8f9fa;
+		border-radius: 5px;
+		max-height: 200px;
+		overflow-y: auto;
+		font-size: 14px;
+	}
+	#dataOutput {
+		margin: 15px 0;
+		padding: 10px;
+		background-color: #f8f9fa;
+		border-radius: 5px;
+		min-height: 150px;
+		max-height: 300px;
+		overflow-y: auto;
+		font-family: monospace;
+		white-space: pre;
+		font-size: 12px;
+	}
+	select {
+		width: 100%;
+		padding: 8px;
+		margin: 10px 0;
+		border-radius: 5px;
+		font-size: 14px;
+	}
+	.toggle-btn {
+		padding: 10px 20px;
+		font-size: 16px;
+		cursor: pointer;
+		background-color: #28a745;
+		color: white;
+		border: none;
+		border-radius: 5px;
+	}
+	.toggle-btn:hover {
+		background-color: #218838;
+	}
+	.close-btn {
+		float: right;
+		font-size: 20px;
+		cursor: pointer;
+		color: #333;
+	}
+  </style>
+</head>
+<body>
+  <div class="modal" id="bluetoothModal">
+		<div class="modal-content">
+			<span class="close-btn" onclick="toggleModal()">&times;</span>
+			<h1>Conectar via Bluetooth</h1>
+			<button onclick="connectAndDiscover()">Conectar</button>
+			<div id="status" style="display:none">Status: Desconectado</div>
+			<div id="uuidList" style="display:none">Serviços e Chars</div>
+			<label style="display:none">Escolha Char</label>
+			<select id="charSelect" onchange="selectCharacteristic()" style="display:none">
+				<option value="">-- Selecione --</option>
+			</select>
+			<button onclick="connectWebSocket()" style="display:none">1 - Comando Iniciar</button>
+			<button onclick="startStream()" style="display:none">2 - Iniciar Stream</button>
+			<button onclick="readCharacteristic()" style="display:none">2 - Ler Dados</button>            
+			<button onclick="disconnectBluetooth()" style="display:none" id="disconnectBtn">Desconectar</button>            
+			<div id="dataOutput">Dados</div>
+		</div>
+	</div>
+  <main class="app">
+    <section class="card">
+      <!-- LADO ESQUERDO - STATUS LIGHT -->
+      <div class="left">
+        <div class="status-wrapper" title="Clique para alternar">
+          <div class="status-light" id="statusLight" data-state="gray"></div>
+          <div class="status-label" id="statusLabel">AGUARDANDO</div>
+        </div>
+      </div>
+
+      <!-- LADO DIREITO - FORMULÁRIO E BOTÃO -->
+      <div class="right">
+        <div class="infoAluno">
+          <!-- CAMPO DE TEXTO E BOTÃO (serão escondidos após clicar) -->
+          <div id="formulario">
+            <input type="text" id="nomeInput" placeholder="Nome do Aluno" autocomplete="off" />
+            <div class="mock-gui" id="botao">
+              <div class="bar">INICIAR</div>
+            </div>
+          </div>
+
+          <!-- NOME DO ALUNO (aparece após iniciar) -->
+          <div id="infoAluno" style="display:none;">
+            <h1>Aluno: <span id="nomeAluno"></span></h1>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const light = document.getElementById('statusLight');
+    const label = document.getElementById('statusLabel');
+    const botao = document.getElementById('botao');
+    const formulario = document.getElementById('formulario');
+    const infoAluno = document.getElementById('infoAluno');
+    const nomeInput = document.getElementById('nomeInput');
+    const nomeAlunoSpan = document.getElementById('nomeAluno');
+	
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	
+	let device = null;
+	let server = null;
+	let characteristics = [];
+	let att = 0;
+	let med = 0;
+	const statusDiv = document.getElementById('status');
+	const uuidListDiv = document.getElementById('uuidList');
+	const dataOutputDiv = document.getElementById('dataOutput');
+	const charSelect = document.getElementById('charSelect');
+	const modal = document.getElementById('bluetoothModal');
+	const disconnectBtn = document.getElementById('disconnectBtn');
+	let selectedChar = null;
+	let codigo = null;
+	let ondas = {					
+					Att: 0,
+					Med: 0,
+					Delta: 0,		
+					Theta: 0,
+					LowAlpha: 0,
+					HighAlpha: 0,
+					LowBeta: 0,
+					HighBeta: 0,
+					LowGamma: 0,
+					MiddleGamma: 0
+				};
+	
+	// WebSocket global (será criado uma única vez)
+	let ws = null;
+	let sendInterval = null;
+
+    // Inicia no estado "aguardando"
+    light.setAttribute('data-state', 'gray');
+    label.textContent = 'AGUARDANDO';
+
+    botao.addEventListener('click', () => {
+      const nome = nomeInput.value.trim();
+      if (nome === '') {
+        nomeInput.style.borderColor = '#ff2d55';
+        nomeInput.placeholder = 'Digite o nome antes de iniciar';
+        return;
+      }
+	  
+	  codigo = gerarCodigo();
+	  connectAndDiscover();	  
+	  
+      // Esconde input + botão
+      formulario.style.display = 'None';
+      // Mostra nome do aluno
+      nomeAlunoSpan.textContent = nome;
+      infoAluno.style.display = 'Block';
+
+      // Muda luz para verde e texto para ONLINE
+      light.setAttribute('data-state', 'green');
+      label.textContent = 'ATENÇÃO';
+      label.style.color = '#7dffcf';
+    });
+
+    // Permite pressionar Enter no input
+    nomeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') botao.click();
+    });
+	
+	
+	function updateStatus(message) {		
+		console.log(message);
+	}
+
+	function appendData(data) {
+		const timestamp = new Date().toLocaleTimeString();
+		const dataLine = `[${timestamp}] ${data}\n`;
+		dataOutputDiv.textContent += dataLine;
+		dataOutputDiv.scrollTop = dataOutputDiv.scrollHeight;
+	}
+
+	function displayUuids(services) {
+		let html = '<h3>Serviços Encontrados:</h3>';
+		charSelect.innerHTML = '<option value="">-- Selecione --</option>';
+		characteristics = [];
+		services.forEach(async (service) => {
+			html += `<p><strong>Serviço: ${service.uuid}</strong></p><ul>`;
+			try {
+				const chars = await service.getCharacteristics();
+				console.log(`Chars no serviço ${service.uuid}:`, chars);
+				if (chars.length === 0) {
+					html += `<li>Sem chars. Tente outro serviço.</li>`;
+				}
+				chars.forEach((char) => {
+					const props = getProperties(char.properties);
+					html += `<li>Char: ${char.uuid} (Props: ${props})</li>`;				
+					const charInfo = { char, service };
+					characteristics.push(charInfo);
+					if(service.uuid == '0000ffe0-0000-1000-8000-00805f9b34fb' && !selectedChar){
+						selectedChar = characteristics[characteristics.length - 1];
+						updateStatus(`Char selecionada: ${selectedChar.char.uuid}. Provável stream ThinkGear.`);
+						sendStartCommand();
+						setTimeout(() => {							
+							startStream();
+							connectWebSocket();
+						}, 1000);
+					}
+					const option = document.createElement('option');
+					option.value = characteristics.length - 1;
+					option.textContent = `${service.uuid.substring(0,8)}... > ${char.uuid.substring(0,8)}... (${props})`;
+					charSelect.appendChild(option);
+				});
+			} catch (error) {
+				html += `<li>Erro: ${error.message}</li>`;
+			}
+			html += '</ul>';
+		});
+		uuidListDiv.innerHTML = html;
+		updateStatus(`Achados ${services.length} serviços. Escolha char com NOTIFY pra stream EEG (MindWave serial).`);
+	}
+
+	function getProperties(props) {
+		const propMap = { 0x02: 'READ', 0x04: 'WRITE_NO_RESPONSE', 0x08: 'WRITE', 0x10: 'NOTIFY', 0x20: 'INDICATE', 0x01: 'BROADCAST' };
+		return Object.keys(propMap).filter(key => (props & parseInt(key)) !== 0).map(key => propMap[key]).join(', ') || 'NENHUMA';
+	}
+
+	async function selectCharacteristic() {
+		const index = parseInt(charSelect.value);
+		if (index >= 0 && characteristics[index]) {
+			selectedChar = characteristics[index];
+			updateStatus(`Char selecionada: ${selectedChar.char.uuid}. Provável stream ThinkGear.`);
+		}
+	}
+
+	async function readCharacteristic() {
+		if (!selectedChar) return updateStatus('Selecione uma char!');
+		try {
+			if (selectedChar.char.properties.read) {
+				const value = await selectedChar.char.readValue();
+				const parsed = parseThinkGearPacket(value.buffer);
+				appendData(parsed);
+			} else {
+				updateStatus('Char sem READ. Use stream ou WRITE pra trigger.');
+			}
+		} catch (error) {
+			updateStatus(`Erro leitura: ${error.message}`);
+		}
+	}
+
+	async function startStream() {	
+		if (!selectedChar) return updateStatus('Selecione uma char!');
+		try {
+			if (selectedChar.char.properties.notify || selectedChar.char.properties.indicate) {
+				await selectedChar.char.startNotifications();
+				selectedChar.char.addEventListener('characteristicvaluechanged', handleThinkGearStream);
+				updateStatus('Stream ThinkGear ativo! Foco pra attention, relax pra alpha waves.');				
+			} else {
+				updateStatus('Char sem NOTIFY. Tente serial port service (0x1101).');
+			}
+		} catch (error) {
+			updateStatus(`Erro stream: ${error.message}. Pareie como serial antes.`);
+		}
+	}
+
+	async function sendStartCommand() {
+		if (!selectedChar) return updateStatus('Selecione uma char!');
+		try {
+			if (selectedChar.char.properties.write || selectedChar.char.properties.write_no_response) {
+				const command = new Uint8Array([0x03]);
+				await selectedChar.char.writeValue(command);
+				updateStatus('Comando 0x03 enviado. Tente stream agora.');
+			} else {
+				updateStatus('Char sem WRITE. Escolha outra com WRITE.');
+			}
+		} catch (error) {
+			updateStatus(`Erro ao enviar comando: ${error.message}`);
+		}
+	}
+	
+
+	function connectWebSocket() {
+		console.log('Tentando conectar ao Websocket');
+		// Se já estiver conectado ou conectando, reutiliza
+		if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
+			return ws;
+		}
+
+		// Cria nova conexão
+		ws = new WebSocket('wss://biosynctec.com.br/ws/');
+
+		ws.onopen = () => {
+			console.log('WebSocket conectado com sucesso');
+
+			// Inicia o envio automático a cada 1 segundo
+			if (sendInterval) clearInterval(sendInterval); // limpa caso já exista
+			
+			sendInterval = setInterval(() => {
+				if (ws && ws.readyState === WebSocket.OPEN) {
+					const payload = {
+						Nome: nomeInput.value.trim(),
+						Codigo: codigo,
+						Att: ondas.Att,
+						Med: ondas.Med,
+						Delta: ondas.Delta,
+						Theta: ondas.Theta,
+						LowAlpha: ondas.LowAlpha,
+						HighAlpha: ondas.HighAlpha,
+						LowBeta: ondas.LowBeta,
+						HighBeta: ondas.HighBeta,
+						LowGamma: ondas.LowGamma,
+						MiddleGamma: ondas.MiddleGamma
+					};
+
+					const jsonString = JSON.stringify(payload);
+					ws.send(jsonString);
+
+					console.log('Enviado:', jsonString); // opcional: ver no console
+				}
+			}, 1000); // a cada 1000ms = 1 segundo
+		};
+
+		ws.onclose = () => {
+			console.log('WebSocket desconectado. Tentando reconectar em 5s...');
+
+			// Para o envio automático
+			if (sendInterval) {
+				clearInterval(sendInterval);
+				sendInterval = null;
+			}
+
+			// Reconecta automaticamente
+			setTimeout(connectWebSocket, 5000);
+		};
+
+		ws.onerror = (err) => {
+			console.error('Erro no WebSocket:', err);
+		};
+
+		return ws;
+	}
+	
+	function gerarCodigo() {
+		const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		let codigo = '5';                          // sempre começa com 5
+		
+		for (let i = 0; i < 5; i++) {
+			codigo += letras.charAt(Math.floor(Math.random() * letras.length));
+		}
+		
+		return codigo;  // Ex: 5KXPVN, 5MYECW, 5HJQRT, etc.
+	}
+	
+	function parseThinkGearPacket(buffer) {
+		const view = new Uint8Array(buffer);
+		//console.log('Raw bytes:', Array.from(view).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', '));
+		let output = '';
+		let i = 0;
+		while (i < view.length - 2) {
+			if (view[i] !== 0xAA || view[i+1] !== 0xAA) {
+				console.log(`Sync falhou no índice ${i}: ${view[i]}, ${view[i+1]}`);
+				i++;
+				continue;
+			}
+			const len = view[i+2];
+			if (i + len + 4 > view.length) {
+				console.log(`Pacote incompleto no índice ${i}, len: ${len}, buffer: ${view.length}`);
+				output += 'Pacote incompleto | ';
+				break;
+			}
+			const payloadStart = i + 3;
+			const payloadEnd = i + 3 + len;
+			const payload = view.slice(payloadStart, payloadEnd);
+			const checksum = view[payloadEnd];
+			let sum = 0;
+			for (let j = 0; j < len; j++) sum += view[payloadStart + j];
+			const calcChecksum = (~sum) & 0xFF;
+			//console.log(`Pacote: Sync=0xAA,0xAA, Len=${len}, Payload=[${Array.from(payload).map(b => '0x' + b.toString(16).padStart(2, '0')).join(',')}], Checksum=0x${checksum.toString(16)}, Calc=0x${calcChecksum.toString(16)}`);
+			if (checksum === calcChecksum) {
+				let j = 0;
+				
+
+				while (j < len) {
+					const type = payload[j];
+					j++;
+					if (j >= len) break;
+
+					switch (type) {
+						case 0x04: // Attention
+							ondas.Att = payload[j] > 99 ? 99 : payload[j]; // garante máx 2 dígitos
+							// Controle dos LEDs
+							if (ondas.Att > 51) {
+								light.setAttribute('data-state', 'green');
+								label.textContent = 'ATENÇÃO';
+							} else if (ondas.Att < 45) {
+								light.setAttribute('data-state', 'red');
+								label.textContent = 'DESATENÇÃO';
+							}
+							j++;
+							break;
+
+						case 0x05: // Meditation
+							ondas.Med = payload[j] > 99 ? 99 : payload[j];
+							j++;
+							break;
+
+						case 0x83: // Raw EEG Power (bandas)
+							const bandLen = payload[j];
+							j++;
+							if (j + bandLen > len) break;
+
+							const bandOrder = ['Delta', 'Theta', 'LowAlpha', 'HighAlpha', 'LowBeta', 'HighBeta', 'LowGamma', 'MiddleGamma'];
+
+							for (let k = 0; k < 8 && j + 2 < len; k++) {
+								const value = (payload[j] | (payload[j+1] << 8) | (payload[j+2] << 16)) >>> 0;
+								// Limita a 99 (2 dígitos máximos)
+								ondas[bandOrder[k]] = value > 99 ? 99 : value;
+								j += 3;
+							}
+							break;
+
+						// Outros tipos são ignorados silenciosamente para o JSON
+					}
+				}
+			} else {
+				output += `Checksum inválido (esperado: ${calcChecksum}, recebido: ${checksum}) | `;
+			}
+			i += 3 + len + 1;
+		}
+		return output || 'Nenhum pacote válido encontrado';
+	}
+
+	function handleThinkGearStream(event) {
+		const buffer = event.target.value.buffer;
+		const parsed = parseThinkGearPacket(buffer);
+		appendData(parsed);
+	}
+
+	async function connectAndDiscover() {
+		if (!navigator.bluetooth) return updateStatus('Adaptador Bluetooth não encontrado.');
+		try {
+			updateStatus('Buscando dispositivos... Ative pairing no MindWave (LED piscando).');
+			device = await navigator.bluetooth.requestDevice({
+				filters: [                
+					{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] } // Filtra por serviço
+				],
+				optionalServices: [
+					'00001101-0000-1000-8000-00805f9b34fb',
+					'0000ffe0-0000-1000-8000-00805f9b34fb',
+					'0000ffe1-0000-1000-8000-00805f9b34fb',
+					'generic_access',
+					'battery_service'
+				]
+			});
+			updateStatus('Conectando...');
+			server = await device.gatt.connect();
+			updateStatus('Descobrindo serviços...');
+			disconnectBtn.style.display = 'inline-block';
+			const services = await server.getPrimaryServices();
+			displayUuids(services);
+			device.addEventListener('gattserverdisconnected', () => {
+				updateStatus('Desconectado. Reconecte o MindWave.');
+				disconnectBtn.style.display = 'none';
+				resetVars();
+			});
+		} catch (error) {
+			updateStatus(`Erro: ${error.message}. Pareie como serial no sistema primeiro.`);
+			console.error(error);
+		}
+	}
+
+	function resetVars() {
+		device = null;
+		server = null;
+		selectedChar = null;
+		characteristics = [];
+	}
+
+	async function disconnectBluetooth() {
+		if (server) {
+			await server.disconnect();
+			resetVars();
+			disconnectBtn.style.display = 'none';
+			updateStatus('Desconectado');
+		}
+	}
+	
+		
+	function randomChoices(characters, k) {
+	  let result = '';
+	  for (let i = 0; i < k; i++) {
+		const idx = Math.floor(Math.random() * characters.length);
+		result += characters[idx];
+	  }
+	  return result;
+	}
+	
+  </script>
+</body>
+</html>

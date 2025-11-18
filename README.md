@@ -2,7 +2,7 @@
 
 **Sistema de Neurofeedback Educacional com monitoramento EEG em tempo real**
 
-**Versão:** 2.4.0 | **Status:** 🚀 Pronto para Produção | **Última Atualização:** 17/11/2025
+**Versão:** 2.5.0 | **Status:** 🚀 Pronto para Produção | **Última Atualização:** 18/11/2025
 
 ---
 
@@ -15,6 +15,7 @@ NeuroOne é uma plataforma educacional inovadora que utiliza **neurofeedback** b
 - **Dashboard de Direção**: Gestão completa de usuários, turmas e sessões
 - **Painel do Professor**: Criação e monitoramento de sessões em tempo real
 - **App do Aluno (PWA)**: Conexão Bluetooth com headset EEG, participação em sessões
+- **🎮 Jogos Neurofeedback**: Fazendinha 3D + Monitor EEG standalone (Novo v2.5.0!)
 - **Monitoramento EEG**: Visualização de ondas cerebrais (Delta, Theta, Alpha, Beta, Gamma)
 - **Relatórios em PDF**: Exportação profissional de métricas de sessões
 - **WebSocket Real-Time**: Comunicação bidirecional para dados EEG instantâneos
@@ -27,8 +28,8 @@ A documentação está organizada na pasta [docs/](docs/):
 
 ### 📘 Documentos Principais
 - **[00-PROJETO-OVERVIEW.md](docs/00-PROJETO-OVERVIEW.md)** - Visão geral do projeto
-- **[PROJETO-COMPLETO-FINAL.md](PROJETO-COMPLETO-FINAL.md)** - Especificação completa do sistema
 - **[START-HERE.md](docs/START-HERE.md)** - Por onde começar
+- **[JOGOS.md](JOGOS.md)** - Jogos de neurofeedback integrados
 
 ### 🏗️ Arquitetura
 - **[03-ARQUITETURA.md](docs/03-ARQUITETURA.md)** - Arquitetura do sistema
@@ -64,6 +65,8 @@ neuroone-platform/
 ├── neuroone-backend/       # Node.js 18 + Express
 │   ├── routes/             # REST API endpoints
 │   ├── websocket/          # Socket.io server
+│   ├── public/games/       # 🎮 Jogos neurofeedback
+│   ├── public/monitor/     # 📊 Monitor EEG standalone
 │   └── __tests__/          # 29 testes passando
 │
 └── docs/                   # Documentação completa
@@ -126,6 +129,8 @@ npm run dev
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3001/api/v1
 - **Health Check**: http://localhost:3001/health
+- **🎮 Jogo Fazendinha**: http://localhost:3001/games/fazendinha/index.html
+- **📊 Monitor EEG**: http://localhost:3001/monitor/eeg-monitor.html
 
 ---
 
@@ -263,12 +268,13 @@ Contribuições são bem-vindas! Ver [CONTRIBUTING.md](CONTRIBUTING.md) para gui
 
 Ver [docs/CHANGELOG.md](docs/CHANGELOG.md) para histórico completo de versões.
 
-### Última Versão: 2.4.0 (17/11/2025)
-- ✨ Sistema de exportação PDF de relatórios
-- ✨ Página de histórico do aluno completa
-- ✨ Configurações de deploy para Railway, Render, Vercel, Netlify
-- 🗑️ Limpeza de 28 arquivos de documentação redundantes
-- 🚀 Sistema pronto para deploy em produção
+### Última Versão: 2.5.0 (18/11/2025)
+- 🎮 Integração de jogos neurofeedback: Fazendinha 3D com controles EEG
+- 📊 Monitor EEG standalone para visualização em tempo real
+- 🎯 Servidor Express configurado para servir jogos em `/games` e `/monitor`
+- 📚 Documentação JOGOS.md com guia completo de jogos
+- 🗑️ Limpeza de 13 arquivos .md obsoletos
+- ✨ Sistema 100% funcional com neurofeedback via Web Bluetooth API
 
 ---
 

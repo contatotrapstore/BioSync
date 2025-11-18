@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+	
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="assets/estilo.css?7">
+    <title>Fazendinha</title>
+   
+</head>
+<body>
+	<div class="modal" id="bluetoothModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal()">&times;</span>
+            <h1>Conectar via Bluetooth</h1>
+            <button onclick="connectAndDiscover()">Conectar</button>
+			<div id="status" style="display:none">Status: Desconectado</div>
+            <div id="uuidList" style="display:none">Serviços e Chars</div>
+            <label style="display:none">Escolha Char</label>
+            <select id="charSelect" onchange="selectCharacteristic()" style="display:none">
+                <option value="">-- Selecione --</option>
+            </select>
+			<button onclick="sendStartCommand()" style="display:none">1 - Comando Iniciar</button>
+            <button onclick="startStream()" style="display:none">2 - Iniciar Stream</button>
+            <button onclick="readCharacteristic()" style="display:none">2 - Ler Dados</button>            
+            <button onclick="disconnectBluetooth()" style="display:none" id="disconnectBtn">Desconectar</button>            
+            <div id="dataOutput">Dados</div>
+        </div>
+    </div>
+    <div id="gameContainer">
+        <!-- Tela de Carregamento -->
+        <div id="loadingScreen">
+            <div id="logo"></div>
+            <div id="progressContainer">
+                <div id="loadingBar"></div>
+            </div>
+            <div id="loadingText">Carregando...</div>
+        </div>
+	
+		<!-- Tela de Menu -->
+        <div id="menuScreen">
+            <h1 id="gameTitle">FAZENDINHA</h1>
+            <div id="gameObjective">
+                <h3>Objetivo do Jogo</h3>
+                <p>Colete todos os itens e leve-os até o celeiro!<br /></p>
+            </div>
+            <div id="playerIDInput" style="background: rgba(0,0,0,1); padding: 30px; border-radius: 15px; z-index: 1001; text-align: center; color: white;">
+			<h2>Defina os parâmetros</h2>
+				<!--<input type="text" id="playerID" placeholder="Seu ID" style="padding: 10px; margin-bottom: 15px; border-radius: 5px; border: none; width: 200px; color: black;">
+				<button id="startButton" style="padding: 10px 20px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; font-size: 16px; cursor: pointer;">Iniciar Jogo</button></br>
+				<span id="statusID" class="status-offline"></span>-->
+				<div style="margin-top: 20px; font-size: 18px;">
+				  <label style="margin-right: 30px;">
+					<input type="radio" name="opcao" value="Foco" style="transform: scale(1.5); margin-right: 10px;" checked> <span style="font-size: 20px;">Foco</span>
+				  </label>
+				  <label>
+					<input type="radio" name="opcao" value="Relaxamento" style="transform: scale(1.5); margin-right: 10px;"> <span style="font-size: 20px;">Relaxamento</span>
+				  </label>
+				</div>
+				<button id="editarParametrosButton" style="padding: 10px 20px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; font-size: 16px; cursor: pointer; margin-top: 20px;" onclick="document.getElementById('parametrosDiv').style.display = 'block';">Editar Parâmetros</button>
+				<div id="parametrosDiv" style="display: none; margin-top: 20px;">
+				  <label style="margin-right: 20px;">
+					Maior que: <input type="text" id="maiorQue" style="padding: 5px; border-radius: 5px; border: none; width: 100px;" value="51">
+				  </label>
+				  <label>
+					Menor que: <input type="text" id="menorQue" style="padding: 5px; border-radius: 5px; border: none; width: 100px;" value="45">
+				  </label>
+				</div>				
+				<!--<button id="startButton" style="padding: 10px 20px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; font-size: 16px; cursor: pointer;">Iniciar Jogo</button></br>-->
+			</div>	
+			<button id="startButton" style="margin-top:0px">Iniciar</button>
+        </div>
+		
+		<!-- HUD do Jogo -->
+        <div id="gameHUD">
+            <div>Tempo: <span id="time">00:00</span></div>
+            <div>Itens Coletados: <span id="speed">0/42</span> </div>
+            <div style="display:none">Altura: <span id="altitude">0</span> m</div>
+        </div>
+
+        <div id="instructions" style="display: none;">
+            <h3>Colete todos os itens e leve-os até o celeiro!</h3>           
+        </div>
+		
+		<!-- Tela de Vitória -->
+        <div id="winScreen" class="endGameScreen winScreen">
+            <div class="endGameContent">
+                <h2 class="endGameTitle">Parabéns!</h2>
+                <p class="endGameMessage">Você fez a colheita!<p class='tempoFinal'>Tempo total: <span id="finalTimeWin">00:00</span></p></p>
+                <button id="playAgainWin" class="playAgainButton">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <!-- Tela de Derrota -->
+        <div id="loseScreen" class="endGameScreen winScreen">
+            <div class="endGameContent">
+                <h2 class="endGameTitle">Que pena!</h2>
+                <p class="endGameMessage">Você demorou demais<br><p class='tempoFinal'>Tempo total: <span id="finalTimeLose">00:00</span></p><p class='tempoFinal'>Tanques abatidos: <span id="finalTanques">0</span></p></p>
+                <button id="playAgainLose" class="playAgainButton">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Socket.IO Client CDN -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+    <!-- Three.JS CDN -->
+    <script src="three.min.js"></script>
+    <script src="GLTFLoader.js"></script>
+	<script src="assets/funcoes.js?32"></script>
+    <script src="game.js?34"></script>
+</body>
+</html>
+
