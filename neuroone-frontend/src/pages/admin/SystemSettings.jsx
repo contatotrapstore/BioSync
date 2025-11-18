@@ -1,26 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Grid,
   TextField,
   FormControlLabel,
   Checkbox,
-  CircularProgress,
   Stack,
-  Divider,
   Alert,
   Chip,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SaveIcon from '@mui/icons-material/Save';
-import RestoreIcon from '@mui/icons-material/Restore';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+// MUI Icons
+import SaveIcon from '@mui/icons-material/Save';
+import RestoreIcon from '@mui/icons-material/Restore';
+import Home from '@mui/icons-material/Home';
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings';
+import SettingsIcon from '@mui/icons-material/Settings';
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import StorageIcon from '@mui/icons-material/Storage';
+import BackupIcon from '@mui/icons-material/Backup';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export function SystemSettings() {
   const navigate = useNavigate();
@@ -50,16 +62,31 @@ export function SystemSettings() {
       const { data, error } = await supabase
         .from('system_settings')
         .select('*')
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (error) throw error;
-
-      if (data) {
+      if (error) {
+        console.error('Erro ao buscar configurações:', error);
+        // Se não existir, criar configurações padrão
+        const defaultSettings = {
+          attention_threshold_low: 40,
+          attention_threshold_high: 70,
+          session_min_duration: 5,
+          session_max_duration: 60,
+          auto_end_session: true,
+          enable_notifications: true,
+          data_retention_days: 90,
+          auto_backup: false,
+          max_students_per_session: 30,
+        };
+        setSettings(defaultSettings);
+        setOriginalSettings(JSON.parse(JSON.stringify(defaultSettings)));
+      } else if (data) {
         setSettings(data);
         setOriginalSettings(JSON.parse(JSON.stringify(data)));
       }
     } catch (error) {
-      console.error('Erro ao buscar configurações:', error);
+      console.error('Erro crítico ao buscar configurações:', error);
       alert('Erro ao carregar configurações');
     } finally {
       setLoading(false);
@@ -181,46 +208,45 @@ export function SystemSettings() {
     setSettings(defaultSettings);
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Button
-            variant="text"
-            onClick={() => navigate('/admin')}
-            sx={{ mb: 2 }}
-            startIcon={<ArrowBackIcon />}
-          >
-            Voltar ao Dashboard
-          </Button>
+    <DashboardLayout
+      title="Configurações do Sistema"
+      subtitle="Configure parâmetros globais do NeuroOne"
+      breadcrumbs={[
+        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+        { label: 'Admin', icon: <AdminPanelSettings fontSize="small" /> },
+        { label: 'Configurações', icon: <SettingsIcon fontSize="small" /> },
+      ]}
+      actions={
+        <Button
+          variant="outlined"
+          onClick={handleRestoreDefaults}
+          startIcon={<RestoreIcon />}
+        >
+          Restaurar Padrões
+        </Button>
+      }
+      maxWidth="lg"
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando configurações..." />}
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h1">Configurações do Sistema</Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1 }}>
-                Configure parâmetros globais do NeuroOne
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+      {/* Erro se settings não carregou */}
+      {!loading && !settings && (
+        <Alert severity="error">
+          Erro ao carregar configurações do sistema. Por favor, recarregue a página.
+        </Alert>
+      )}
 
-        {/* Alerta de mudanças pendentes */}
-        {hasChanges && (
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            <strong>Você tem alterações não salvas.</strong> Clique em "Salvar Configurações" para aplicar as mudanças.
-          </Alert>
-        )}
+      {/* Conteúdo principal - só renderiza quando settings estiver carregado */}
+      {!loading && settings ? (
+        <>
+          {/* Alerta de mudanças pendentes */}
+          {hasChanges && (
+            <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 3 }}>
+              <strong>Você tem alterações não salvas.</strong> Clique em "Salvar Configurações" para aplicar as mudanças.
+            </Alert>
+          )}
 
         {/* Botões de Ação */}
         <Card sx={{ mb: 3 }}>
@@ -252,15 +278,16 @@ export function SystemSettings() {
 
         {/* 1. Thresholds de Atenção */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            🎯 Thresholds de Atenção
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <GpsFixedIcon />
+            Thresholds de Atenção
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Defina os limites para classificação de níveis de atenção
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Atenção Baixa (%)"
                 type="number"
@@ -273,7 +300,7 @@ export function SystemSettings() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Atenção Alta (%)"
                 type="number"
@@ -286,7 +313,7 @@ export function SystemSettings() {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Chip label={`0-${settings.attention_threshold_low}% (Baixa)`} color="error" size="small" />
                 <Chip label={`${settings.attention_threshold_low}-${settings.attention_threshold_high}% (Média)`} color="warning" size="small" />
@@ -298,15 +325,16 @@ export function SystemSettings() {
 
         {/* 2. Thresholds de Relaxamento */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            🧘 Thresholds de Relaxamento
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SelfImprovementIcon />
+            Thresholds de Relaxamento
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure os níveis de relaxamento/meditação
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Relaxamento Baixo (%)"
                 type="number"
@@ -319,7 +347,7 @@ export function SystemSettings() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Relaxamento Alto (%)"
                 type="number"
@@ -336,15 +364,16 @@ export function SystemSettings() {
 
         {/* 3. Configurações de Sessão */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            ⏱️ Configurações de Sessão
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AccessTimeIcon />
+            Configurações de Sessão
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Parâmetros de duração e comportamento de sessões
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Duração Mínima (minutos)"
                 type="number"
@@ -357,7 +386,7 @@ export function SystemSettings() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Duração Máxima (minutos)"
                 type="number"
@@ -374,15 +403,16 @@ export function SystemSettings() {
 
         {/* 4. Auto-Save e Sincronização */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            💾 Sincronização de Dados
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CloudSyncIcon />
+            Sincronização de Dados
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure intervalos de salvamento automático
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Intervalo de Auto-Save (segundos)"
                 type="number"
@@ -395,7 +425,7 @@ export function SystemSettings() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Sincronização EEG (segundos)"
                 type="number"
@@ -412,15 +442,16 @@ export function SystemSettings() {
 
         {/* 5. Qualidade de Sinal */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            📡 Qualidade de Sinal EEG
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SignalCellularAltIcon />
+            Qualidade de Sinal EEG
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure o threshold de qualidade aceitável
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Threshold de Qualidade"
                 type="number"
@@ -436,15 +467,16 @@ export function SystemSettings() {
 
         {/* 6. Notificações */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            🔔 Notificações
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <NotificationsIcon />
+            Notificações
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure alertas e notificações do sistema
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -459,7 +491,7 @@ export function SystemSettings() {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -478,15 +510,16 @@ export function SystemSettings() {
 
         {/* 7. Retenção de Dados */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            🗄️ Retenção de Dados
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <StorageIcon />
+            Retenção de Dados
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure políticas de armazenamento
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Retenção de Dados (dias)"
                 type="number"
@@ -502,15 +535,16 @@ export function SystemSettings() {
 
         {/* 8. Backup */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            💼 Backup Automático
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BackupIcon />
+            Backup Automático
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure rotinas de backup
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -523,7 +557,7 @@ export function SystemSettings() {
             </Grid>
 
             {settings.enable_auto_backup && (
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Intervalo de Backup (horas)"
                   type="number"
@@ -540,15 +574,16 @@ export function SystemSettings() {
 
         {/* 9. Jogos e Neurofeedback */}
         <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            🎮 Jogos e Neurofeedback
+          <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SportsEsportsIcon />
+            Jogos e Neurofeedback
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Configure módulo de jogos
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -564,7 +599,7 @@ export function SystemSettings() {
             </Grid>
 
             {settings.enable_games && (
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Threshold de Recompensa (%)"
                   type="number"
@@ -583,8 +618,9 @@ export function SystemSettings() {
         {hasChanges && (
           <Card sx={{ position: 'sticky', bottom: 20, boxShadow: 4 }}>
             <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
-                ⚠️ Alterações não salvas
+              <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <WarningAmberIcon fontSize="small" />
+                Alterações não salvas
               </Typography>
               <Stack direction="row" spacing={2}>
                 <Button variant="outlined" onClick={handleReset}>
@@ -602,7 +638,8 @@ export function SystemSettings() {
             </Stack>
           </Card>
         )}
-      </Box>
-    </Container>
+        </>
+      ) : null}
+    </DashboardLayout>
   );
 }

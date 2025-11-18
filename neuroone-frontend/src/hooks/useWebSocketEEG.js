@@ -69,7 +69,7 @@ export function useWebSocketEEG(sessionId) {
 
       // Event: Desconexão
       socket.on('disconnect', (reason) => {
-        console.warn('⚠️ WebSocket desconectado:', reason);
+        console.warn('[WebSocket] Desconectado:', reason);
         setIsConnected(false);
 
         if (reason === 'io server disconnect') {
@@ -80,7 +80,7 @@ export function useWebSocketEEG(sessionId) {
 
       // Event: Erro de conexão
       socket.on('connect_error', (err) => {
-        console.error('❌ Erro de conexão WebSocket:', err.message);
+        console.error('[WebSocket] Erro de conexão:', err.message);
         reconnectAttemptsRef.current += 1;
 
         if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
@@ -111,13 +111,13 @@ export function useWebSocketEEG(sessionId) {
 
       // Event: Aluno conectou
       socket.on('student:connected', (data) => {
-        console.log('👤 Aluno conectou:', data.studentId);
+        console.log('[Student] Conectou:', data.studentId);
         // Pode ser usado para mostrar notificação
       });
 
       // Event: Aluno desconectou
       socket.on('student:disconnected', (data) => {
-        console.log('👤 Aluno desconectou:', data.studentId);
+        console.log('[Student] Desconectou:', data.studentId);
 
         // Marcar aluno como offline nos dados
         setStudentsData((prev) => {

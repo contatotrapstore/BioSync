@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Card,
@@ -10,17 +9,25 @@ import {
   Chip,
   Stack,
   Alert,
-  CircularProgress,
   Divider,
 } from '@mui/material';
 import { Button } from '../../components/atoms/Button';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import EmptyState from '../../components/layout/EmptyState';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
 import { generateSessionReport, generateStudentSummary } from '../../utils/pdfExport';
+// MUI Icons
 import DownloadIcon from '@mui/icons-material/Download';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import Home from '@mui/icons-material/Home';
+import SchoolIcon from '@mui/icons-material/School';
+import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BusinessIcon from '@mui/icons-material/Business';
 
 export function StudentHistory() {
   const navigate = useNavigate();
@@ -167,36 +174,38 @@ export function StudentHistory() {
     return `${minutes} min`;
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ py: 8, textAlign: 'center' }}>
-          <CircularProgress />
-          <Typography sx={{ mt: 2 }}>Carregando histórico...</Typography>
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h1" sx={{ mb: 0 }}>
-            <TimelineIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Histórico de Sessões
-          </Typography>
-          <Button variant="outlined" onClick={() => navigate('/student')}>
-            Voltar ao Dashboard
+    <DashboardLayout
+      title="Histórico de Sessões"
+      subtitle="Acompanhe seu progresso e desempenho nas sessões"
+      breadcrumbs={[
+        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+        { label: 'Aluno', icon: <SchoolIcon fontSize="small" /> },
+        { label: 'Histórico', icon: <TimelineIcon fontSize="small" /> },
+      ]}
+      actions={
+        sessions.length > 0 && (
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={handleExportAll}
+            size="small"
+          >
+            Exportar Histórico
           </Button>
-        </Box>
+        )
+      }
+      maxWidth="lg"
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando histórico..." />}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
         {/* Statistics Cards */}
         {stats && (
@@ -269,27 +278,18 @@ export function StudentHistory() {
             color={filter === 'week' ? 'primary' : 'default'}
             variant={filter === 'week' ? 'filled' : 'outlined'}
           />
-          <Box sx={{ flexGrow: 1 }} />
-          {sessions.length > 0 && (
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              onClick={handleExportAll}
-              size="small"
-            >
-              Exportar Histórico Completo
-            </Button>
-          )}
         </Box>
 
         <Divider sx={{ mb: 3 }} />
 
         {/* Sessions List */}
         {sessions.length === 0 ? (
-          <Alert severity="info">
-            Nenhuma sessão encontrada para o período selecionado. Participe de uma sessão para ver
-            seu histórico aqui!
-          </Alert>
+          <EmptyState
+            variant="noData"
+            icon={<TimelineIcon sx={{ fontSize: 64 }} />}
+            title="Nenhuma sessão encontrada"
+            description="Nenhuma sessão encontrada para o período selecionado. Participe de uma sessão para ver seu histórico aqui!"
+          />
         ) : (
           <Grid container spacing={2}>
             {sessions.map((sessionData, index) => (
@@ -301,16 +301,18 @@ export function StudentHistory() {
                     </Typography>
 
                     <Stack spacing={1} sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        📅 {formatDate(sessionData.session?.started_at)}
+                      <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <EventIcon fontSize="small" />
+                        {formatDate(sessionData.session?.started_at)}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ⏱️ Duração:{' '}
-                        {formatDuration(sessionData.session?.started_at, sessionData.session?.ended_at)}
+                      <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <AccessTimeIcon fontSize="small" />
+                        Duração: {formatDuration(sessionData.session?.started_at, sessionData.session?.ended_at)}
                       </Typography>
                       {sessionData.session?.class && (
-                        <Typography variant="body2" color="text.secondary">
-                          🏫 Turma: {sessionData.session.class.name}
+                        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <BusinessIcon fontSize="small" />
+                          Turma: {sessionData.session.class.name}
                         </Typography>
                       )}
                     </Stack>
@@ -368,7 +370,6 @@ export function StudentHistory() {
             ))}
           </Grid>
         )}
-      </Box>
-    </Container>
+    </DashboardLayout>
   );
 }

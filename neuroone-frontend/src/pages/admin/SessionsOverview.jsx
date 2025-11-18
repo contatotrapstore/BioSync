@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Grid,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -14,12 +12,18 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DownloadIcon from '@mui/icons-material/Download';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import EmptyState from '../../components/layout/EmptyState';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { SessionFilterBar } from '../../components/direction/SessionFilterBar';
+// MUI Icons
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import Refresh from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -191,39 +195,37 @@ export function SessionsOverview() {
     return `${hours}h ${mins}min`;
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
+    <DashboardLayout
+      title="Monitoramento de Sessões"
+      subtitle="Visualização global de todas as sessões de aula"
+      breadcrumbs={[
+        { label: 'Dashboard', path: '/admin' },
+        { label: 'Monitoramento' },
+      ]}
+      actions={
+        <Stack direction="row" spacing={1}>
           <Button
-            variant="text"
-            onClick={() => navigate('/admin')}
-            sx={{ mb: 2 }}
+            variant="outlined"
             startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/admin')}
           >
-            Voltar ao Dashboard
+            Voltar
           </Button>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h1">Monitoramento de Sessões</Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1 }}>
-                Visualização global de todas as sessões de aula
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={fetchSessions}
+            disabled={loading}
+          >
+            Atualizar
+          </Button>
+        </Stack>
+      }
+      maxWidth="lg"
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando sessões..." />}
 
         {/* Stats Summary */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -273,21 +275,25 @@ export function SessionsOverview() {
         </Grid>
 
         {/* Filters */}
-        <Card sx={{ mb: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            Filtros
-          </Typography>
+        <Card sx={{ mb: 3, p: 3 }}>
           <SessionFilterBar filters={filters} onFiltersChange={handleFiltersChange} />
         </Card>
 
         {/* Actions */}
-        <Card sx={{ mb: 3 }}>
-          <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Exibindo <strong>{filteredSessions.length}</strong> de <strong>{totalSessions}</strong> sessão(ões)
-            </Typography>
+        <Card sx={{ mb: 3, p: 2 }}>
+          <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+            <Box>
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                Exibindo {filteredSessions.length} de {totalSessions} sessão(ões)
+              </Typography>
+              {filteredSessions.length !== totalSessions && (
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Filtros ativos aplicados
+                </Typography>
+              )}
+            </Box>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<DownloadIcon />}
               onClick={exportToCSV}
               disabled={filteredSessions.length === 0}
@@ -299,18 +305,16 @@ export function SessionsOverview() {
 
         {/* Table */}
         {filteredSessions.length === 0 ? (
-          <Card>
-            <Box sx={{ py: 8, textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ mb: 2, color: 'text.secondary' }}>
-                📊 Nenhuma sessão encontrada
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                {totalSessions === 0
-                  ? 'Ainda não há sessões cadastradas no sistema'
-                  : 'Ajuste os filtros para visualizar sessões'}
-              </Typography>
-            </Box>
-          </Card>
+          <EmptyState
+            variant="noData"
+            icon={<AssessmentIcon sx={{ fontSize: 64 }} />}
+            title="Nenhuma sessão encontrada"
+            description={
+              totalSessions === 0
+                ? 'Ainda não há sessões cadastradas no sistema'
+                : 'Ajuste os filtros para visualizar sessões'
+            }
+          />
         ) : (
           <TableContainer component={Card}>
             <Table>
@@ -391,7 +395,6 @@ export function SessionsOverview() {
             </Table>
           </TableContainer>
         )}
-      </Box>
-    </Container>
+    </DashboardLayout>
   );
 }

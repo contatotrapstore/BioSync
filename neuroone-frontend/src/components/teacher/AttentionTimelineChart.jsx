@@ -1,6 +1,6 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { Box } from '@mui/material';
+import { Box, useTheme, useMediaQuery, Typography } from '@mui/material';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,11 +18,29 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 /**
  * Gráfico de linha mostrando evolução da atenção ao longo da sessão
+ * Com suporte a theme claro/escuro e responsividade avançada
  * @param {Array} timelineData - Array de { timestamp, avgAttention, minAttention, maxAttention }
  * @param {Object} thresholds - { low, high }
  * @param {number} height - Altura do gráfico em px
  */
 export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 40, high: 70 }, height = 300 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Cores do theme MUI adaptadas ao modo claro/escuro
+  const isDark = theme.palette.mode === 'dark';
+  const colors = {
+    primary: theme.palette.primary.main,
+    error: theme.palette.error.main,
+    success: theme.palette.success.main,
+    text: theme.palette.text.primary,
+    textSecondary: theme.palette.text.secondary,
+    grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+    tooltip: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+    primaryAlpha: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+  };
+
   // Formatar dados para o Chart.js
   const labels = timelineData.map((point) => {
     const date = new Date(point.timestamp);
@@ -40,39 +58,44 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
       {
         label: 'Atenção Média',
         data: avgAttentionData,
-        borderColor: '#3B82F6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: colors.primary,
+        backgroundColor: colors.primaryAlpha,
         fill: true,
         tension: 0.4,
-        borderWidth: 3,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        borderWidth: isMobile ? 2 : 3,
+        pointRadius: isMobile ? 3 : 4,
+        pointHoverRadius: isMobile ? 5 : 6,
+        pointBackgroundColor: colors.primary,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
       },
       // Mínimo (linha tracejada)
       {
         label: 'Mínimo',
         data: minAttentionData,
-        borderColor: '#EF4444',
+        borderColor: colors.error,
         backgroundColor: 'transparent',
         borderDash: [5, 5],
         fill: false,
         tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 2,
-        pointHoverRadius: 4,
+        borderWidth: isMobile ? 1.5 : 2,
+        pointRadius: isMobile ? 1.5 : 2,
+        pointHoverRadius: isMobile ? 3 : 4,
+        pointBackgroundColor: colors.error,
       },
       // Máximo (linha tracejada)
       {
         label: 'Máximo',
         data: maxAttentionData,
-        borderColor: '#10B981',
+        borderColor: colors.success,
         backgroundColor: 'transparent',
         borderDash: [5, 5],
         fill: false,
         tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 2,
-        pointHoverRadius: 4,
+        borderWidth: isMobile ? 1.5 : 2,
+        pointRadius: isMobile ? 1.5 : 2,
+        pointHoverRadius: isMobile ? 3 : 4,
+        pointBackgroundColor: colors.success,
       },
     ],
   };
@@ -83,26 +106,34 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
     plugins: {
       legend: {
         display: true,
-        position: 'top',
+        position: isMobile ? 'bottom' : 'top',
         labels: {
           usePointStyle: true,
-          padding: 15,
+          pointStyle: 'circle',
+          padding: isMobile ? 10 : 15,
           font: {
-            size: 12,
+            size: isMobile ? 10 : (isTablet ? 11 : 12),
+            family: theme.typography.fontFamily,
           },
+          color: colors.text,
         },
       },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: colors.tooltip,
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
         titleFont: {
-          size: 13,
+          size: isMobile ? 12 : 13,
+          family: theme.typography.fontFamily,
         },
         bodyFont: {
-          size: 12,
+          size: isMobile ? 11 : 12,
+          family: theme.typography.fontFamily,
         },
-        padding: 12,
+        padding: isMobile ? 10 : 12,
+        cornerRadius: 4,
         callbacks: {
           label: function (context) {
             return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
@@ -113,12 +144,14 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
         display: true,
         text: 'Evolução da Atenção Durante a Sessão',
         font: {
-          size: 16,
+          size: isMobile ? 14 : (isTablet ? 15 : 16),
           weight: 'bold',
+          family: theme.typography.fontFamily,
         },
         padding: {
-          bottom: 20,
+          bottom: isMobile ? 15 : 20,
         },
+        color: colors.text,
       },
     },
     scales: {
@@ -130,37 +163,55 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
             return value + '%';
           },
           font: {
-            size: 11,
+            size: isMobile ? 10 : 11,
+            family: theme.typography.fontFamily,
           },
+          color: colors.textSecondary,
+          stepSize: 20,
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
+          color: colors.grid,
+          drawBorder: false,
+        },
+        border: {
+          color: colors.grid,
         },
         title: {
-          display: true,
+          display: !isMobile,
           text: 'Nível de Atenção (%)',
           font: {
-            size: 12,
+            size: isMobile ? 11 : 12,
+            family: theme.typography.fontFamily,
           },
+          color: colors.textSecondary,
         },
       },
       x: {
         ticks: {
           font: {
-            size: 11,
+            size: isMobile ? 9 : 11,
+            family: theme.typography.fontFamily,
           },
-          maxRotation: 45,
-          minRotation: 45,
+          color: colors.textSecondary,
+          maxRotation: isMobile ? 45 : 45,
+          minRotation: isMobile ? 45 : 0,
+          autoSkip: true,
+          maxTicksLimit: isMobile ? 6 : (isTablet ? 10 : 15),
         },
         grid: {
           display: false,
         },
+        border: {
+          color: colors.grid,
+        },
         title: {
-          display: true,
+          display: !isMobile,
           text: 'Tempo',
           font: {
-            size: 12,
+            size: isMobile ? 11 : 12,
+            family: theme.typography.fontFamily,
           },
+          color: colors.textSecondary,
         },
       },
     },
@@ -168,37 +219,6 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
       mode: 'nearest',
       axis: 'x',
       intersect: false,
-    },
-    // Linhas de referência para thresholds
-    annotation: {
-      annotations: {
-        lowLine: {
-          type: 'line',
-          yMin: thresholds.low,
-          yMax: thresholds.low,
-          borderColor: '#EF4444',
-          borderWidth: 2,
-          borderDash: [10, 5],
-          label: {
-            content: `Baixa (${thresholds.low}%)`,
-            enabled: true,
-            position: 'start',
-          },
-        },
-        highLine: {
-          type: 'line',
-          yMin: thresholds.high,
-          yMax: thresholds.high,
-          borderColor: '#10B981',
-          borderWidth: 2,
-          borderDash: [10, 5],
-          label: {
-            content: `Alta (${thresholds.high}%)`,
-            enabled: true,
-            position: 'start',
-          },
-        },
-      },
     },
   };
 
@@ -214,7 +234,9 @@ export function AttentionTimelineChart({ timelineData = [], thresholds = { low: 
           borderRadius: 2,
         }}
       >
-        <span style={{ color: '#9CA3AF' }}>Sem dados para exibir</span>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Sem dados para exibir
+        </Typography>
       </Box>
     );
   }

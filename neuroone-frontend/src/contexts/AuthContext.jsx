@@ -30,10 +30,9 @@ export function AuthProvider({ children }) {
 
           if (userId && parsed.user) {
             setUser(parsed.user);
-            // Don't await - Supabase queries hang indefinitely
-            // Let fetchProfile run in background
-            fetchProfile(userId).catch(err => {
-              console.error('[AuthContext] fetchProfile failed:', err);
+            // Fetch profile em background (não bloqueia)
+            fetchProfile(userId).catch(() => {
+              // Ignorar erros - sistema funciona com user_metadata
             });
           }
         } else {
@@ -52,10 +51,13 @@ export function AuthProvider({ children }) {
 
     // Listener para mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (session?.user) {
           setUser(session.user);
-          await fetchProfile(session.user.id);
+          // Fetch profile em background (não bloqueia)
+          fetchProfile(session.user.id).catch(() => {
+            // Ignorar erros - sistema funciona com user_metadata
+          });
         } else {
           setUser(null);
           setProfile(null);
@@ -67,29 +69,58 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function fetchProfile(userId) {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (data) {
-      setProfile(data);
-    } else {
-      console.error('Error fetching profile:', error);
+      if (error) {
+        console.warn('[AuthContext] Perfil não carregado:', error.message);
+        return; // Silenciar erro - sistema funciona sem profile
+      }
+
+      if (data) {
+        console.log('[AuthContext] Perfil carregado:', data.user_role);
+        setProfile(data);
+      }
+    } catch (error) {
+      // Silenciar erros - o sistema usa user_metadata como fallback
+      console.warn('[AuthContext] Erro ao carregar perfil (ignorado):', error.message);
     }
   }
 
   async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    console.log('[AuthContext] signIn iniciado com email:', email);
 
-    if (error) throw error;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    await fetchProfile(data.user.id);
-    return data;
+      if (error) {
+        console.error('[AuthContext] Erro no signInWithPassword:', error);
+        throw error;
+      }
+
+      console.log('[AuthContext] Login bem-sucedido, user:', data.user.id);
+
+      // Atualizar user imediatamente
+      setUser(data.user);
+
+      // Fetch profile em background (não bloqueia login)
+      fetchProfile(data.user.id).catch(() => {
+        // Ignorar erros - sistema funciona com user_metadata
+      });
+
+      console.log('[AuthContext] signIn completo');
+      return data;
+    } catch (error) {
+      console.error('[AuthContext] Erro crítico no signIn:', error);
+      throw error;
+    }
   }
 
   async function signOut() {

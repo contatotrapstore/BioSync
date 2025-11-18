@@ -18,6 +18,28 @@ import { Button } from '../atoms/Button';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+// Validation functions
+function validateName(value) {
+  if (!value || !value.trim()) return 'Nome é obrigatório';
+  if (value.trim().length < 3) return 'Nome deve ter pelo menos 3 caracteres';
+  if (value.length > 100) return 'Nome muito longo (máximo 100 caracteres)';
+  return '';
+}
+
+function validateEmail(value) {
+  if (!value || !value.trim()) return 'Email é obrigatório';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) return 'Email inválido';
+  return '';
+}
+
+function validatePassword(value, isRequired) {
+  if (isRequired && !value) return 'Senha é obrigatória';
+  if (value && value.length < 6) return 'Senha deve ter no mínimo 6 caracteres';
+  if (value && value.length > 50) return 'Senha muito longa (máximo 50 caracteres)';
+  return '';
+}
+
 export function UserForm({ user, open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -28,6 +50,16 @@ export function UserForm({ user, open, onClose, onSuccess }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
 
   useEffect(() => {
     if (user) {
@@ -35,11 +67,10 @@ export function UserForm({ user, open, onClose, onSuccess }) {
         name: user.name,
         email: user.email,
         user_role: user.user_role,
-        password: '', // Não preencher senha ao editar
+        password: '',
         active: user.active,
       });
     } else {
-      // Reset form para novo usuário
       setFormData({
         name: '',
         email: '',
@@ -49,15 +80,74 @@ export function UserForm({ user, open, onClose, onSuccess }) {
       });
     }
     setError('');
+    setFieldErrors({ name: '', email: '', password: '' });
+    setTouched({ name: false, email: false, password: false });
   }, [user, open]);
+
+  const validateField = (field, value) => {
+    switch (field) {
+      case 'name':
+        return validateName(value);
+      case 'email':
+        return validateEmail(value);
+      case 'password':
+        return validatePassword(value, !user);
+      default:
+        return '';
+    }
+  };
 
   const handleChange = (field) => (event) => {
     const value = field === 'active' ? event.target.checked : event.target.value;
     setFormData({ ...formData, [field]: value });
+
+    // Validate on change if field was already touched
+    if (touched[field]) {
+      const errorMsg = validateField(field, value);
+      setFieldErrors({ ...fieldErrors, [field]: errorMsg });
+    }
+  };
+
+  const handleBlur = (field) => () => {
+    // Mark field as touched
+    setTouched({ ...touched, [field]: true });
+
+    // Validate on blur
+    const errorMsg = validateField(field, formData[field]);
+    setFieldErrors({ ...fieldErrors, [field]: errorMsg });
+  };
+
+  const hasErrors = () => {
+    return (
+      validateName(formData.name) ||
+      validateEmail(formData.email) ||
+      validatePassword(formData.password, !user)
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Mark all fields as touched
+    setTouched({ name: true, email: true, password: true });
+
+    // Validate all fields
+    const nameError = validateName(formData.name);
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password, !user);
+
+    setFieldErrors({
+      name: nameError,
+      email: emailError,
+      password: passwordError,
+    });
+
+    // Stop if there are validation errors
+    if (nameError || emailError || passwordError) {
+      setError('Por favor, corrija os erros no formulário antes de continuar.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -67,10 +157,15 @@ export function UserForm({ user, open, onClose, onSuccess }) {
         console.log(`[UserForm] Updating user ${user.id}...`);
 
         const updateData = {
-          name: formData.name,
+          name: formData.name.trim(),
           user_role: formData.user_role,
           active: formData.active,
         };
+
+        // Only include password if it was changed
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
 
         const response = await fetch(`${API_URL}/api/users/${user.id}`, {
           method: 'PUT',
@@ -82,7 +177,7 @@ export function UserForm({ user, open, onClose, onSuccess }) {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.error || 'Failed to update user');
+          throw new Error(error.error || 'Falha ao atualizar usuário');
         }
 
         const result = await response.json();
@@ -92,21 +187,9 @@ export function UserForm({ user, open, onClose, onSuccess }) {
         // CREATE new user
         console.log(`[UserForm] Creating user ${formData.email}...`);
 
-        if (!formData.password) {
-          setError('Senha é obrigatória para novos usuários');
-          setLoading(false);
-          return;
-        }
-
-        if (formData.password.length < 6) {
-          setError('Senha deve ter no mínimo 6 caracteres');
-          setLoading(false);
-          return;
-        }
-
         const createData = {
-          email: formData.email,
-          name: formData.name,
+          email: formData.email.trim(),
+          name: formData.name.trim(),
           user_role: formData.user_role,
           password: formData.password,
         };
@@ -121,7 +204,7 @@ export function UserForm({ user, open, onClose, onSuccess }) {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.error || 'Failed to create user');
+          throw new Error(error.error || 'Falha ao criar usuário');
         }
 
         const result = await response.json();
@@ -156,6 +239,9 @@ export function UserForm({ user, open, onClose, onSuccess }) {
             label="Nome Completo"
             value={formData.name}
             onChange={handleChange('name')}
+            onBlur={handleBlur('name')}
+            error={touched.name && !!fieldErrors.name}
+            helperText={touched.name && fieldErrors.name ? fieldErrors.name : 'Nome completo do usuário'}
             required
             margin="normal"
             autoFocus
@@ -167,9 +253,18 @@ export function UserForm({ user, open, onClose, onSuccess }) {
             type="email"
             value={formData.email}
             onChange={handleChange('email')}
+            onBlur={handleBlur('email')}
+            error={touched.email && !!fieldErrors.email}
+            helperText={
+              touched.email && fieldErrors.email
+                ? fieldErrors.email
+                : user
+                ? 'Email não pode ser alterado'
+                : 'Email será usado para login'
+            }
             required
             margin="normal"
-            disabled={!!user} // Não permitir editar email
+            disabled={!!user}
           />
 
           <FormControl fullWidth margin="normal" required>
@@ -191,13 +286,17 @@ export function UserForm({ user, open, onClose, onSuccess }) {
             type="password"
             value={formData.password}
             onChange={handleChange('password')}
-            required={!user}
-            margin="normal"
+            onBlur={handleBlur('password')}
+            error={touched.password && !!fieldErrors.password}
             helperText={
-              user
+              touched.password && fieldErrors.password
+                ? fieldErrors.password
+                : user
                 ? 'Deixe em branco para não alterar'
                 : 'Mínimo de 6 caracteres'
             }
+            required={!user}
+            margin="normal"
           />
 
           <FormControlLabel
@@ -216,8 +315,13 @@ export function UserForm({ user, open, onClose, onSuccess }) {
           <Button onClick={onClose} variant="outlined" disabled={loading}>
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" disabled={loading}>
-            {loading ? 'Salvando...' : 'Salvar'}
+          <Button
+            type="submit"
+            variant="contained"
+            loading={loading}
+            disabled={loading || (touched.name && touched.email && touched.password && hasErrors())}
+          >
+            Salvar
           </Button>
         </DialogActions>
       </form>

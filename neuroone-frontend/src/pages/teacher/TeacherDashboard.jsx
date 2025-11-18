@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, Typography, Grid, Stack, CircularProgress } from '@mui/material';
+import { Box, Typography, Grid, Alert } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
-import { ThemeToggle } from '../../components/atoms/ThemeToggle';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import EmptyState from '../../components/layout/EmptyState';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { StatsCard } from '../../components/direction/StatsCard';
 import { TeacherClassCard } from '../../components/teacher/TeacherClassCard';
 import { TeacherSessionCard } from '../../components/teacher/TeacherSessionCard';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
+// MUI Icons
+import ClassIcon from '@mui/icons-material/Class';
+import People from '@mui/icons-material/People';
+import Assessment from '@mui/icons-material/Assessment';
+import Psychology from '@mui/icons-material/Psychology';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Home from '@mui/icons-material/Home';
+import School from '@mui/icons-material/School';
 
 export function TeacherDashboard() {
   const { profile, user, signOut } = useAuth();
@@ -192,15 +203,6 @@ export function TeacherDashboard() {
     }
   }
 
-  async function handleSignOut() {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  }
-
   function handleNewSession() {
     navigate('/teacher/session/create');
   }
@@ -219,164 +221,164 @@ export function TeacherDashboard() {
     }
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Box>
-            <Typography variant="h1">
-              Painel do Professor
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1 }}>
-              Bem-vindo, {profile?.name}
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <ThemeToggle />
-            <Button variant="outlined" onClick={handleSignOut}>
-              Sair
-            </Button>
-          </Stack>
+    <DashboardLayout
+      title="Painel do Professor"
+      subtitle={`Bem-vindo, ${profile?.name || 'Professor'}`}
+      breadcrumbs={[
+        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+        { label: 'Professor', icon: <School fontSize="small" /> },
+        { label: 'Dashboard' },
+      ]}
+      actions={
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={fetchDashboardData}
+            disabled={loading}
+          >
+            Atualizar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleNewSession}
+          >
+            Nova Sessão
+          </Button>
         </Box>
+      }
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando dashboard..." />}
 
-        {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Minhas Turmas"
-              value={stats.totalClasses}
-              icon="👨‍🏫"
-              color="blue"
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Total de Alunos"
-              value={stats.totalStudents}
-              icon="👥"
-              color="green"
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Sessões no Mês"
-              value={stats.sessionsThisMonth}
-              icon="📊"
-              color="orange"
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <StatsCard
-              title="Atenção Média"
-              value={`${stats.avgAttention.toFixed(1)}%`}
-              icon="🎯"
-              color="purple"
-            />
-          </Grid>
+      {/* Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Minhas Turmas"
+            value={stats.totalClasses}
+            icon={<ClassIcon />}
+            color="primary"
+            loading={loading}
+          />
         </Grid>
 
-        {/* Botão Destacado - Nova Sessão */}
-        <Card sx={{ mb: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-          <Box sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h3" sx={{ color: 'white', mb: 2 }}>
-              Pronto para iniciar uma nova sessão?
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={handleNewSession}
-              sx={{
-                bgcolor: 'white',
-                color: '#667eea',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.9)',
-                },
-              }}
-            >
-              + Iniciar Nova Sessão
-            </Button>
-          </Box>
-        </Card>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Total de Alunos"
+            value={stats.totalStudents}
+            icon={<People />}
+            color="success"
+            loading={loading}
+          />
+        </Grid>
 
-        {/* Minhas Turmas */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h2" sx={{ mb: 3 }}>
-            Minhas Turmas
-          </Typography>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Sessões no Mês"
+            value={stats.sessionsThisMonth}
+            icon={<Assessment />}
+            color="warning"
+            loading={loading}
+          />
+        </Grid>
 
-          {classes.length === 0 ? (
-            <Card>
-              <Box sx={{ py: 6, textAlign: 'center' }}>
-                <Typography variant="h3" sx={{ mb: 2, color: 'text.secondary' }}>
-                  📚 Nenhuma turma cadastrada
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  Solicite à direção para adicionar você como responsável por uma turma
-                </Typography>
-              </Box>
-            </Card>
-          ) : (
-            <Grid container spacing={3}>
-              {classes.map((classItem) => (
-                <Grid item xs={12} sm={6} md={4} key={classItem.id}>
-                  <TeacherClassCard
-                    classData={classItem}
-                    onViewDetails={handleViewClassDetails}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Atenção Média"
+            value={`${stats.avgAttention.toFixed(1)}%`}
+            icon={<Psychology />}
+            color="info"
+            loading={loading}
+          />
+        </Grid>
+      </Grid>
 
-        {/* Sessões Recentes */}
-        <Box>
-          <Typography variant="h2" sx={{ mb: 3 }}>
-            Sessões Recentes
-          </Typography>
+      {/* Call to Action - Nova Sessão */}
+      <Alert
+        severity="info"
+        icon={<Psychology />}
+        sx={{
+          mb: 4,
+          '& .MuiAlert-message': { width: '100%' },
+        }}
+        action={
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Add />}
+            onClick={handleNewSession}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Iniciar Sessão
+          </Button>
+        }
+      >
+        <Typography variant="subtitle1" fontWeight={600}>
+          Pronto para iniciar uma nova sessão?
+        </Typography>
+        <Typography variant="body2">
+          Conecte o headset EEG e comece o monitoramento dos alunos
+        </Typography>
+      </Alert>
 
-          {recentSessions.length === 0 ? (
-            <Card>
-              <Box sx={{ py: 6, textAlign: 'center' }}>
-                <Typography variant="h3" sx={{ mb: 2, color: 'text.secondary' }}>
-                  📊 Nenhuma sessão realizada
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
-                  Inicie sua primeira sessão para começar a acompanhar o desempenho dos alunos
-                </Typography>
-                <Button variant="contained" onClick={handleNewSession}>
-                  Iniciar Primeira Sessão
-                </Button>
-              </Box>
-            </Card>
-          ) : (
-            <Grid container spacing={3}>
-              {recentSessions.map((session) => (
-                <Grid item xs={12} sm={6} md={4} key={session.id}>
-                  <TeacherSessionCard
-                    session={session}
-                    onViewReport={handleViewSessionReport}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+      {/* Minhas Turmas */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          Minhas Turmas
+        </Typography>
+
+        {classes.length === 0 ? (
+          <EmptyState
+            variant="noData"
+            icon={<ClassIcon sx={{ fontSize: 64 }} />}
+            title="Nenhuma turma cadastrada"
+            description="Solicite à direção para adicionar você como responsável por uma turma"
+          />
+        ) : (
+          <Grid container spacing={3}>
+            {classes.map((classItem) => (
+              <Grid item xs={12} sm={6} md={4} key={classItem.id}>
+                <TeacherClassCard
+                  classData={classItem}
+                  onViewDetails={handleViewClassDetails}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
-    </Container>
+
+      {/* Sessões Recentes */}
+      <Box>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          Sessões Recentes
+        </Typography>
+
+        {recentSessions.length === 0 ? (
+          <EmptyState
+            variant="noData"
+            icon={<Assessment sx={{ fontSize: 64 }} />}
+            title="Nenhuma sessão realizada"
+            description="Inicie sua primeira sessão para começar a acompanhar o desempenho dos alunos"
+            actionLabel="Iniciar Primeira Sessão"
+            onAction={handleNewSession}
+          />
+        ) : (
+          <Grid container spacing={3}>
+            {recentSessions.map((session) => (
+              <Grid item xs={12} sm={6} md={4} key={session.id}>
+                <TeacherSessionCard
+                  session={session}
+                  onViewReport={handleViewSessionReport}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
+    </DashboardLayout>
   );
 }

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography } from '@mui/material';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
+// MUI Icon
+import BlockIcon from '@mui/icons-material/Block';
 
 export function Forbidden() {
   const navigate = useNavigate();
@@ -20,9 +22,7 @@ export function Forbidden() {
         }}
       >
         <Card sx={{ width: '100%', textAlign: 'center' }}>
-          <Typography variant="h1" sx={{ fontSize: '4rem', mb: 2 }}>
-            🚫
-          </Typography>
+          <BlockIcon sx={{ fontSize: 80, color: 'error.main', mb: 2 }} />
 
           <Typography variant="h2" gutterBottom>
             Acesso Negado

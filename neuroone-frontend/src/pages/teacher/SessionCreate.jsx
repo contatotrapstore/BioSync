@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Grid,
@@ -9,7 +8,6 @@ import {
   Checkbox,
   Stack,
   Alert,
-  CircularProgress,
   Radio,
   RadioGroup,
   Chip
@@ -17,11 +15,18 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import EmptyState from '../../components/layout/EmptyState';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
+// MUI Icons
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import Home from '@mui/icons-material/Home';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -175,28 +180,29 @@ export function SessionCreate() {
     navigate(-1);
   }
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="md">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h1" sx={{ mb: 1 }}>
-            Nova Sessão Neurofeedback
-          </Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            Configure e inicie uma nova sessão de monitoramento com seus alunos
-          </Typography>
-        </Box>
+    <DashboardLayout
+      title="Nova Sessão Neurofeedback"
+      subtitle="Configure e inicie uma nova sessão de monitoramento com seus alunos"
+      breadcrumbs={[
+        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+        { label: 'Professor', icon: <School fontSize="small" /> },
+        { label: 'Nova Sessão' },
+      ]}
+      actions={
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={handleCancel}
+          disabled={submitting}
+        >
+          Voltar
+        </Button>
+      }
+      maxWidth="md"
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando turmas..." />}
 
         {/* Alertas */}
         {error && (
@@ -211,29 +217,24 @@ export function SessionCreate() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
-          {/* Seção 1: Selecionar Turma */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h2" sx={{ mb: 2 }}>
-              1. Selecione a Turma
-            </Typography>
+      <form onSubmit={handleSubmit}>
+        {/* Seção 1: Selecionar Turma */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+            1. Selecione a Turma
+          </Typography>
 
-            {classes.length === 0 ? (
-              <Card>
-                <Box sx={{ py: 4, textAlign: 'center' }}>
-                  <SchoolIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h3" sx={{ mb: 1, color: 'text.secondary' }}>
-                    Nenhuma turma disponível
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Você precisa ter turmas cadastradas para criar uma sessão
-                  </Typography>
-                </Box>
-              </Card>
-            ) : (
-              <Grid container spacing={2}>
-                {classes.map((classItem) => (
-                  <Grid item xs={12} sm={6} key={classItem.id}>
+          {classes.length === 0 ? (
+            <EmptyState
+              variant="noData"
+              icon={<SchoolIcon sx={{ fontSize: 64 }} />}
+              title="Nenhuma turma disponível"
+              description="Você precisa ter turmas cadastradas para criar uma sessão. Solicite à direção."
+            />
+          ) : (
+            <Grid container spacing={2}>
+              {classes.map((classItem) => (
+                <Grid item xs={12} sm={6} key={classItem.id}>
                     <Card
                       onClick={() => setFormData({ ...formData, class_id: classItem.id })}
                       sx={{
@@ -481,26 +482,26 @@ export function SessionCreate() {
             </Card>
           </Box>
 
-          {/* Botões de Ação */}
-          <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
-            <Button
-              variant="outlined"
-              onClick={handleCancel}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={submitting || classes.length === 0}
-              startIcon={submitting ? <CircularProgress size={20} /> : null}
-            >
-              {submitting ? 'Criando...' : '🚀 Iniciar Sessão'}
-            </Button>
-          </Stack>
-        </form>
-      </Box>
-    </Container>
+        {/* Botões de Ação */}
+        <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
+          <Button
+            variant="outlined"
+            onClick={handleCancel}
+            disabled={submitting}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={submitting || classes.length === 0}
+            loading={submitting}
+            startIcon={<PlayArrowIcon />}
+          >
+            Iniciar Sessão
+          </Button>
+        </Stack>
+      </form>
+    </DashboardLayout>
   );
 }

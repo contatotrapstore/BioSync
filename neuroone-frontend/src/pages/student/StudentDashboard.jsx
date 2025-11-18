@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  Typography,
-  Grid,
-  Card as MuiCard,
-  CardContent,
-  CardActions,
-  Alert,
-  Chip,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Typography, Grid, Alert, Chip } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/atoms/Button';
+import { Card } from '../../components/atoms/Card';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import EmptyState from '../../components/layout/EmptyState';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../services/supabase';
+// MUI Icons
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SettingsIcon from '@mui/icons-material/Settings';
 import WifiIcon from '@mui/icons-material/Wifi';
+import Home from '@mui/icons-material/Home';
+import SchoolIcon from '@mui/icons-material/School';
+import Refresh from '@mui/icons-material/Refresh';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { StudentSession } from './StudentSession';
 import { StudentHistory } from './StudentHistory';
 import { StudentSettings } from './StudentSettings';
@@ -74,127 +72,195 @@ export function StudentDashboard() {
       <Route
         path="/"
         element={
-          <Container maxWidth="lg">
-            <Box sx={{ py: 4 }}>
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h1" sx={{ mb: 1 }}>
-                  Bem-vindo, {user?.name || 'Aluno'}! 👋
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  Participe de sessões de neurofeedback e acompanhe seu progresso.
-                </Typography>
-              </Box>
+          <DashboardLayout
+            title="Painel do Aluno"
+            subtitle={`Bem-vindo, ${user?.name || 'Aluno'}!`}
+            breadcrumbs={[
+              { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+              { label: 'Aluno', icon: <SchoolIcon fontSize="small" /> },
+              { label: 'Dashboard' },
+            ]}
+            actions={
+              <Button
+                variant="outlined"
+                startIcon={<Refresh />}
+                onClick={fetchActiveSessions}
+                disabled={loading}
+              >
+                Atualizar
+              </Button>
+            }
+          >
+            {/* Loading Overlay */}
+            {loading && <LoadingOverlay variant="section" message="Carregando sessões..." />}
 
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
-                </Alert>
-              )}
+            {/* Error Alert */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
 
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                  <CircularProgress />
-                </Box>
+            {/* Sessões Ativas */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                Sessões Ativas
+              </Typography>
+
+              {activeSessions.length === 0 ? (
+                <EmptyState
+                  variant="noData"
+                  icon={<WifiIcon sx={{ fontSize: 64 }} />}
+                  title="Nenhuma sessão ativa"
+                  description="Aguarde seu professor iniciar uma sessão de neurofeedback"
+                />
               ) : (
-                <>
-                  <Box sx={{ mb: 4 }}>
-                    <Typography variant="h2" sx={{ mb: 2 }}>
-                      Sessões Ativas
-                    </Typography>
+                <Grid container spacing={3}>
+                  {activeSessions.map((session) => (
+                    <Grid item xs={12} md={6} key={session.id}>
+                      <Card
+                        variant="outlined"
+                        sx={{
+                          borderColor: 'primary.main',
+                          borderWidth: 2,
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: 4,
+                            background: 'linear-gradient(90deg, #10B981, #3B82F6)',
+                          },
+                        }}
+                      >
+                        <Box sx={{ p: 3 }}>
+                          {/* Status Badge */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                            <Chip
+                              icon={<WifiIcon />}
+                              label="Ao Vivo"
+                              color="success"
+                              size="small"
+                              sx={{ fontWeight: 600 }}
+                            />
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(session.start_time).toLocaleTimeString('pt-BR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </Typography>
+                          </Box>
 
-                    {activeSessions.length === 0 ? (
-                      <Alert severity="info">
-                        Nenhuma sessão ativa no momento. Aguarde seu professor iniciar uma sessão.
-                      </Alert>
-                    ) : (
-                      <Grid container spacing={3}>
-                        {activeSessions.map((session) => (
-                          <Grid item xs={12} md={6} key={session.id}>
-                            <MuiCard sx={{ border: '2px solid', borderColor: 'primary.main' }}>
-                              <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                  <Chip icon={<WifiIcon />} label="Ao Vivo" color="success" size="small" sx={{ mr: 1 }} />
-                                  <Typography variant="caption" color="text.secondary">
-                                    {new Date(session.start_time).toLocaleTimeString('pt-BR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
-                                  </Typography>
-                                </Box>
-                                <Typography variant="h3" sx={{ mb: 1 }}>
-                                  {session.title}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                  {session.class?.name} • {session.class?.school_year}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                                  Professor: {session.teacher?.name}
-                                </Typography>
-                                {session.game_id && (
-                                  <Chip icon={<SportsEsportsIcon />} label={`Jogo: ${session.game_id}`} size="small" variant="outlined" />
-                                )}
-                              </CardContent>
-                              <CardActions>
-                                <Button fullWidth onClick={() => navigate(`/student/session/${session.id}`)} startIcon={<SportsEsportsIcon />}>
-                                  Entrar na Sessão
-                                </Button>
-                              </CardActions>
-                            </MuiCard>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    )}
-                  </Box>
+                          {/* Session Info */}
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                            {session.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                            {session.class?.name} • {session.class?.school_year}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                            Professor: {session.teacher?.name}
+                          </Typography>
 
-                  <Box sx={{ mb: 4 }}>
-                    <Typography variant="h2" sx={{ mb: 2 }}>
-                      Ações Rápidas
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <MuiCard sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 } }} onClick={() => navigate('/student/history')}>
-                          <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                            <AssessmentIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                            <Typography variant="h3" sx={{ fontSize: '1.1rem' }}>
-                              Histórico
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              Ver sessões passadas
-                            </Typography>
-                          </CardContent>
-                        </MuiCard>
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <MuiCard sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 } }} onClick={() => navigate('/student/settings')}>
-                          <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                            <SettingsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-                            <Typography variant="h3" sx={{ fontSize: '1.1rem' }}>
-                              Configurações
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                              Dispositivo EEG
-                            </Typography>
-                          </CardContent>
-                        </MuiCard>
-                      </Grid>
+                          {/* Game Badge */}
+                          {session.game_id && (
+                            <Chip
+                              icon={<SportsEsportsIcon />}
+                              label={`Jogo: ${session.game_id}`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mb: 2 }}
+                            />
+                          )}
+
+                          {/* Action Button */}
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<PlayArrowIcon />}
+                            onClick={() => navigate(`/student/session/${session.id}`)}
+                          >
+                            Entrar na Sessão
+                          </Button>
+                        </Box>
+                      </Card>
                     </Grid>
-                  </Box>
-
-                  <Alert severity="info">
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      Como Funciona
-                    </Typography>
-                    <Typography variant="body2">
-                      1. Aguarde seu professor iniciar uma sessão<br />
-                      2. Entre na sessão clicando em "Entrar na Sessão"<br />
-                      3. Conecte seu dispositivo EEG quando solicitado<br />
-                      4. Jogue e melhore sua atenção!
-                    </Typography>
-                  </Alert>
-                </>
+                  ))}
+                </Grid>
               )}
             </Box>
-          </Container>
+
+            {/* Ações Rápidas */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                Ações Rápidas
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <Card
+                    clickable
+                    onClick={() => navigate('/student/history')}
+                    sx={{ textAlign: 'center', py: 4 }}
+                  >
+                    <AssessmentIcon sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Histórico
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Ver sessões passadas e seu progresso
+                    </Typography>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Card
+                    clickable
+                    onClick={() => navigate('/student/settings')}
+                    sx={{ textAlign: 'center', py: 4 }}
+                  >
+                    <SettingsIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Configurações
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Configurar dispositivo EEG
+                    </Typography>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Info Alert */}
+            <Alert severity="info" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Como Funciona
+              </Typography>
+              <Box component="ol" sx={{ m: 0, pl: 2.5 }}>
+                <li>
+                  <Typography variant="body2">
+                    Aguarde seu professor iniciar uma sessão
+                  </Typography>
+                </li>
+                <li>
+                  <Typography variant="body2">
+                    Entre na sessão clicando em "Entrar na Sessão"
+                  </Typography>
+                </li>
+                <li>
+                  <Typography variant="body2">
+                    Conecte seu dispositivo EEG quando solicitado
+                  </Typography>
+                </li>
+                <li>
+                  <Typography variant="body2">
+                    Jogue e melhore sua atenção!
+                  </Typography>
+                </li>
+              </Box>
+            </Alert>
+          </DashboardLayout>
         }
       />
       <Route path="/session/:sessionId" element={<StudentSession />} />

@@ -6,12 +6,10 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Forbidden } from './pages/Forbidden';
-import { DesignSystemTest } from './pages/DesignSystemTest';
 import { DirectionDashboard } from './pages/admin/DirectionDashboard';
 import { UsersManagement } from './pages/admin/UsersManagement';
 import { ClassesManagement } from './pages/admin/ClassesManagement';
 import { SessionsOverview } from './pages/admin/SessionsOverview';
-import { SystemSettings } from './pages/admin/SystemSettings';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { SessionCreate } from './pages/teacher/SessionCreate';
 import { SessionActive } from './pages/teacher/SessionActive';
@@ -71,14 +69,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedRoute allowedRoles={['direcao']}>
-                  <SystemSettings />
-                </ProtectedRoute>
-              }
-            />
 
             {/* Teacher routes - only professor */}
             <Route
@@ -123,9 +113,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Design system (public for now) */}
-            <Route path="/design-system" element={<DesignSystemTest />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

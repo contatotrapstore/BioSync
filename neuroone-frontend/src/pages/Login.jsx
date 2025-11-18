@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Input } from '../components/atoms/Input';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
+import { ThemeToggle } from '../components/atoms/ThemeToggle';
+import logoNeuroOnePreta from '../assets/logo-neuroone.png';
+import logoNeuroOneBranca from '../assets/logo-neuroone-branca.png';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -13,7 +17,11 @@ export function Login() {
   const [loading, setLoading] = useState(false);
 
   const { signIn } = useAuth();
+  const { mode } = useTheme();
   const navigate = useNavigate();
+
+  // Seleciona a logo baseada no tema
+  const logoNeuroOne = mode === 'dark' ? logoNeuroOneBranca : logoNeuroOnePreta;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,11 +35,25 @@ export function Login() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      // Redirecionamento será feito por ProtectedRoute futuramente
-      navigate('/');
+      console.log('[Login] Tentando fazer login...');
+      const data = await signIn(email, password);
+      console.log('[Login] Login bem-sucedido, redirecionando...');
+
+      // Redirecionar baseado na role
+      const role = data.user?.user_metadata?.role;
+      console.log('[Login] User role:', role);
+
+      if (role === 'direcao' || role === 'direção') {
+        navigate('/admin');
+      } else if (role === 'professor') {
+        navigate('/teacher');
+      } else if (role === 'aluno') {
+        navigate('/student');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('[Login] Erro no login:', err);
       setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
     } finally {
       setLoading(false);
@@ -39,26 +61,46 @@ export function Login() {
   }
 
   return (
-    <Container maxWidth="sm">
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      width: '100%',
+      px: 2,
+      py: 4,
+      position: 'relative'
+    }}>
+      {/* Theme Toggle no canto superior direito */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <ThemeToggle />
+      </Box>
+
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        py: 4
+        width: '100%',
+        maxWidth: '500px'
       }}>
-        <Typography variant="h1" sx={{ mb: 1, textAlign: 'center' }}>
-          NeuroOne
-        </Typography>
+        <Box
+          component="img"
+          src={logoNeuroOne}
+          alt="NeuroOne Logo"
+          sx={{
+            width: { xs: '200px', sm: '250px', md: '300px' },
+            height: 'auto',
+            mb: 2
+          }}
+        />
         <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
           Sistema de Neurofeedback Educacional
         </Typography>
 
-        <Card sx={{ width: '100%' }}>
-          <Typography variant="h2" sx={{ mb: 3 }}>
-            Login
-          </Typography>
+        <Card sx={{ width: '100%', maxWidth: '500px' }}>
+            <Typography variant="h2" sx={{ mb: 3, textAlign: 'center' }}>
+              Login
+            </Typography>
 
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -96,12 +138,8 @@ export function Login() {
               </Button>
             </Box>
           </form>
-
-          <Typography variant="body2" sx={{ mt: 3, color: 'text.secondary', textAlign: 'center' }}>
-            Para testes, use credenciais de desenvolvimento
-          </Typography>
-        </Card>
+      </Card>
       </Box>
-    </Container>
+    </Box>
   );
 }

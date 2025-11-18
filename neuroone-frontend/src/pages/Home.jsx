@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
 import { ThemeToggle } from '../components/atoms/ThemeToggle';
+// MUI Icons
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export function Home() {
   const { user, profile, role, signOut, loading } = useAuth();
@@ -89,8 +91,9 @@ export function Home() {
               <Typography variant="body2" color="text.secondary">
                 Status da Sessão:
               </Typography>
-              <Typography variant="body1" color="success.main">
-                ✅ Autenticado
+              <Typography variant="body1" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <CheckCircleIcon fontSize="small" />
+                Autenticado
               </Typography>
             </Box>
           </Stack>
@@ -100,18 +103,6 @@ export function Home() {
               Sair
             </Button>
           </Box>
-        </Card>
-
-        <Card sx={{ mt: 3 }}>
-          <Typography variant="h3" gutterBottom>
-            📊 Status do Desenvolvimento
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            • Sprint 0: Database ✅<br />
-            • Semana 1: Design System ✅<br />
-            • Semana 3: Autenticação ✅ (em teste)<br />
-            • Próximo: Proteção de Rotas por Role
-          </Typography>
         </Card>
       </Box>
     </Container>

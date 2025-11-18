@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
 
     // Fetch all classes
     const classes = await supabaseQuery('classes', {
-      select: 'id,name,school_year,description,created_by,active,created_at,updated_at',
+      select: 'id,name,school_year,subject,description,teacher_id,created_by,active,created_at,updated_at',
       headers: {
         'Order': 'created_at.desc'
       }
@@ -105,7 +105,7 @@ router.get('/:id', async (req, res) => {
     logger.info(`[CLASSES API] GET /api/classes/${id} - Getting class`);
 
     const data = await supabaseQuery(`classes?id=eq.${id}`, {
-      select: 'id,name,school_year,description,created_by,active,created_at,updated_at'
+      select: 'id,name,school_year,subject,description,teacher_id,created_by,active,created_at,updated_at'
     });
 
     if (!data || data.length === 0) {
@@ -137,7 +137,7 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/create', async (req, res) => {
   try {
-    const { name, school_year, description, created_by, student_ids } = req.body;
+    const { name, school_year, subject, description, teacher_id, created_by, student_ids } = req.body;
 
     logger.info(`[CLASSES API] POST /api/classes/create - Creating class ${name}`);
 
@@ -152,11 +152,13 @@ router.post('/create', async (req, res) => {
     // Create the class
     const classData = await supabaseQuery('classes', {
       method: 'POST',
-      select: 'id,name,school_year,description,created_by,active,created_at,updated_at',
+      select: 'id,name,school_year,subject,description,teacher_id,created_by,active,created_at,updated_at',
       body: {
         name: name.trim(),
         school_year: school_year?.trim() || null,
+        subject: subject?.trim() || null,
         description: description?.trim() || null,
+        teacher_id: teacher_id || null,
         created_by,
         active: true
       }
@@ -206,7 +208,7 @@ router.post('/create', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, school_year, description, active } = req.body;
+    const { name, school_year, subject, description, teacher_id, active } = req.body;
 
     logger.info(`[CLASSES API] PUT /api/classes/${id} - Updating class`);
 
@@ -219,8 +221,14 @@ router.put('/:id', async (req, res) => {
     if (school_year !== undefined) {
       updateBody.school_year = school_year?.trim() || null;
     }
+    if (subject !== undefined) {
+      updateBody.subject = subject?.trim() || null;
+    }
     if (description !== undefined) {
       updateBody.description = description?.trim() || null;
+    }
+    if (teacher_id !== undefined) {
+      updateBody.teacher_id = teacher_id || null;
     }
     if (active !== undefined) {
       updateBody.active = active;
@@ -238,7 +246,7 @@ router.put('/:id', async (req, res) => {
 
     const data = await supabaseQuery(`classes?id=eq.${id}`, {
       method: 'PATCH',
-      select: 'id,name,school_year,description,created_by,active,created_at,updated_at',
+      select: 'id,name,school_year,subject,description,teacher_id,created_by,active,created_at,updated_at',
       body: updateBody
     });
 
@@ -288,7 +296,7 @@ router.delete('/:id', async (req, res) => {
       // Soft delete - just set active = false
       data = await supabaseQuery(`classes?id=eq.${id}`, {
         method: 'PATCH',
-        select: 'id,name,school_year,description,active,created_at,updated_at',
+        select: 'id,name,school_year,subject,description,teacher_id,active,created_at,updated_at',
         body: {
           active: false,
           updated_at: new Date().toISOString()

@@ -1,21 +1,21 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  Box,
-  Typography,
-} from '@mui/material';
+import { Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Card } from '../atoms/Card';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DataTable from '../molecules/DataTable';
 
-export function UserTable({ users, onEdit, onDelete }) {
+/**
+ * UserTable - Tabela de usuários usando DataTable universal
+ *
+ * @param {Object} props
+ * @param {Array} props.users - Lista de usuários
+ * @param {Function} props.onEdit - Callback ao editar usuário
+ * @param {Function} props.onDelete - Callback ao deletar usuário
+ * @param {boolean} props.loading - Estado de loading
+ */
+export function UserTable({ users = [], onEdit, onDelete, loading = false }) {
+  // Mapear roles para nomes amigáveis
   const getRoleName = (role) => {
     const roles = {
       direcao: 'Direção',
@@ -25,6 +25,7 @@ export function UserTable({ users, onEdit, onDelete }) {
     return roles[role] || role;
   };
 
+  // Mapear roles para cores
   const getRoleColor = (role) => {
     const colors = {
       direcao: 'error',
@@ -34,87 +35,84 @@ export function UserTable({ users, onEdit, onDelete }) {
     return colors[role] || 'default';
   };
 
-  if (users.length === 0) {
-    return (
-      <Card>
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h3" color="text.secondary" gutterBottom>
-            Nenhum usuário encontrado
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Clique em "Novo Usuário" para adicionar o primeiro usuário
-          </Typography>
-        </Box>
-      </Card>
-    );
-  }
+  // Configuração de colunas
+  const columns = [
+    {
+      id: 'name',
+      label: 'Nome',
+      sortable: true,
+    },
+    {
+      id: 'email',
+      label: 'Email',
+      sortable: true,
+    },
+    {
+      id: 'user_role',
+      label: 'Tipo',
+      sortable: true,
+      render: (value) => (
+        <Chip
+          label={getRoleName(value)}
+          color={getRoleColor(value)}
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'active',
+      label: 'Status',
+      sortable: true,
+      render: (value) => (
+        <Chip
+          label={value ? 'Ativo' : 'Inativo'}
+          color={value ? 'success' : 'default'}
+          size="small"
+          variant="outlined"
+        />
+      ),
+    },
+    {
+      id: 'created_at',
+      label: 'Criado em',
+      sortable: true,
+      format: 'date',
+    },
+  ];
+
+  // Configuração de ações
+  const actions = [
+    {
+      icon: <EditIcon />,
+      onClick: onEdit,
+      label: 'Editar usuário',
+      color: 'primary',
+    },
+    {
+      icon: <DeleteIcon />,
+      onClick: (user) => onDelete(user.id),
+      label: 'Desativar usuário',
+      color: 'error',
+      disabled: (user) => !user.active,
+    },
+  ];
 
   return (
-    <TableContainer component={Card}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell><strong>Nome</strong></TableCell>
-            <TableCell><strong>Email</strong></TableCell>
-            <TableCell><strong>Tipo</strong></TableCell>
-            <TableCell><strong>Status</strong></TableCell>
-            <TableCell><strong>Criado em</strong></TableCell>
-            <TableCell align="right"><strong>Ações</strong></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow
-              key={user.id}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>
-                <Chip
-                  label={getRoleName(user.user_role)}
-                  color={getRoleColor(user.user_role)}
-                  size="small"
-                />
-              </TableCell>
-              <TableCell>
-                <Chip
-                  label={user.active ? 'Ativo' : 'Inativo'}
-                  color={user.active ? 'success' : 'default'}
-                  size="small"
-                  variant="outlined"
-                />
-              </TableCell>
-              <TableCell>
-                {new Date(user.created_at).toLocaleDateString('pt-BR')}
-              </TableCell>
-              <TableCell align="right">
-                <IconButton
-                  size="small"
-                  onClick={() => onEdit(user)}
-                  color="primary"
-                  title="Editar"
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => onDelete(user.id)}
-                  color="error"
-                  title="Desativar"
-                  disabled={!user.active}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <DataTable
+      columns={columns}
+      data={users}
+      actions={actions}
+      loading={loading}
+      emptyState={{
+        icon: <PersonAddIcon sx={{ fontSize: 64 }} />,
+        title: 'Nenhum usuário encontrado',
+        description: 'Clique em "Novo Usuário" para adicionar o primeiro usuário',
+      }}
+      pagination={true}
+      searchable={true}
+      searchPlaceholder="Buscar por nome ou email..."
+      defaultSortBy="name"
+      defaultSortOrder="asc"
+    />
   );
 }

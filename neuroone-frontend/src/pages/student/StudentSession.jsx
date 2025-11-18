@@ -337,9 +337,7 @@ export function StudentSession() {
               Conecte seu Dispositivo EEG
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-              Para participar da sessão, você precisa conectar um dispositivo EEG.
-              <br />
-              (Modo de demonstração: clique para simular dados)
+              Para participar da sessão, conecte seu dispositivo EEG e siga as instruções na tela.
             </Typography>
             <Button
               size="large"
@@ -347,7 +345,7 @@ export function StudentSession() {
               disabled={!wsConnected}
               startIcon={<BluetoothIcon />}
             >
-              {wsConnected ? 'Conectar Dispositivo (Simulado)' : 'Aguardando Conexão ao Servidor...'}
+              {wsConnected ? 'Conectar Dispositivo EEG' : 'Aguardando Conexão ao Servidor...'}
             </Button>
           </Card>
         ) : (

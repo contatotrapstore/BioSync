@@ -5,8 +5,18 @@ import {
   TextField,
   MenuItem,
   Stack,
+  InputAdornment,
+  Chip,
+  Typography,
+  Divider,
 } from '@mui/material';
 import { Button } from '../atoms/Button';
+// Icons
+import PersonIcon from '@mui/icons-material/Person';
+import ClassIcon from '@mui/icons-material/Class';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import EventIcon from '@mui/icons-material/Event';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -101,9 +111,33 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
     filters.dateTo ||
     filters.status !== 'all';
 
+  // Count active filters
+  const activeFiltersCount = [
+    filters.teacherId,
+    filters.classId,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.status !== 'all' ? filters.status : null,
+  ].filter(Boolean).length;
+
   return (
     <Box>
-      <Grid container spacing={2}>
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+        <FilterListIcon sx={{ color: 'text.secondary' }} />
+        <Typography variant="h6" sx={{ flex: 1 }}>
+          Filtros de Pesquisa
+        </Typography>
+        {activeFiltersCount > 0 && (
+          <Chip
+            label={`${activeFiltersCount} filtro(s) ativo(s)`}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+        )}
+      </Stack>
+
+      <Grid container spacing={3}>
         {/* Professor */}
         <Grid item xs={12} sm={6} md={3}>
           <TextField
@@ -112,9 +146,17 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
             value={filters.teacherId}
             onChange={handleFilterChange('teacherId')}
             fullWidth
-            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
           >
-            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value="">
+              <em>Todos os professores</em>
+            </MenuItem>
             {professors.map((prof) => (
               <MenuItem key={prof.id} value={prof.id}>
                 {prof.name}
@@ -131,9 +173,17 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
             value={filters.classId}
             onChange={handleFilterChange('classId')}
             fullWidth
-            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <ClassIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
           >
-            <MenuItem value="">Todas</MenuItem>
+            <MenuItem value="">
+              <em>Todas as turmas</em>
+            </MenuItem>
             {classes.map((cls) => (
               <MenuItem key={cls.id} value={cls.id}>
                 {cls.name}
@@ -150,7 +200,6 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
             value={filters.status}
             onChange={handleFilterChange('status')}
             fullWidth
-            size="small"
           >
             <MenuItem value="all">Todas</MenuItem>
             <MenuItem value="active">Ativas</MenuItem>
@@ -166,10 +215,17 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
             value={filters.dateFrom}
             onChange={handleFilterChange('dateFrom')}
             fullWidth
-            size="small"
             InputLabelProps={{
               shrink: true,
             }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EventIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="dd/mm/aaaa"
           />
         </Grid>
 
@@ -181,21 +237,36 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
             value={filters.dateTo}
             onChange={handleFilterChange('dateTo')}
             fullWidth
-            size="small"
             InputLabelProps={{
               shrink: true,
             }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EventIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="dd/mm/aaaa"
           />
         </Grid>
       </Grid>
 
       {/* Botão Limpar Filtros */}
       {hasActiveFilters && (
-        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <Button variant="outlined" size="small" onClick={handleClearFilters}>
-            Limpar Filtros
-          </Button>
-        </Stack>
+        <>
+          <Divider sx={{ my: 3 }} />
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<ClearIcon />}
+              onClick={handleClearFilters}
+              size="small"
+            >
+              Limpar Filtros
+            </Button>
+          </Stack>
+        </>
       )}
     </Box>
   );

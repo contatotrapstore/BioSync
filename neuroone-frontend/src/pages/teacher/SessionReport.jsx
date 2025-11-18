@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Grid, Alert, CircularProgress, Stack, Chip } from '@mui/material';
+import { Box, Typography, Grid, Alert, Stack, Chip } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/atoms/Card';
 import { Button } from '../../components/atoms/Button';
+import LoadingOverlay from '../../components/atoms/LoadingOverlay';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { AttentionTimelineChart } from '../../components/teacher/AttentionTimelineChart';
 import { AttentionDistributionChart } from '../../components/teacher/AttentionDistributionChart';
 import { StudentPerformanceTable } from '../../components/teacher/StudentPerformanceTable';
+// MUI Icons
 import PeopleIcon from '@mui/icons-material/People';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import Home from '@mui/icons-material/Home';
+import School from '@mui/icons-material/School';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -152,64 +160,59 @@ export function SessionReport() {
     ? mockStudents.reduce((sum, s) => sum + s.avgRelaxation, 0) / mockStudents.length
     : (metrics?.overall?.avgRelaxation || 0);
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ py: 4 }}>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-          <Button onClick={() => navigate('/teacher')}>Voltar ao Dashboard</Button>
-        </Box>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Box>
-              <Typography variant="h1" sx={{ mb: 0.5 }}>
-                Relatório da Sessão
-              </Typography>
-              <Typography variant="h3" sx={{ fontSize: '1.25rem', color: 'text.secondary' }}>
-                {session?.title}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                {session?.class?.name} • {new Date(session?.start_time).toLocaleDateString('pt-BR')}
-              </Typography>
-            </Box>
-            <Stack direction="row" spacing={1}>
-              <Chip label="Concluída" color="success" />
-              <Button variant="outlined" onClick={() => navigate('/teacher')}>
-                Voltar
-              </Button>
-            </Stack>
-          </Box>
+    <DashboardLayout
+      title="Relatório da Sessão"
+      subtitle={session ? `${session.title} • ${session.class?.name}` : 'Carregando...'}
+      breadcrumbs={[
+        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
+        { label: 'Professor', icon: <School fontSize="small" /> },
+        { label: 'Relatório' },
+      ]}
+      actions={
+        <Stack direction="row" spacing={1}>
+          {session?.status === 'completed' && (
+            <Chip label="Concluída" color="success" size="small" />
+          )}
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/teacher')}
+            disabled={loading}
+          >
+            Voltar
+          </Button>
+        </Stack>
+      }
+      maxWidth="lg"
+    >
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay variant="section" message="Carregando relatório..." />}
 
-          {useMockData && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              ⚠️ <strong>Dados Mockados</strong>: Não foi possível carregar métricas reais. Exibindo dados de demonstração.
-            </Alert>
-          )}
-          {!useMockData && metrics && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              ✅ <strong>Dados Reais</strong>: Métricas calculadas a partir de {students.length} aluno(s) com dados EEG.
-            </Alert>
-          )}
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Content - Only show if not loading and no error */}
+      {!loading && !error && session && (
+        <>
+          {/* Mock Data Warning / Real Data Success */}
+          <Box sx={{ mb: 3 }}>
+
+            {useMockData && (
+              <Alert severity="warning" icon={<WarningAmberIcon />}>
+                <strong>Erro ao Carregar Métricas</strong>: Os dados completos da sessão não estão disponíveis. Por favor, tente novamente mais tarde.
+              </Alert>
+            )}
+            {!useMockData && metrics && (
+              <Alert severity="success" icon={<CheckCircleIcon />}>
+                <strong>Métricas da Sessão</strong>: Dados de {students.length} aluno(s) processados com sucesso.
+              </Alert>
+            )}
+
         </Box>
 
         {/* KPIs */}
@@ -304,7 +307,8 @@ export function SessionReport() {
             }))} />
           </Grid>
         </Grid>
-      </Box>
-    </Container>
+        </>
+      )}
+    </DashboardLayout>
   );
 }

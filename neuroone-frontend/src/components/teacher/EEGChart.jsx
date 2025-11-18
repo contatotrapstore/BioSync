@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Box } from '@mui/material';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,12 +16,29 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 /**
  * Gráfico de barras para ondas cerebrais EEG
+ * Com suporte a theme claro/escuro e responsividade avançada
  * @param {Object} eegData - { delta, theta, alpha, beta, gamma }
  * @param {boolean} compact - Modo compacto (sem legenda, menor altura)
  * @param {number} height - Altura do gráfico em px
  */
 export function EEGChart({ eegData = {}, compact = false, height = 120 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { delta = 0, theta = 0, alpha = 0, beta = 0, gamma = 0 } = eegData;
+
+  // Cores do theme MUI adaptadas ao modo claro/escuro
+  const isDark = theme.palette.mode === 'dark';
+  const colors = {
+    delta: theme.palette.error.main,       // Vermelho - Delta (sono profundo)
+    theta: theme.palette.warning.main,     // Laranja - Theta (relaxamento)
+    alpha: theme.palette.success.main,     // Verde - Alpha (alerta relaxado)
+    beta: theme.palette.primary.main,      // Azul - Beta (atenção ativa)
+    gamma: theme.palette.secondary.main,   // Roxo - Gamma (alta cognição)
+    text: theme.palette.text.primary,
+    textSecondary: theme.palette.text.secondary,
+    grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    tooltip: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+  };
 
   // Dados do gráfico
   const chartData = {
@@ -31,19 +48,19 @@ export function EEGChart({ eegData = {}, compact = false, height = 120 }) {
         label: 'Ondas Cerebrais',
         data: [delta, theta, alpha, beta, gamma],
         backgroundColor: [
-          '#EF4444', // Vermelho - Delta (sono profundo)
-          '#F59E0B', // Laranja - Theta (relaxamento, sonolência)
-          '#10B981', // Verde - Alpha (alerta relaxado)
-          '#3B82F6', // Azul - Beta (atenção ativa)
-          '#8B5CF6', // Roxo - Gamma (alta cognição)
+          colors.delta,
+          colors.theta,
+          colors.alpha,
+          colors.beta,
+          colors.gamma,
         ],
         borderRadius: 4,
-        barThickness: compact ? 12 : 20,
+        barThickness: compact ? (isMobile ? 10 : 12) : (isMobile ? 16 : 20),
       },
     ],
   };
 
-  // Opções do gráfico
+  // Opções do gráfico adaptadas ao theme e responsividade
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -53,13 +70,28 @@ export function EEGChart({ eegData = {}, compact = false, height = 120 }) {
         position: 'bottom',
         labels: {
           font: {
-            size: 10,
+            size: isMobile ? 9 : 10,
+            family: theme.typography.fontFamily,
           },
-          padding: 8,
+          padding: isMobile ? 6 : 8,
+          color: colors.text,
         },
       },
       tooltip: {
         enabled: true,
+        backgroundColor: colors.tooltip,
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        titleFont: {
+          size: isMobile ? 11 : 13,
+          family: theme.typography.fontFamily,
+        },
+        bodyFont: {
+          size: isMobile ? 10 : 12,
+          family: theme.typography.fontFamily,
+        },
+        padding: isMobile ? 8 : 10,
+        cornerRadius: 4,
         callbacks: {
           label: function (context) {
             return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
@@ -70,8 +102,11 @@ export function EEGChart({ eegData = {}, compact = false, height = 120 }) {
         display: !compact,
         text: 'Ondas Cerebrais (EEG)',
         font: {
-          size: 12,
+          size: isMobile ? 11 : 12,
+          family: theme.typography.fontFamily,
+          weight: '600',
         },
+        color: colors.text,
       },
     },
     scales: {
@@ -81,21 +116,32 @@ export function EEGChart({ eegData = {}, compact = false, height = 120 }) {
         ticks: {
           display: !compact,
           font: {
-            size: 9,
+            size: isMobile ? 8 : 9,
+            family: theme.typography.fontFamily,
           },
+          color: colors.textSecondary,
         },
         grid: {
           display: !compact,
+          color: colors.grid,
+        },
+        border: {
+          color: colors.grid,
         },
       },
       x: {
         ticks: {
           font: {
-            size: compact ? 9 : 11,
+            size: compact ? (isMobile ? 8 : 9) : (isMobile ? 10 : 11),
+            family: theme.typography.fontFamily,
           },
+          color: colors.textSecondary,
         },
         grid: {
           display: false,
+        },
+        border: {
+          color: colors.grid,
         },
       },
     },

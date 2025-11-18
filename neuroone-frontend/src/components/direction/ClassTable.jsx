@@ -1,133 +1,121 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Chip,
-  Typography,
-  Box,
-} from '@mui/material';
+import { Chip, Box, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PeopleIcon from '@mui/icons-material/People';
-import { Card } from '../atoms/Card';
+import ClassIcon from '@mui/icons-material/Class';
+import DataTable from '../molecules/DataTable';
 
-export function ClassTable({ classes, onEdit, onDelete }) {
-  if (!classes || classes.length === 0) {
-    return (
-      <Card>
-        <Box sx={{ py: 8, textAlign: 'center' }}>
-          <Typography variant="h3" sx={{ mb: 2, color: 'text.secondary' }}>
-            📚 Nenhuma turma encontrada
-          </Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            Clique em "Nova Turma" para criar a primeira turma
-          </Typography>
+/**
+ * ClassTable - Tabela de turmas usando DataTable universal
+ *
+ * @param {Object} props
+ * @param {Array} props.classes - Lista de turmas
+ * @param {Function} props.onEdit - Callback ao editar turma
+ * @param {Function} props.onDelete - Callback ao deletar turma
+ * @param {boolean} props.loading - Estado de loading
+ */
+export function ClassTable({ classes = [], onEdit, onDelete, loading = false }) {
+  // Configuração de colunas
+  const columns = [
+    {
+      id: 'name',
+      label: 'Nome da Turma',
+      sortable: true,
+      render: (value) => (
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {value}
+        </Typography>
+      ),
+    },
+    {
+      id: 'school_year',
+      label: 'Ano Letivo',
+      sortable: true,
+      render: (value) => value || '-',
+    },
+    {
+      id: 'description',
+      label: 'Descrição',
+      render: (value) => (
+        <Typography
+          variant="body2"
+          sx={{
+            maxWidth: 300,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={value || '-'}
+        >
+          {value || '-'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'student_count',
+      label: 'Alunos',
+      sortable: true,
+      render: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <PeopleIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+          <Typography variant="body2">{value || 0}</Typography>
         </Box>
-      </Card>
-    );
-  }
+      ),
+    },
+    {
+      id: 'active',
+      label: 'Status',
+      sortable: true,
+      render: (value) => (
+        <Chip
+          label={value ? 'Ativa' : 'Inativa'}
+          color={value ? 'success' : 'default'}
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'created_at',
+      label: 'Criado em',
+      sortable: true,
+      format: 'date',
+    },
+  ];
+
+  // Configuração de ações
+  const actions = [
+    {
+      icon: <EditIcon />,
+      onClick: onEdit,
+      label: 'Editar turma',
+      color: 'primary',
+    },
+    {
+      icon: <DeleteIcon />,
+      onClick: (classItem) => onDelete(classItem.id),
+      label: 'Desativar turma',
+      color: 'error',
+      disabled: (classItem) => !classItem.active,
+    },
+  ];
 
   return (
-    <TableContainer component={Card}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Nome da Turma</TableCell>
-            <TableCell>Ano Letivo</TableCell>
-            <TableCell>Descrição</TableCell>
-            <TableCell>Alunos</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Criado em</TableCell>
-            <TableCell align="right">Ações</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {classes.map((classItem) => (
-            <TableRow
-              key={classItem.id}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              <TableCell>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                  {classItem.name}
-                </Typography>
-              </TableCell>
-
-              <TableCell>
-                <Typography variant="body2">
-                  {classItem.school_year || '-'}
-                </Typography>
-              </TableCell>
-
-              <TableCell>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    maxWidth: 300,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {classItem.description || '-'}
-                </Typography>
-              </TableCell>
-
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <PeopleIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  <Typography variant="body2">
-                    {classItem.student_count || 0}
-                  </Typography>
-                </Box>
-              </TableCell>
-
-              <TableCell>
-                <Chip
-                  label={classItem.active ? 'Ativa' : 'Inativa'}
-                  color={classItem.active ? 'success' : 'default'}
-                  size="small"
-                />
-              </TableCell>
-
-              <TableCell>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {new Date(classItem.created_at).toLocaleDateString('pt-BR')}
-                </Typography>
-              </TableCell>
-
-              <TableCell align="right">
-                <IconButton
-                  size="small"
-                  onClick={() => onEdit(classItem)}
-                  sx={{ mr: 1 }}
-                  title="Editar turma"
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => onDelete(classItem.id)}
-                  disabled={!classItem.active}
-                  color="error"
-                  title={classItem.active ? 'Desativar turma' : 'Turma já desativada'}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <DataTable
+      columns={columns}
+      data={classes}
+      actions={actions}
+      loading={loading}
+      emptyState={{
+        icon: <ClassIcon sx={{ fontSize: 64 }} />,
+        title: 'Nenhuma turma encontrada',
+        description: 'Clique em "Nova Turma" para criar a primeira turma',
+      }}
+      pagination={true}
+      searchable={true}
+      searchPlaceholder="Buscar por nome da turma..."
+      defaultSortBy="name"
+      defaultSortOrder="asc"
+    />
   );
 }

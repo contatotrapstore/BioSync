@@ -3,7 +3,10 @@ import { Box, Typography, Divider, Stack } from '@mui/material';
 import { Card } from '../atoms/Card';
 import { AttentionIndicator } from './AttentionIndicator';
 import { EEGChart } from './EEGChart';
+// MUI Icons
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
+import CloudOffIcon from '@mui/icons-material/CloudOff';
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
 
 /**
  * Card individual de aluno mostrando dados EEG em tempo real
@@ -62,8 +65,9 @@ export function StudentCard({ student, eegData = null, thresholds = { low: 40, h
         {/* Corpo: Dados ou Mensagem de Offline */}
         {!connected ? (
           <Box sx={{ py: 2, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
-              ⚫ Offline
+            <CloudOffIcon sx={{ fontSize: 32, color: 'text.disabled', mb: 1 }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 600 }}>
+              Offline
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>
               Aguardando conexão...
@@ -71,8 +75,9 @@ export function StudentCard({ student, eegData = null, thresholds = { low: 40, h
           </Box>
         ) : !hasData ? (
           <Box sx={{ py: 2, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
-              ⚪ Conectado
+            <CloudDoneIcon sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 600 }}>
+              Conectado
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>
               Aguardando dados EEG...
