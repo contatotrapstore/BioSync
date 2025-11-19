@@ -34,12 +34,15 @@ export function TeacherDashboard() {
   });
   const [classes, setClasses] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    // Só carrega uma vez quando o user está disponível
+    if (user?.id && !hasLoadedOnce) {
       fetchDashboardData();
+      setHasLoadedOnce(true);
     }
-  }, [user]);
+  }, [user?.id]); // Usa user?.id ao invés do objeto user completo
 
   async function fetchDashboardData() {
     setLoading(true);
@@ -58,11 +61,11 @@ export function TeacherDashboard() {
 
   async function fetchClasses() {
     try {
-      // Buscar turmas criadas pelo professor
+      // Buscar turmas onde o professor é responsável
       const { data: classesData, error } = await supabase
         .from('classes')
         .select('*')
-        .eq('created_by', user.id)
+        .eq('teacher_id', user.id)
         .eq('active', true)
         .order('created_at', { ascending: false });
 
@@ -78,13 +81,14 @@ export function TeacherDashboard() {
             .eq('class_id', classItem.id);
 
           // Buscar última sessão
-          const { data: lastSession } = await supabase
+          const { data: sessions } = await supabase
             .from('sessions')
             .select('start_time')
             .eq('class_id', classItem.id)
             .order('start_time', { ascending: false })
-            .limit(1)
-            .single();
+            .limit(1);
+
+          const lastSession = sessions?.[0] || null;
 
           return {
             ...classItem,
@@ -117,16 +121,20 @@ export function TeacherDashboard() {
       // Para cada sessão, buscar métricas
       const sessionsWithMetrics = await Promise.all(
         (sessionsData || []).map(async (session) => {
+          // Removido .single() para evitar erro 406 quando não há métricas
           const { data: metricsData } = await supabase
             .from('session_metrics')
             .select('avg_attention')
             .eq('session_id', session.id)
-            .single();
+            .limit(1);
+
+          // Pega primeiro resultado se existir
+          const metrics = metricsData && metricsData.length > 0 ? metricsData[0] : null;
 
           return {
             ...session,
             class_name: session.classes?.name || 'Turma não especificada',
-            avg_attention: metricsData?.avg_attention || 0,
+            avg_attention: metrics?.avg_attention || 0,
           };
         })
       );
@@ -143,14 +151,14 @@ export function TeacherDashboard() {
       const { count: totalClasses } = await supabase
         .from('classes')
         .select('*', { count: 'exact', head: true })
-        .eq('created_by', user.id)
+        .eq('teacher_id', user.id)
         .eq('active', true);
 
       // Total de alunos (soma de todas as turmas)
       const { data: classIds } = await supabase
         .from('classes')
         .select('id')
-        .eq('created_by', user.id)
+        .eq('teacher_id', user.id)
         .eq('active', true);
 
       let totalStudents = 0;
@@ -208,16 +216,19 @@ export function TeacherDashboard() {
   }
 
   function handleViewClassDetails(classData) {
-    // TODO: Navegar para página de detalhes da turma
-    alert(`Ver detalhes da turma: ${classData.name}`);
+    navigate(`/teacher/class/${classData.id}`);
   }
 
   function handleViewSessionReport(session) {
-    // TODO: Navegar para página de relatório ou sessão ativa
     if (session.status === 'active') {
-      alert(`Entrar na sessão ativa: ${session.title}`);
+      // Navegar para página de sessão ativa
+      navigate(`/teacher/session/${session.id}/active`);
+    } else if (session.status === 'completed') {
+      // Navegar para página de relatório
+      navigate(`/teacher/session/${session.id}/report`);
     } else {
-      alert(`Ver relatório da sessão: ${session.title}`);
+      // Para outros status, informar que não está disponível
+      alert(`Esta sessão está no status: ${session.status}. Apenas sessões ativas ou concluídas podem ser visualizadas.`);
     }
   }
 
@@ -255,7 +266,7 @@ export function TeacherDashboard() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatsCard
             title="Minhas Turmas"
             value={stats.totalClasses}
@@ -265,7 +276,7 @@ export function TeacherDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatsCard
             title="Total de Alunos"
             value={stats.totalStudents}
@@ -275,7 +286,7 @@ export function TeacherDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatsCard
             title="Sessões no Mês"
             value={stats.sessionsThisMonth}
@@ -285,7 +296,7 @@ export function TeacherDashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatsCard
             title="Atenção Média"
             value={`${stats.avgAttention.toFixed(1)}%`}
@@ -340,7 +351,7 @@ export function TeacherDashboard() {
         ) : (
           <Grid container spacing={3}>
             {classes.map((classItem) => (
-              <Grid item xs={12} sm={6} md={4} key={classItem.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={classItem.id}>
                 <TeacherClassCard
                   classData={classItem}
                   onViewDetails={handleViewClassDetails}
@@ -369,7 +380,7 @@ export function TeacherDashboard() {
         ) : (
           <Grid container spacing={3}>
             {recentSessions.map((session) => (
-              <Grid item xs={12} sm={6} md={4} key={session.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={session.id}>
                 <TeacherSessionCard
                   session={session}
                   onViewReport={handleViewSessionReport}
