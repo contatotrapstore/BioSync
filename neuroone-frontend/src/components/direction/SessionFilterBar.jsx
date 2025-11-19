@@ -139,7 +139,7 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
 
       <Grid container spacing={3}>
         {/* Professor */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             select
             label="Professor"
@@ -166,7 +166,7 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
         </Grid>
 
         {/* Turma */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             select
             label="Turma"
@@ -193,7 +193,7 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
         </Grid>
 
         {/* Status */}
-        <Grid item xs={12} sm={6} md={2}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <TextField
             select
             label="Status"
@@ -208,7 +208,7 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
         </Grid>
 
         {/* Data De */}
-        <Grid item xs={12} sm={6} md={2}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <TextField
             type="date"
             label="Data De"
@@ -230,7 +230,7 @@ export function SessionFilterBar({ filters, onFiltersChange }) {
         </Grid>
 
         {/* Data Até */}
-        <Grid item xs={12} sm={6} md={2}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <TextField
             type="date"
             label="Data Até"

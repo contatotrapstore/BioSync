@@ -28,6 +28,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BusinessIcon from '@mui/icons-material/Business';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export function StudentHistory() {
   const navigate = useNavigate();
@@ -66,39 +67,82 @@ export function StudentHistory() {
         startDate.setMonth(startDate.getMonth() - 1);
       }
 
-      // Fetch session metrics for this student
-      const { data, error: fetchError } = await supabase
-        .from('session_metrics')
-        .select(
-          `
-          *,
-          session:sessions!inner(
-            id,
-            title,
-            started_at,
-            ended_at,
-            class:classes(name)
-          )
-        `
-        )
+      // Fetch session participants for this student
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('session_participants')
+        .select('*, session_id')
         .eq('student_id', user.id)
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (fetchError) throw fetchError;
+      if (participantsError) {
+        console.error('Error fetching participants:', participantsError);
+        throw participantsError;
+      }
 
-      setSessions(data || []);
+      if (!participantsData || participantsData.length === 0) {
+        setSessions([]);
+        setStats(null);
+        return;
+      }
+
+      // Get unique session IDs
+      const sessionIds = [...new Set(participantsData.map(p => p.session_id))];
+
+      // Fetch session details
+      const { data: sessionsData, error: sessionsError } = await supabase
+        .from('sessions')
+        .select('id, title, started_at, ended_at, class_id')
+        .in('id', sessionIds);
+
+      if (sessionsError) {
+        console.error('Error fetching sessions:', sessionsError);
+        throw sessionsError;
+      }
+
+      // Fetch class details if there are class_ids
+      const classIds = [...new Set(sessionsData.filter(s => s.class_id).map(s => s.class_id))];
+      let classesData = [];
+
+      if (classIds.length > 0) {
+        const { data: classes, error: classesError } = await supabase
+          .from('classes')
+          .select('id, name')
+          .in('id', classIds);
+
+        if (!classesError && classes) {
+          classesData = classes;
+        }
+      }
+
+      // Combine all data
+      const combinedData = participantsData.map(participant => {
+        const session = sessionsData.find(s => s.id === participant.session_id);
+        const classInfo = session && session.class_id
+          ? classesData.find(c => c.id === session.class_id)
+          : null;
+
+        return {
+          ...participant,
+          session: session ? {
+            ...session,
+            class: classInfo ? { name: classInfo.name } : null
+          } : null
+        };
+      }).filter(item => item.session);
+
+      setSessions(combinedData);
 
       // Calculate statistics
-      if (data && data.length > 0) {
+      if (combinedData && combinedData.length > 0) {
         const avgAttention =
-          data.reduce((sum, s) => sum + (s.avg_attention || 0), 0) / data.length;
+          combinedData.reduce((sum, s) => sum + (s.avg_attention || 0), 0) / combinedData.length;
         const avgRelaxation =
-          data.reduce((sum, s) => sum + (s.avg_relaxation || 0), 0) / data.length;
-        const totalScore = data.reduce((sum, s) => sum + (s.game_score || 0), 0);
-        const maxAttention = Math.max(...data.map((s) => s.peak_attention || 0));
-        const maxRelaxation = Math.max(...data.map((s) => s.peak_relaxation || 0));
+          combinedData.reduce((sum, s) => sum + (s.avg_relaxation || 0), 0) / combinedData.length;
+        const totalScore = combinedData.reduce((sum, s) => sum + (s.game_score || 0), 0);
+        const maxAttention = Math.max(...combinedData.map((s) => s.peak_attention || 0));
+        const maxRelaxation = Math.max(...combinedData.map((s) => s.peak_relaxation || 0));
 
         setStats({
           avgAttention: avgAttention.toFixed(1),
@@ -106,8 +150,10 @@ export function StudentHistory() {
           totalScore,
           maxAttention,
           maxRelaxation,
-          totalSessions: data.length,
+          totalSessions: combinedData.length,
         });
+      } else {
+        setStats(null);
       }
     } catch (err) {
       console.error('Erro ao carregar histórico:', err);
@@ -184,16 +230,26 @@ export function StudentHistory() {
         { label: 'Histórico', icon: <TimelineIcon fontSize="small" /> },
       ]}
       actions={
-        sessions.length > 0 && (
+        <Stack direction="row" spacing={2}>
           <Button
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            onClick={handleExportAll}
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/student')}
             size="small"
           >
-            Exportar Histórico
+            Voltar
           </Button>
-        )
+          {sessions.length > 0 && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={handleExportAll}
+              size="small"
+            >
+              Exportar Histórico
+            </Button>
+          )}
+        </Stack>
       }
       maxWidth="lg"
     >

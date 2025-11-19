@@ -77,7 +77,7 @@ const StyledButton = styled(MuiButton)(({ theme, size }) => ({
   },
 }));
 
-const MotionButton = motion(StyledButton);
+const MotionButton = motion.create(StyledButton);
 
 export function Button({
   children,

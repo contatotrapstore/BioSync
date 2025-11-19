@@ -77,9 +77,9 @@ export function SessionCreate() {
         throw new Error(result.error || 'Erro ao buscar turmas');
       }
 
-      // Filtrar apenas turmas criadas pelo professor atual e ativas
+      // Filtrar apenas turmas onde o professor é responsável e estão ativas
       const myActiveClasses = (result.data || [])
-        .filter(c => c.created_by === user.id && c.active)
+        .filter(c => c.teacher_id === user.id && c.active)
         .sort((a, b) => a.name.localeCompare(b.name));
 
       setClasses(myActiveClasses);
@@ -186,7 +186,7 @@ export function SessionCreate() {
       subtitle="Configure e inicie uma nova sessão de monitoramento com seus alunos"
       breadcrumbs={[
         { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
-        { label: 'Professor', icon: <School fontSize="small" /> },
+        { label: 'Professor', icon: <SchoolIcon fontSize="small" /> },
         { label: 'Nova Sessão' },
       ]}
       actions={
@@ -234,7 +234,7 @@ export function SessionCreate() {
           ) : (
             <Grid container spacing={2}>
               {classes.map((classItem) => (
-                <Grid item xs={12} sm={6} key={classItem.id}>
+                <Grid size={{ xs: 12, sm: 6 }} key={classItem.id}>
                     <Card
                       onClick={() => setFormData({ ...formData, class_id: classItem.id })}
                       sx={{
@@ -304,7 +304,7 @@ export function SessionCreate() {
               onChange={(e) => setFormData({ ...formData, session_type: e.target.value })}
             >
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Card
                     onClick={() => setFormData({ ...formData, session_type: 'monitoramento' })}
                     sx={{
@@ -335,7 +335,7 @@ export function SessionCreate() {
                   </Card>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Card
                     onClick={() => setFormData({ ...formData, session_type: 'treinamento' })}
                     sx={{
@@ -415,7 +415,7 @@ export function SessionCreate() {
                     Limiares de Atenção
                   </Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         label="Limite Baixo (%)"
                         type="number"
@@ -427,7 +427,7 @@ export function SessionCreate() {
                         inputProps={{ min: 0, max: 100 }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         label="Limite Alto (%)"
                         type="number"

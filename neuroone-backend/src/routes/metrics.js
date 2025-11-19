@@ -1,6 +1,7 @@
 import express from 'express';
 import { calculateSessionMetrics, getCachedMetrics } from '../services/metricsCalculator.js';
 import logger from '../utils/logger.js';
+import pool from '../services/database.js';
 
 const router = express.Router();
 
@@ -100,6 +101,59 @@ router.get('/sessions/:sessionId/export', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to export metrics',
+    });
+  }
+});
+
+/**
+ * POST /api/metrics/admin/apply-rls-policies
+ * TEMPORARY ENDPOINT - Apply missing RLS policies for metrics tables
+ * Run once to fix 406 errors, then delete this endpoint
+ */
+router.post('/admin/apply-rls-policies', async (req, res) => {
+  try {
+    logger.info('🔧 Applying RLS policies for metrics tables...');
+
+    const policies = [
+      `CREATE POLICY IF NOT EXISTS session_metrics_insert_system ON session_metrics FOR INSERT WITH CHECK (true);`,
+      `CREATE POLICY IF NOT EXISTS session_metrics_update_system ON session_metrics FOR UPDATE USING (true) WITH CHECK (true);`,
+      `CREATE POLICY IF NOT EXISTS student_metrics_insert_system ON student_metrics FOR INSERT WITH CHECK (true);`,
+      `CREATE POLICY IF NOT EXISTS student_metrics_update_system ON student_metrics FOR UPDATE USING (true) WITH CHECK (true);`
+    ];
+
+    const results = [];
+    for (const policy of policies) {
+      try {
+        await pool.query(policy);
+        const policyName = policy.match(/POLICY\s+(?:IF NOT EXISTS\s+)?(\w+)/i)[1];
+        results.push({ policy: policyName, status: 'created' });
+        logger.success(`✅ Applied policy: ${policyName}`);
+      } catch (error) {
+        if (error.code === '42710') {
+          // Policy already exists
+          const policyName = policy.match(/POLICY\s+(?:IF NOT EXISTS\s+)?(\w+)/i)[1];
+          results.push({ policy: policyName, status: 'already_exists' });
+          logger.info(`ℹ️  Policy already exists: ${policyName}`);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    logger.success('✅ All RLS policies applied successfully!');
+
+    res.json({
+      success: true,
+      message: 'RLS policies applied successfully',
+      results,
+      note: 'This endpoint can now be deleted from the code'
+    });
+  } catch (error) {
+    logger.error('❌ Error applying RLS policies:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to apply RLS policies',
+      details: error
     });
   }
 });

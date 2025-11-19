@@ -54,7 +54,21 @@ export function Login() {
       }
     } catch (err) {
       console.error('[Login] Erro no login:', err);
-      setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+
+      // Traduzir mensagens de erro do Supabase
+      let errorMessage = 'Erro ao fazer login. Verifique suas credenciais.';
+
+      if (err.message === 'Invalid login credentials') {
+        errorMessage = 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.';
+      } else if (err.message.includes('Email not confirmed')) {
+        errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
+      } else if (err.message.includes('User not found')) {
+        errorMessage = 'Usuário não encontrado. Verifique o email digitado.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

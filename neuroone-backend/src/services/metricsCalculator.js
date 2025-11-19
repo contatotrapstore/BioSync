@@ -1,4 +1,34 @@
-import pool from './database.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL || 'https://fsszpnbuabhhvrdmrtct.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+
+// Helper to query Supabase REST API directly
+async function supabaseQuery(endpoint, options = {}) {
+  const url = `${supabaseUrl}/rest/v1/${endpoint}`;
+
+  const response = await fetch(url, {
+    method: options.method || 'GET',
+    headers: {
+      'apikey': supabaseServiceKey,
+      'Authorization': `Bearer ${supabaseServiceKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Supabase API error: ${response.status} - ${error}`);
+  }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : [data];
+}
 
 /**
  * Calculate session metrics from EEG data
@@ -8,170 +38,192 @@ import pool from './database.js';
 export async function calculateSessionMetrics(sessionId) {
   try {
     // 1. Get session info
-    const sessionQuery = `
-      SELECT
-        s.*,
-        c.name as class_name,
-        c.school_year
-      FROM sessions s
-      JOIN classes c ON s.class_id = c.id
-      WHERE s.id = $1;
-    `;
-    const sessionResult = await pool.query(sessionQuery, [sessionId]);
-    const session = sessionResult.rows[0];
+    const sessions = await supabaseQuery(`sessions?id=eq.${sessionId}&select=*,classes(name,school_year)`);
+    const session = sessions[0];
 
     if (!session) {
       throw new Error('Session not found');
     }
 
-    // 2. Calculate overall session metrics
-    const overallQuery = `
-      SELECT
-        COUNT(DISTINCT student_id) as total_students,
-        ROUND(AVG(attention)::numeric, 2) as avg_attention,
-        ROUND(AVG(relaxation)::numeric, 2) as avg_relaxation,
-        MIN(attention) as min_attention,
-        MAX(attention) as max_attention,
-        MIN(relaxation) as min_relaxation,
-        MAX(relaxation) as max_relaxation,
-        ROUND(AVG(signal_quality)::numeric, 2) as avg_signal_quality
-      FROM eeg_data
-      WHERE session_id = $1;
-    `;
-    const overallResult = await pool.query(overallQuery, [sessionId]);
-    const overall = overallResult.rows[0];
+    // 2. Get all EEG data for this session
+    const eegData = await supabaseQuery(`eeg_data?session_id=eq.${sessionId}&select=*`);
 
-    // 3. Calculate per-student metrics
-    const studentMetricsQuery = `
-      SELECT
-        ed.student_id,
-        u.name as student_name,
-        COUNT(*) as data_points,
-        ROUND(AVG(ed.attention)::numeric, 2) as avg_attention,
-        ROUND(AVG(ed.relaxation)::numeric, 2) as avg_relaxation,
-        MIN(ed.attention) as min_attention,
-        MAX(ed.attention) as max_attention,
-        ROUND(AVG(ed.signal_quality)::numeric, 2) as avg_signal_quality,
-        MIN(ed.timestamp) as first_data,
-        MAX(ed.timestamp) as last_data,
-        EXTRACT(EPOCH FROM (MAX(ed.timestamp) - MIN(ed.timestamp)))/60 as duration_minutes
-      FROM eeg_data ed
-      JOIN users u ON ed.student_id = u.id
-      WHERE ed.session_id = $1
-      GROUP BY ed.student_id, u.name
-      ORDER BY avg_attention DESC;
-    `;
-    const studentMetricsResult = await pool.query(studentMetricsQuery, [sessionId]);
-    const studentMetrics = studentMetricsResult.rows;
+    if (eegData.length === 0) {
+      // Return empty metrics if no data
+      return {
+        session: {
+          id: session.id,
+          title: session.title,
+          className: session.classes?.name,
+          schoolYear: session.classes?.school_year,
+          startTime: session.start_time,
+          endTime: session.end_time,
+          status: session.status,
+        },
+        overall: {
+          totalStudents: 0,
+          avgAttention: 0,
+          avgRelaxation: 0,
+          minAttention: 0,
+          maxAttention: 0,
+          avgSignalQuality: 0,
+        },
+        distribution: {
+          low: { count: 0, percentage: 0 },
+          medium: { count: 0, percentage: 0 },
+          high: { count: 0, percentage: 0 },
+        },
+        timeline: [],
+        students: [],
+      };
+    }
 
-    // 4. Calculate attention distribution
-    const distributionQuery = `
-      SELECT
-        COUNT(CASE WHEN attention < 40 THEN 1 END) as low_count,
-        COUNT(CASE WHEN attention >= 40 AND attention < 70 THEN 1 END) as medium_count,
-        COUNT(CASE WHEN attention >= 70 THEN 1 END) as high_count,
-        ROUND(COUNT(CASE WHEN attention < 40 THEN 1 END)::numeric * 100.0 / COUNT(*)::numeric, 2) as low_percentage,
-        ROUND(COUNT(CASE WHEN attention >= 40 AND attention < 70 THEN 1 END)::numeric * 100.0 / COUNT(*)::numeric, 2) as medium_percentage,
-        ROUND(COUNT(CASE WHEN attention >= 70 THEN 1 END)::numeric * 100.0 / COUNT(*)::numeric, 2) as high_percentage
-      FROM eeg_data
-      WHERE session_id = $1;
-    `;
-    const distributionResult = await pool.query(distributionQuery, [sessionId]);
-    const distribution = distributionResult.rows[0];
+    // 3. Calculate overall metrics
+    const uniqueStudents = [...new Set(eegData.map(d => d.student_id))];
+    const totalStudents = uniqueStudents.length;
 
-    // 5. Calculate timeline (5-minute buckets)
-    const timelineQuery = `
-      SELECT
-        DATE_TRUNC('minute', timestamp) +
-        INTERVAL '5 minute' * FLOOR(EXTRACT(EPOCH FROM (timestamp - $2))/300) as bucket,
-        ROUND(AVG(attention)::numeric, 2) as avg_attention,
-        MIN(attention) as min_attention,
-        MAX(attention) as max_attention,
-        ROUND(AVG(relaxation)::numeric, 2) as avg_relaxation,
-        COUNT(*) as data_points
-      FROM eeg_data
-      WHERE session_id = $1
-      GROUP BY bucket
-      ORDER BY bucket;
-    `;
-    const timelineResult = await pool.query(timelineQuery, [sessionId, session.start_time]);
-    const timeline = timelineResult.rows;
+    const avgAttention = eegData.reduce((sum, d) => sum + (d.attention || 0), 0) / eegData.length;
+    const avgRelaxation = eegData.reduce((sum, d) => sum + (d.relaxation || 0), 0) / eegData.length;
+    const minAttention = Math.min(...eegData.map(d => d.attention || 0));
+    const maxAttention = Math.max(...eegData.map(d => d.attention || 0));
+    const avgSignalQuality = eegData.reduce((sum, d) => sum + (d.signal_quality || 0), 0) / eegData.length;
 
-    // 6. Save metrics to session_metrics table
-    const sessionMetricsInsert = `
-      INSERT INTO session_metrics (
-        session_id,
-        total_students,
-        avg_attention,
-        avg_relaxation,
-        min_attention,
-        max_attention,
-        avg_signal_quality,
-        data_points,
-        calculated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
-      ON CONFLICT (session_id)
-      DO UPDATE SET
-        total_students = EXCLUDED.total_students,
-        avg_attention = EXCLUDED.avg_attention,
-        avg_relaxation = EXCLUDED.avg_relaxation,
-        min_attention = EXCLUDED.min_attention,
-        max_attention = EXCLUDED.max_attention,
-        avg_signal_quality = EXCLUDED.avg_signal_quality,
-        data_points = EXCLUDED.data_points,
-        calculated_at = NOW()
-      RETURNING *;
-    `;
+    // 4. Calculate per-student metrics
+    const studentMetrics = [];
+    for (const studentId of uniqueStudents) {
+      const studentData = eegData.filter(d => d.student_id === studentId);
 
-    const totalDataPoints = studentMetrics.reduce((sum, s) => sum + parseInt(s.data_points), 0);
+      // Get student info
+      const students = await supabaseQuery(`users?id=eq.${studentId}&select=name`);
+      const student = students[0];
 
-    await pool.query(sessionMetricsInsert, [
-      sessionId,
-      overall.total_students,
-      overall.avg_attention,
-      overall.avg_relaxation,
-      overall.min_attention,
-      overall.max_attention,
-      overall.avg_signal_quality,
-      totalDataPoints,
-    ]);
+      const studentAvgAttention = studentData.reduce((sum, d) => sum + (d.attention || 0), 0) / studentData.length;
+      const studentAvgRelaxation = studentData.reduce((sum, d) => sum + (d.relaxation || 0), 0) / studentData.length;
+      const studentMinAttention = Math.min(...studentData.map(d => d.attention || 0));
+      const studentMaxAttention = Math.max(...studentData.map(d => d.attention || 0));
+      const studentAvgSignalQuality = studentData.reduce((sum, d) => sum + (d.signal_quality || 0), 0) / studentData.length;
 
-    // 7. Save per-student metrics
+      // Calculate duration
+      const timestamps = studentData.map(d => new Date(d.timestamp).getTime());
+      const durationMs = Math.max(...timestamps) - Math.min(...timestamps);
+      const durationMinutes = durationMs / 60000;
+
+      studentMetrics.push({
+        studentId,
+        studentName: student?.name || 'Unknown',
+        avgAttention: parseFloat(studentAvgAttention.toFixed(2)),
+        avgRelaxation: parseFloat(studentAvgRelaxation.toFixed(2)),
+        minAttention: studentMinAttention,
+        maxAttention: studentMaxAttention,
+        avgSignalQuality: parseFloat(studentAvgSignalQuality.toFixed(2)),
+        dataPoints: studentData.length,
+        durationMinutes: parseFloat(durationMinutes.toFixed(2)),
+      });
+    }
+
+    // Sort by avgAttention descending
+    studentMetrics.sort((a, b) => b.avgAttention - a.avgAttention);
+
+    // 5. Calculate attention distribution
+    const lowCount = eegData.filter(d => d.attention < 40).length;
+    const mediumCount = eegData.filter(d => d.attention >= 40 && d.attention < 70).length;
+    const highCount = eegData.filter(d => d.attention >= 70).length;
+
+    const distribution = {
+      low: {
+        count: lowCount,
+        percentage: parseFloat(((lowCount / eegData.length) * 100).toFixed(2)),
+      },
+      medium: {
+        count: mediumCount,
+        percentage: parseFloat(((mediumCount / eegData.length) * 100).toFixed(2)),
+      },
+      high: {
+        count: highCount,
+        percentage: parseFloat(((highCount / eegData.length) * 100).toFixed(2)),
+      },
+    };
+
+    // 6. Calculate timeline (5-minute buckets)
+    const sessionStartTime = new Date(session.start_time).getTime();
+    const buckets = {};
+
+    eegData.forEach(d => {
+      const timestamp = new Date(d.timestamp).getTime();
+      const minutesFromStart = Math.floor((timestamp - sessionStartTime) / 1000 / 60);
+      const bucketIndex = Math.floor(minutesFromStart / 5) * 5;
+
+      if (!buckets[bucketIndex]) {
+        buckets[bucketIndex] = {
+          attentionValues: [],
+          relaxationValues: [],
+        };
+      }
+
+      buckets[bucketIndex].attentionValues.push(d.attention || 0);
+      buckets[bucketIndex].relaxationValues.push(d.relaxation || 0);
+    });
+
+    const timeline = Object.keys(buckets).sort((a, b) => parseInt(a) - parseInt(b)).map(key => {
+      const bucket = buckets[key];
+      const avgAttention = bucket.attentionValues.reduce((sum, v) => sum + v, 0) / bucket.attentionValues.length;
+      const avgRelaxation = bucket.relaxationValues.reduce((sum, v) => sum + v, 0) / bucket.relaxationValues.length;
+      const minAttention = Math.min(...bucket.attentionValues);
+      const maxAttention = Math.max(...bucket.attentionValues);
+
+      return {
+        timestamp: new Date(sessionStartTime + parseInt(key) * 60 * 1000).toISOString(),
+        avgAttention: parseFloat(avgAttention.toFixed(2)),
+        minAttention,
+        maxAttention,
+        avgRelaxation: parseFloat(avgRelaxation.toFixed(2)),
+        dataPoints: bucket.attentionValues.length,
+      };
+    });
+
+    // 7. Save metrics to session_metrics table
+    const sessionMetrics = {
+      session_id: sessionId,
+      total_students: totalStudents,
+      avg_attention: parseFloat(avgAttention.toFixed(2)),
+      avg_relaxation: parseFloat(avgRelaxation.toFixed(2)),
+      min_attention: minAttention,
+      max_attention: maxAttention,
+      avg_signal_quality: parseFloat(avgSignalQuality.toFixed(2)),
+      data_points: eegData.length,
+      calculated_at: new Date().toISOString(),
+    };
+
+    // Upsert session metrics
+    await supabaseQuery(`session_metrics?session_id=eq.${sessionId}`, {
+      method: 'POST',
+      headers: {
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: sessionMetrics,
+    });
+
+    // 8. Save per-student metrics
     for (const student of studentMetrics) {
-      const studentMetricsInsert = `
-        INSERT INTO student_metrics (
-          session_id,
-          student_id,
-          avg_attention,
-          avg_relaxation,
-          min_attention,
-          max_attention,
-          avg_signal_quality,
-          data_points,
-          duration_minutes
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        ON CONFLICT (session_id, student_id)
-        DO UPDATE SET
-          avg_attention = EXCLUDED.avg_attention,
-          avg_relaxation = EXCLUDED.avg_relaxation,
-          min_attention = EXCLUDED.min_attention,
-          max_attention = EXCLUDED.max_attention,
-          avg_signal_quality = EXCLUDED.avg_signal_quality,
-          data_points = EXCLUDED.data_points,
-          duration_minutes = EXCLUDED.duration_minutes;
-      `;
+      const studentMetric = {
+        session_id: sessionId,
+        student_id: student.studentId,
+        avg_attention: student.avgAttention,
+        avg_relaxation: student.avgRelaxation,
+        min_attention: student.minAttention,
+        max_attention: student.maxAttention,
+        avg_signal_quality: student.avgSignalQuality,
+        data_points: student.dataPoints,
+        duration_minutes: student.durationMinutes,
+      };
 
-      await pool.query(studentMetricsInsert, [
-        sessionId,
-        student.student_id,
-        student.avg_attention,
-        student.avg_relaxation,
-        student.min_attention,
-        student.max_attention,
-        student.avg_signal_quality,
-        student.data_points,
-        student.duration_minutes,
-      ]);
+      await supabaseQuery(`student_metrics?session_id=eq.${sessionId}&student_id=eq.${student.studentId}`, {
+        method: 'POST',
+        headers: {
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        body: studentMetric,
+      });
     }
 
     // Return complete metrics
@@ -179,53 +231,23 @@ export async function calculateSessionMetrics(sessionId) {
       session: {
         id: session.id,
         title: session.title,
-        className: session.class_name,
-        schoolYear: session.school_year,
+        className: session.classes?.name,
+        schoolYear: session.classes?.school_year,
         startTime: session.start_time,
         endTime: session.end_time,
         status: session.status,
       },
       overall: {
-        totalStudents: parseInt(overall.total_students),
-        avgAttention: parseFloat(overall.avg_attention),
-        avgRelaxation: parseFloat(overall.avg_relaxation),
-        minAttention: overall.min_attention,
-        maxAttention: overall.max_attention,
-        avgSignalQuality: parseFloat(overall.avg_signal_quality),
+        totalStudents,
+        avgAttention: parseFloat(avgAttention.toFixed(2)),
+        avgRelaxation: parseFloat(avgRelaxation.toFixed(2)),
+        minAttention,
+        maxAttention,
+        avgSignalQuality: parseFloat(avgSignalQuality.toFixed(2)),
       },
-      distribution: {
-        low: {
-          count: parseInt(distribution.low_count),
-          percentage: parseFloat(distribution.low_percentage),
-        },
-        medium: {
-          count: parseInt(distribution.medium_count),
-          percentage: parseFloat(distribution.medium_percentage),
-        },
-        high: {
-          count: parseInt(distribution.high_count),
-          percentage: parseFloat(distribution.high_percentage),
-        },
-      },
-      timeline: timeline.map((t) => ({
-        timestamp: t.bucket,
-        avgAttention: parseFloat(t.avg_attention),
-        minAttention: t.min_attention,
-        maxAttention: t.max_attention,
-        avgRelaxation: parseFloat(t.avg_relaxation),
-        dataPoints: parseInt(t.data_points),
-      })),
-      students: studentMetrics.map((s) => ({
-        studentId: s.student_id,
-        studentName: s.student_name,
-        avgAttention: parseFloat(s.avg_attention),
-        avgRelaxation: parseFloat(s.avg_relaxation),
-        minAttention: s.min_attention,
-        maxAttention: s.max_attention,
-        avgSignalQuality: parseFloat(s.avg_signal_quality),
-        dataPoints: parseInt(s.data_points),
-        durationMinutes: parseFloat(s.duration_minutes),
-      })),
+      distribution,
+      timeline,
+      students: studentMetrics,
     };
   } catch (error) {
     console.error('❌ Error calculating session metrics:', error);
@@ -241,99 +263,95 @@ export async function calculateSessionMetrics(sessionId) {
 export async function getCachedMetrics(sessionId) {
   try {
     // Get session metrics
-    const sessionMetricsQuery = `
-      SELECT
-        sm.*,
-        s.title,
-        s.start_time,
-        s.end_time,
-        c.name as class_name,
-        c.school_year
-      FROM session_metrics sm
-      JOIN sessions s ON sm.session_id = s.id
-      JOIN classes c ON s.class_id = c.id
-      WHERE sm.session_id = $1;
-    `;
-    const sessionResult = await pool.query(sessionMetricsQuery, [sessionId]);
+    const sessionMetrics = await supabaseQuery(
+      `session_metrics?session_id=eq.${sessionId}&select=*,sessions(title,start_time,end_time,classes(name,school_year))`
+    );
 
-    if (sessionResult.rows.length === 0) {
+    if (sessionMetrics.length === 0) {
       return null; // No cached metrics
     }
 
-    const sessionMetrics = sessionResult.rows[0];
+    const metrics = sessionMetrics[0];
 
     // Get student metrics
-    const studentMetricsQuery = `
-      SELECT
-        sm.*,
-        u.name as student_name
-      FROM student_metrics sm
-      JOIN users u ON sm.student_id = u.id
-      WHERE sm.session_id = $1
-      ORDER BY sm.avg_attention DESC;
-    `;
-    const studentResult = await pool.query(studentMetricsQuery, [sessionId]);
+    const studentMetrics = await supabaseQuery(
+      `student_metrics?session_id=eq.${sessionId}&select=*,users(name)&order=avg_attention.desc`
+    );
 
-    // Get distribution from session metrics
-    const distributionQuery = `
-      SELECT
-        COUNT(CASE WHEN attention < 40 THEN 1 END) as low_count,
-        COUNT(CASE WHEN attention >= 40 AND attention < 70 THEN 1 END) as medium_count,
-        COUNT(CASE WHEN attention >= 70 THEN 1 END) as high_count
-      FROM eeg_data
-      WHERE session_id = $1;
-    `;
-    const distributionResult = await pool.query(distributionQuery, [sessionId]);
-    const distribution = distributionResult.rows[0];
+    // Get distribution from EEG data
+    const eegData = await supabaseQuery(`eeg_data?session_id=eq.${sessionId}&select=attention`);
 
-    // Get timeline
-    const timelineQuery = `
-      SELECT
-        DATE_TRUNC('minute', timestamp) +
-        INTERVAL '5 minute' * FLOOR(EXTRACT(EPOCH FROM (timestamp - $2))/300) as bucket,
-        ROUND(AVG(attention)::numeric, 2) as avg_attention,
-        MIN(attention) as min_attention,
-        MAX(attention) as max_attention,
-        ROUND(AVG(relaxation)::numeric, 2) as avg_relaxation
-      FROM eeg_data
-      WHERE session_id = $1
-      GROUP BY bucket
-      ORDER BY bucket;
-    `;
-    const timelineResult = await pool.query(timelineQuery, [sessionId, sessionMetrics.start_time]);
+    const lowCount = eegData.filter(d => d.attention < 40).length;
+    const mediumCount = eegData.filter(d => d.attention >= 40 && d.attention < 70).length;
+    const highCount = eegData.filter(d => d.attention >= 70).length;
+
+    // Get timeline from EEG data (5-minute buckets)
+    const sessions = await supabaseQuery(`sessions?id=eq.${sessionId}&select=start_time`);
+    const sessionStartTime = new Date(sessions[0]?.start_time).getTime();
+
+    const allEegData = await supabaseQuery(
+      `eeg_data?session_id=eq.${sessionId}&select=timestamp,attention,relaxation&order=timestamp.asc`
+    );
+
+    const buckets = {};
+    allEegData.forEach(d => {
+      const timestamp = new Date(d.timestamp).getTime();
+      const minutesFromStart = Math.floor((timestamp - sessionStartTime) / 1000 / 60);
+      const bucketIndex = Math.floor(minutesFromStart / 5) * 5;
+
+      if (!buckets[bucketIndex]) {
+        buckets[bucketIndex] = {
+          attentionValues: [],
+          relaxationValues: [],
+        };
+      }
+
+      buckets[bucketIndex].attentionValues.push(d.attention || 0);
+      buckets[bucketIndex].relaxationValues.push(d.relaxation || 0);
+    });
+
+    const timeline = Object.keys(buckets).sort((a, b) => parseInt(a) - parseInt(b)).map(key => {
+      const bucket = buckets[key];
+      const avgAttention = bucket.attentionValues.reduce((sum, v) => sum + v, 0) / bucket.attentionValues.length;
+      const avgRelaxation = bucket.relaxationValues.reduce((sum, v) => sum + v, 0) / bucket.relaxationValues.length;
+      const minAttention = Math.min(...bucket.attentionValues);
+      const maxAttention = Math.max(...bucket.attentionValues);
+
+      return {
+        timestamp: new Date(sessionStartTime + parseInt(key) * 60 * 1000).toISOString(),
+        avgAttention: parseFloat(avgAttention.toFixed(2)),
+        minAttention,
+        maxAttention,
+        avgRelaxation: parseFloat(avgRelaxation.toFixed(2)),
+      };
+    });
 
     return {
       session: {
-        id: sessionMetrics.session_id,
-        title: sessionMetrics.title,
-        className: sessionMetrics.class_name,
-        schoolYear: sessionMetrics.school_year,
-        startTime: sessionMetrics.start_time,
-        endTime: sessionMetrics.end_time,
+        id: metrics.session_id,
+        title: metrics.sessions?.title,
+        className: metrics.sessions?.classes?.name,
+        schoolYear: metrics.sessions?.classes?.school_year,
+        startTime: metrics.sessions?.start_time,
+        endTime: metrics.sessions?.end_time,
       },
       overall: {
-        totalStudents: sessionMetrics.total_students,
-        avgAttention: parseFloat(sessionMetrics.avg_attention),
-        avgRelaxation: parseFloat(sessionMetrics.avg_relaxation),
-        minAttention: sessionMetrics.min_attention,
-        maxAttention: sessionMetrics.max_attention,
-        avgSignalQuality: parseFloat(sessionMetrics.avg_signal_quality),
+        totalStudents: metrics.total_students,
+        avgAttention: parseFloat(metrics.avg_attention),
+        avgRelaxation: parseFloat(metrics.avg_relaxation),
+        minAttention: metrics.min_attention,
+        maxAttention: metrics.max_attention,
+        avgSignalQuality: parseFloat(metrics.avg_signal_quality),
       },
       distribution: {
-        low: { count: parseInt(distribution.low_count) },
-        medium: { count: parseInt(distribution.medium_count) },
-        high: { count: parseInt(distribution.high_count) },
+        low: { count: lowCount },
+        medium: { count: mediumCount },
+        high: { count: highCount },
       },
-      timeline: timelineResult.rows.map((t) => ({
-        timestamp: t.bucket,
-        avgAttention: parseFloat(t.avg_attention),
-        minAttention: t.min_attention,
-        maxAttention: t.max_attention,
-        avgRelaxation: parseFloat(t.avg_relaxation),
-      })),
-      students: studentResult.rows.map((s) => ({
+      timeline,
+      students: studentMetrics.map(s => ({
         studentId: s.student_id,
-        studentName: s.student_name,
+        studentName: s.users?.name || 'Unknown',
         avgAttention: parseFloat(s.avg_attention),
         avgRelaxation: parseFloat(s.avg_relaxation),
         minAttention: s.min_attention,
@@ -341,7 +359,7 @@ export async function getCachedMetrics(sessionId) {
         avgSignalQuality: parseFloat(s.avg_signal_quality),
         durationMinutes: parseFloat(s.duration_minutes),
       })),
-      calculatedAt: sessionMetrics.calculated_at,
+      calculatedAt: metrics.calculated_at,
     };
   } catch (error) {
     console.error('❌ Error getting cached metrics:', error);

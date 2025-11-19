@@ -1,6 +1,8 @@
 import express from 'express';
 import logger from '../utils/logger.js';
 import dotenv from 'dotenv';
+import { validateBody } from '../middleware/validate.js';
+import { sessionSchemas } from '../validation/schemas.js';
 
 dotenv.config();
 

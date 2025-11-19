@@ -291,7 +291,7 @@ export function SessionActive() {
 
         {/* Stats Bar */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Card sx={{ textAlign: 'center', py: 2 }}>
               <PeopleIcon sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
               <Typography variant="h3" sx={{ fontSize: '1.5rem', mb: 0.5 }}>
@@ -303,7 +303,7 @@ export function SessionActive() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Card sx={{ textAlign: 'center', py: 2 }}>
               <TrendingUpIcon sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
               <Typography variant="h3" sx={{ fontSize: '1.5rem', mb: 0.5 }}>
@@ -315,7 +315,7 @@ export function SessionActive() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Card sx={{ textAlign: 'center', py: 2 }}>
               <AccessTimeIcon sx={{ fontSize: 32, color: 'info.main', mb: 1 }} />
               <Typography variant="h3" sx={{ fontSize: '1.5rem', mb: 0.5 }}>

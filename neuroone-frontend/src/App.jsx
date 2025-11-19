@@ -11,6 +11,7 @@ import { UsersManagement } from './pages/admin/UsersManagement';
 import { ClassesManagement } from './pages/admin/ClassesManagement';
 import { SessionsOverview } from './pages/admin/SessionsOverview';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
+import { ClassDetails } from './pages/teacher/ClassDetails';
 import { SessionCreate } from './pages/teacher/SessionCreate';
 import { SessionActive } from './pages/teacher/SessionActive';
 import { SessionReport } from './pages/teacher/SessionReport';
@@ -76,6 +77,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['professor']}>
                   <TeacherDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/teacher/class/:classId"
+              element={
+                <ProtectedRoute allowedRoles={['professor']}>
+                  <ClassDetails />
                 </ProtectedRoute>
               }
             />
