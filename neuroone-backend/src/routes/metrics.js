@@ -2,6 +2,8 @@ import express from 'express';
 import { calculateSessionMetrics, getCachedMetrics } from '../services/metricsCalculator.js';
 import logger from '../utils/logger.js';
 import pool from '../services/database.js';
+import { validateParams } from '../middleware/validate.js';
+import { metricsSchemas } from '../validation/schemas.js';
 
 const router = express.Router();
 
@@ -9,7 +11,7 @@ const router = express.Router();
  * POST /api/metrics/sessions/:sessionId/calculate
  * Calculate and cache metrics for a session
  */
-router.post('/sessions/:sessionId/calculate', async (req, res) => {
+router.post('/sessions/:sessionId/calculate', validateParams(metricsSchemas.sessionIdParam), async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -36,7 +38,7 @@ router.post('/sessions/:sessionId/calculate', async (req, res) => {
  * GET /api/metrics/sessions/:sessionId
  * Get cached metrics for a session (or calculate if not cached)
  */
-router.get('/sessions/:sessionId', async (req, res) => {
+router.get('/sessions/:sessionId', validateParams(metricsSchemas.sessionIdParam), async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -69,7 +71,7 @@ router.get('/sessions/:sessionId', async (req, res) => {
  * GET /api/metrics/sessions/:sessionId/export
  * Export session metrics as CSV
  */
-router.get('/sessions/:sessionId/export', async (req, res) => {
+router.get('/sessions/:sessionId/export', validateParams(metricsSchemas.sessionIdParam), async (req, res) => {
   try {
     const { sessionId } = req.params;
 

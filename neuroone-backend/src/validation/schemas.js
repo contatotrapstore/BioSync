@@ -74,14 +74,12 @@ export const userSchemas = {
 export const sessionSchemas = {
   // Create session
   create: Joi.object({
-    title: Joi.string()
-      .min(3)
-      .max(100)
+    teacher_id: Joi.string()
+      .uuid()
       .required()
       .messages({
-        'string.min': 'Título deve ter no mínimo 3 caracteres',
-        'string.max': 'Título deve ter no máximo 100 caracteres',
-        'any.required': 'Título é obrigatório'
+        'string.guid': 'ID do professor inválido',
+        'any.required': 'ID do professor é obrigatório'
       }),
 
     class_id: Joi.string()
@@ -92,23 +90,14 @@ export const sessionSchemas = {
         'any.required': 'ID da turma é obrigatório'
       }),
 
-    scheduled_at: Joi.date()
-      .iso()
+    title: Joi.string()
+      .min(3)
+      .max(100)
       .required()
       .messages({
-        'date.base': 'Data inválida',
-        'date.format': 'Data deve estar no formato ISO 8601',
-        'any.required': 'Data agendada é obrigatória'
-      }),
-
-    duration_minutes: Joi.number()
-      .integer()
-      .min(5)
-      .max(180)
-      .default(45)
-      .messages({
-        'number.min': 'Duração mínima é 5 minutos',
-        'number.max': 'Duração máxima é 180 minutos'
+        'string.min': 'Título deve ter no mínimo 3 caracteres',
+        'string.max': 'Título deve ter no máximo 100 caracteres',
+        'any.required': 'Título é obrigatório'
       }),
 
     description: Joi.string()
@@ -116,10 +105,26 @@ export const sessionSchemas = {
       .optional()
       .allow('', null),
 
-    game_type: Joi.string()
-      .valid('memory', 'attention', 'relaxation', 'custom')
+    session_type: Joi.string()
+      .valid('monitoramento', 'treinamento', 'avaliacao')
       .optional()
-      .allow(null)
+      .default('monitoramento'),
+
+    status: Joi.string()
+      .valid('scheduled', 'active', 'paused', 'completed', 'cancelled')
+      .optional()
+      .default('scheduled'),
+
+    start_time: Joi.date()
+      .iso()
+      .optional(),
+
+    duration_minutes: Joi.number()
+      .integer()
+      .min(5)
+      .max(180)
+      .optional()
+      .default(30)
   }),
 
   // Update session
@@ -180,25 +185,37 @@ export const classSchemas = {
         'any.required': 'Nome da turma é obrigatório'
       }),
 
-    grade_level: Joi.string()
+    school_year: Joi.string()
       .max(50)
       .optional()
       .allow('', null),
 
-    school_year: Joi.number()
-      .integer()
-      .min(2020)
-      .max(2100)
+    subject: Joi.string()
+      .max(500)
+      .optional()
+      .allow('', null),
+
+    description: Joi.string()
+      .max(2000)
+      .optional()
+      .allow('', null),
+
+    teacher_id: Joi.string()
+      .uuid()
       .optional()
       .allow(null),
 
-    professor_id: Joi.string()
+    created_by: Joi.string()
       .uuid()
       .required()
       .messages({
-        'string.guid': 'ID do professor inválido',
-        'any.required': 'ID do professor é obrigatório'
-      })
+        'string.guid': 'ID do criador inválido',
+        'any.required': 'ID do criador é obrigatório'
+      }),
+
+    student_ids: Joi.array()
+      .items(Joi.string().uuid())
+      .optional()
   }),
 
   // Update class
@@ -208,20 +225,27 @@ export const classSchemas = {
       .max(100)
       .optional(),
 
-    grade_level: Joi.string()
+    school_year: Joi.string()
       .max(50)
       .optional()
       .allow('', null),
 
-    school_year: Joi.number()
-      .integer()
-      .min(2020)
-      .max(2100)
+    subject: Joi.string()
+      .max(500)
+      .optional()
+      .allow('', null),
+
+    description: Joi.string()
+      .max(2000)
+      .optional()
+      .allow('', null),
+
+    teacher_id: Joi.string()
+      .uuid()
       .optional()
       .allow(null),
 
-    professor_id: Joi.string()
-      .uuid()
+    active: Joi.boolean()
       .optional()
   }).min(1),
 
@@ -234,6 +258,17 @@ export const classSchemas = {
         'string.guid': 'ID do aluno inválido',
         'any.required': 'ID do aluno é obrigatório'
       })
+  }),
+
+  // Update students in class (replaces all)
+  updateStudents: Joi.object({
+    student_ids: Joi.array()
+      .items(Joi.string().uuid())
+      .required()
+      .messages({
+        'array.base': 'student_ids deve ser um array',
+        'any.required': 'student_ids é obrigatório'
+      })
   })
 };
 
@@ -242,7 +277,18 @@ export const classSchemas = {
 // ============================================================================
 
 export const metricsSchemas = {
-  // Record session metrics
+  // Session ID param validation
+  sessionIdParam: Joi.object({
+    sessionId: Joi.string()
+      .uuid()
+      .required()
+      .messages({
+        'string.guid': 'ID da sessão inválido',
+        'any.required': 'ID da sessão é obrigatório'
+      })
+  }),
+
+  // Record session metrics (for future use)
   sessionMetrics: Joi.object({
     session_id: Joi.string()
       .uuid()
@@ -269,7 +315,7 @@ export const metricsSchemas = {
       .required()
   }),
 
-  // Record student metrics
+  // Record student metrics (for future use)
   studentMetrics: Joi.object({
     session_id: Joi.string()
       .uuid()

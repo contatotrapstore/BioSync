@@ -1,6 +1,8 @@
 import express from 'express';
 import logger from '../utils/logger.js';
 import dotenv from 'dotenv';
+import { validateBody } from '../middleware/validate.js';
+import { classSchemas } from '../validation/schemas.js';
 
 dotenv.config();
 
@@ -135,29 +137,21 @@ router.get('/:id', async (req, res) => {
  * POST /api/classes/create
  * Create a new class
  */
-router.post('/create', async (req, res) => {
+router.post('/create', validateBody(classSchemas.create), async (req, res) => {
   try {
     const { name, school_year, subject, description, teacher_id, created_by, student_ids } = req.body;
 
     logger.info(`[CLASSES API] POST /api/classes/create - Creating class ${name}`);
-
-    // Validate required fields
-    if (!name || !created_by) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: name, created_by'
-      });
-    }
 
     // Create the class
     const classData = await supabaseQuery('classes', {
       method: 'POST',
       select: 'id,name,school_year,subject,description,teacher_id,created_by,active,created_at,updated_at',
       body: {
-        name: name.trim(),
-        school_year: school_year?.trim() || null,
-        subject: subject?.trim() || null,
-        description: description?.trim() || null,
+        name,
+        school_year: school_year || null,
+        subject: subject || null,
+        description: description || null,
         teacher_id: teacher_id || null,
         created_by,
         active: true
@@ -205,44 +199,17 @@ router.post('/create', async (req, res) => {
  * PUT /api/classes/:id
  * Update an existing class
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateBody(classSchemas.update), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, school_year, subject, description, teacher_id, active } = req.body;
 
     logger.info(`[CLASSES API] PUT /api/classes/${id} - Updating class`);
 
-    // Build update body
-    const updateBody = {};
-
-    if (name !== undefined) {
-      updateBody.name = name.trim();
-    }
-    if (school_year !== undefined) {
-      updateBody.school_year = school_year?.trim() || null;
-    }
-    if (subject !== undefined) {
-      updateBody.subject = subject?.trim() || null;
-    }
-    if (description !== undefined) {
-      updateBody.description = description?.trim() || null;
-    }
-    if (teacher_id !== undefined) {
-      updateBody.teacher_id = teacher_id || null;
-    }
-    if (active !== undefined) {
-      updateBody.active = active;
-    }
-
-    if (Object.keys(updateBody).length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No fields to update'
-      });
-    }
-
-    // Always update updated_at
-    updateBody.updated_at = new Date().toISOString();
+    // Joi already validated - use spread operator
+    const updateBody = {
+      ...req.body,
+      updated_at: new Date().toISOString()
+    };
 
     const data = await supabaseQuery(`classes?id=eq.${id}`, {
       method: 'PATCH',
@@ -381,19 +348,12 @@ router.get('/:id/students', async (req, res) => {
  * POST /api/classes/:id/students
  * Update students in a class (replaces all current students)
  */
-router.post('/:id/students', async (req, res) => {
+router.post('/:id/students', validateBody(classSchemas.updateStudents), async (req, res) => {
   try {
     const { id } = req.params;
     const { student_ids } = req.body;
 
     logger.info(`[CLASSES API] POST /api/classes/${id}/students - Updating class students`);
-
-    if (!Array.isArray(student_ids)) {
-      return res.status(400).json({
-        success: false,
-        error: 'student_ids must be an array'
-      });
-    }
 
     // Step 1: Remove all current students
     await supabaseQuery(`class_students?class_id=eq.${id}`, {

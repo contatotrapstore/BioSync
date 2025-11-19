@@ -230,7 +230,7 @@ router.get('/:id', async (req, res) => {
  * POST /api/sessions/create
  * Create a new session
  */
-router.post('/create', async (req, res) => {
+router.post('/create', validateBody(sessionSchemas.create), async (req, res) => {
   try {
     const {
       teacher_id,
@@ -242,16 +242,7 @@ router.post('/create', async (req, res) => {
       start_time,
       duration_minutes
     } = req.body;
-
     logger.info(`[SESSIONS API] POST /api/sessions/create - Creating session ${title}`);
-
-    // Validate required fields
-    if (!teacher_id || !class_id || !title) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: teacher_id, class_id, title'
-      });
-    }
 
     // Create the session
     const sessionData = await supabaseQuery('sessions', {
@@ -290,38 +281,17 @@ router.post('/create', async (req, res) => {
  * PUT /api/sessions/:id
  * Update an existing session
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateBody(sessionSchemas.update), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, status, end_time } = req.body;
 
     logger.info(`[SESSIONS API] PUT /api/sessions/${id} - Updating session`);
 
-    // Build update body
-    const updateBody = {};
-
-    if (title !== undefined) {
-      updateBody.title = title.trim();
-    }
-    if (description !== undefined) {
-      updateBody.description = description?.trim() || null;
-    }
-    if (status !== undefined) {
-      updateBody.status = status;
-    }
-    if (end_time !== undefined) {
-      updateBody.end_time = end_time;
-    }
-
-    if (Object.keys(updateBody).length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No fields to update'
-      });
-    }
-
-    // Always update updated_at
-    updateBody.updated_at = new Date().toISOString();
+    // Joi already validated - use spread operator
+    const updateBody = {
+      ...req.body,
+      updated_at: new Date().toISOString()
+    };
 
     const data = await supabaseQuery(`sessions?id=eq.${id}`, {
       method: 'PATCH',
