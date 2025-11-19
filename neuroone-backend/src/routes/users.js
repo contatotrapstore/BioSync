@@ -2,6 +2,8 @@ import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import logger from '../utils/logger.js';
 import dotenv from 'dotenv';
+import { validateBody } from '../middleware/validate.js';
+import { userSchemas } from '../validation/schemas.js';
 
 dotenv.config();
 
@@ -134,35 +136,11 @@ router.get('/:id', async (req, res) => {
  * Create a new user (handles BOTH auth.users and public.users)
  * This is the complete user creation flow
  */
-router.post('/create', async (req, res) => {
+router.post('/create', validateBody(userSchemas.create), async (req, res) => {
   try {
     const { email, name, user_role, password } = req.body;
 
     logger.info(`[USERS API] POST /api/users/create - Creating user ${email}`);
-
-    // Validate required fields
-    if (!email || !name || !user_role || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: email, name, user_role, password',
-      });
-    }
-
-    // Validate user_role
-    if (!['direcao', 'professor', 'aluno'].includes(user_role)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid user_role. Must be: direcao, professor, or aluno',
-      });
-    }
-
-    // Validate password
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        error: 'Password must be at least 6 characters',
-      });
-    }
 
     // Step 1: Create auth user using Supabase Admin API
     logger.info(`[USERS API] Creating auth user for ${email}...`);
@@ -230,41 +208,16 @@ router.post('/create', async (req, res) => {
  * PUT /api/users/:id
  * Update an existing user
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateBody(userSchemas.update), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, user_role, active } = req.body;
 
     logger.info(`[USERS API] PUT /api/users/${id} - Updating user`);
 
-    // Build update body
-    const updateBody = {};
-
-    if (name !== undefined) {
-      updateBody.name = name;
-    }
-    if (user_role !== undefined) {
-      if (!['direcao', 'professor', 'aluno'].includes(user_role)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid user_role. Must be: direcao, professor, or aluno',
-        });
-      }
-      updateBody.user_role = user_role;
-    }
-    if (active !== undefined) {
-      updateBody.active = active;
-    }
-
-    if (Object.keys(updateBody).length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No fields to update',
-      });
-    }
-
-    // Always update updated_at
-    updateBody.updated_at = new Date().toISOString();
+    // Joi already validated and stripped unknown fields
+    const updateBody = {
+      ...req.body,
+      updated_at: new Date().toISOString()};
 
     // Use Supabase REST API with PATCH and id filter
     const data = await supabaseQuery(`users?id=eq.${id}`, {

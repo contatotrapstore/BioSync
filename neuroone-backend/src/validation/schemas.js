@@ -39,10 +39,10 @@ export const userSchemas = {
       }),
 
     user_role: Joi.string()
-      .valid('direction', 'professor', 'student')
+      .valid('direcao', 'professor', 'aluno')
       .required()
       .messages({
-        'any.only': 'Tipo de usuário inválido. Deve ser: direction, professor ou student',
+        'any.only': 'Tipo de usuário inválido. Deve ser: direcao, professor ou aluno',
         'any.required': 'Tipo de usuário é obrigatório'
       })
   }),
@@ -59,7 +59,7 @@ export const userSchemas = {
       .optional(),
 
     user_role: Joi.string()
-      .valid('direction', 'professor', 'student')
+      .valid('direcao', 'professor', 'aluno')
       .optional(),
 
     active: Joi.boolean()
