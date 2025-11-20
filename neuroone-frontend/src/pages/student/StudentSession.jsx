@@ -46,6 +46,7 @@ export function StudentSession() {
 
   // EEG state
   const [eegConnected, setEegConnected] = useState(false);
+  const [monitorPaused, setMonitorPaused] = useState(false); // Pausa monitor quando jogo assume controle
   const [eegData, setEegData] = useState({
     attention: 0,
     relaxation: 0,
@@ -233,28 +234,29 @@ export function StudentSession() {
     };
   }, [session, user]);
 
-  // Connect to EEG device (real device via Python bridge)
-  const connectEEG = useCallback(() => {
-    setEegConnected(true);
+  // Auto-connect EEG monitor when WebSocket is ready
+  useEffect(() => {
+    if (wsConnected && session && user) {
+      // Monitor conecta automaticamente - Python bridge gerencia conexão Bluetooth real
+      setEegConnected(true);
+      console.log('📊 Monitor EEG ativado automaticamente');
+      console.log('📝 Python EEG bridge deve estar rodando:');
+      console.log(`   python neuroone-python-eeg/eeg_bridge.py --student-id ${user.id} --session-id ${session.id}`);
+    }
+  }, [wsConnected, session, user]);
 
-    // EEG data will be received via 'eeg:update' Socket.IO event
-    // The Python bridge (eeg_bridge.py) sends data to the backend,
-    // which broadcasts it to all connected clients in the session room
-
-    console.log('🔌 EEG connection marked as ready. Waiting for data from Python bridge...');
-    console.log('📝 To start the Python EEG bridge, run:');
-    console.log(`   python neuroone-python-eeg/eeg_bridge.py --student-id ${user.id} --session-id ${session.id}`);
-  }, [user, session]);
-
-  const disconnectEEG = useCallback(() => {
-    setEegConnected(false);
-    setEegData({
-      attention: 0,
-      relaxation: 0,
-      signalQuality: 0,
-    });
-    console.log('🔌 EEG connection marked as disconnected');
-  }, []);
+  // Pausar/retomar monitor quando jogo inicia/termina
+  useEffect(() => {
+    if (selectedGame && (selectedGame === 'concentration' || selectedGame === 'balance')) {
+      console.log(`🎮 Jogo "${selectedGame}" assumiu controle do EEG - Monitor pausado`);
+      setMonitorPaused(true);
+    } else {
+      if (monitorPaused) {
+        console.log('📊 Monitor EEG resumido - Jogo encerrado');
+      }
+      setMonitorPaused(false);
+    }
+  }, [selectedGame]);
 
   if (loading) {
     return (
@@ -314,32 +316,30 @@ export function StudentSession() {
           </Alert>
         )}
 
-        {/* EEG Connection Card */}
-        {!eegConnected ? (
-          <Card sx={{ mb: 3, p: 3, textAlign: 'center' }}>
-            <BluetoothIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h2" sx={{ mb: 1 }}>
-              Conecte seu Dispositivo EEG
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-              Para participar da sessão, conecte seu dispositivo EEG e siga as instruções na tela.
-            </Typography>
-            <Button
-              size="large"
-              onClick={connectEEG}
-              disabled={!wsConnected}
-              startIcon={<BluetoothIcon />}
-            >
-              {wsConnected ? 'Conectar Dispositivo EEG' : 'Aguardando Conexão ao Servidor...'}
-            </Button>
-          </Card>
-        ) : (
+        {/* EEG Data Display - Monitor ativo automaticamente */}
+        {eegConnected && (
           <>
-            {/* EEG Data Display */}
+            {/* Aviso se Python bridge não estiver enviando dados */}
+            {eegData.attention === 0 && eegData.relaxation === 0 && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                  📊 Monitor EEG aguardando dados do Python bridge
+                </Typography>
+                <Typography variant="caption">
+                  Certifique-se de que o Python bridge está rodando com seu student ID e session ID corretos.
+                </Typography>
+              </Alert>
+            )}
+
             <Card sx={{ mb: 3, p: 3 }}>
-              <Typography variant="h2" sx={{ mb: 2 }}>
-                Dados em Tempo Real
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h2">
+                  Dados em Tempo Real {monitorPaused && '(Pausado - Jogo Ativo)'}
+                </Typography>
+                {monitorPaused && (
+                  <Chip label="Monitor Pausado" color="warning" size="small" />
+                )}
+              </Box>
 
               {/* Attention */}
               <Box sx={{ mb: 3 }}>
@@ -542,15 +542,10 @@ export function StudentSession() {
               )}
             </Card>
 
-            {/* Disconnect Button */}
-            <Stack direction="row" spacing={2}>
-              <Button variant="outlined" color="error" onClick={disconnectEEG} fullWidth>
-                Desconectar EEG
-              </Button>
-              <Button variant="outlined" onClick={() => navigate('/student')} fullWidth>
-                Sair da Sessão
-              </Button>
-            </Stack>
+            {/* Exit Button */}
+            <Button variant="outlined" onClick={() => navigate('/student')} fullWidth>
+              Sair da Sessão
+            </Button>
           </>
         )}
       </Box>
