@@ -169,7 +169,9 @@ export function createRateLimitMiddleware(limits = {}) {
   const finalLimits = { ...defaultLimits, ...limits };
 
   return function rateLimitMiddleware(eventName, handler) {
-    return function rateLimitedHandler(socket, data, ...args) {
+    return function rateLimitedHandler(data, ...args) {
+      // Get socket from 'this' context (Socket.IO binds socket as 'this')
+      const socket = this;
       const limit = finalLimits[eventName] || finalLimits.default;
 
       if (!rateLimiter.isAllowed(socket.id, eventName, limit)) {
@@ -187,8 +189,8 @@ export function createRateLimitMiddleware(limits = {}) {
         return;
       }
 
-      // Call original handler
-      return handler(socket, data, ...args);
+      // Call original handler with data, binding 'this' context
+      return handler.call(socket, data, ...args);
     };
   };
 }

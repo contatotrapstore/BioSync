@@ -5,7 +5,40 @@ dotenv.config();
 
 const { Pool } = pg;
 
-// Create PostgreSQL connection pool
+// Supabase REST API configuration
+const supabaseUrl = process.env.SUPABASE_URL || 'https://fsszpnbuabhhvrdmrtct.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc3pwbmJ1YWJoaHZyZG1ydGN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzM3MTY0NCwiZXhwIjoyMDc4OTQ3NjQ0fQ.imC7bY7nj0ruaiqJMnvTPScBjImelVK-HdMp8M5Dnxk';
+
+// Helper to query Supabase REST API
+async function supabaseQuery(table, options = {}) {
+  let url = `${supabaseUrl}/rest/v1/${table}`;
+
+  if (options.select) {
+    const separator = table.includes('?') ? '&' : '?';
+    url += `${separator}select=${options.select}`;
+  }
+
+  const response = await fetch(url, {
+    method: options.method || 'GET',
+    headers: {
+      'apikey': supabaseServiceKey,
+      'Authorization': `Bearer ${supabaseServiceKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Supabase API error: ${response.status} - ${error}`);
+  }
+
+  return await response.json();
+}
+
+// Create PostgreSQL connection pool (for EEG data only)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -31,42 +64,28 @@ pool.on('error', (err) => {
  * @returns {Promise<Object>} - Inserted row
  */
 export async function saveEEGData(data) {
-  const query = `
-    INSERT INTO eeg_data (
-      session_id,
-      student_id,
-      timestamp,
-      attention,
-      relaxation,
-      delta,
-      theta,
-      alpha,
-      beta,
-      gamma,
-      signal_quality,
-      raw_data
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    RETURNING *;
-  `;
-
-  const values = [
-    data.sessionId,
-    data.studentId,
-    data.timestamp || new Date().toISOString(),
-    data.attention,
-    data.relaxation,
-    data.delta || 0,
-    data.theta || 0,
-    data.alpha || 0,
-    data.beta || 0,
-    data.gamma || 0,
-    data.signalQuality || 0,
-    data.rawData ? JSON.stringify(data.rawData) : null,
-  ];
-
   try {
-    const result = await pool.query(query, values);
-    return result.rows[0];
+    const eegRecord = {
+      session_id: data.sessionId,
+      student_id: data.studentId,
+      timestamp: data.timestamp || new Date().toISOString(),
+      attention: data.attention,
+      relaxation: data.relaxation,
+      delta: data.delta || 0,
+      theta: data.theta || 0,
+      alpha: data.alpha || 0,
+      beta: data.beta || 0,
+      gamma: data.gamma || 0,
+      signal_quality: data.signalQuality || 0,
+      raw_data: data.rawData ? JSON.stringify(data.rawData) : null,
+    };
+
+    const result = await supabaseQuery('eeg_data', {
+      method: 'POST',
+      body: eegRecord
+    });
+
+    return result[0];
   } catch (error) {
     console.error('❌ Error saving EEG data:', error);
     throw error;
@@ -79,21 +98,22 @@ export async function saveEEGData(data) {
  * @returns {Promise<Object>} - Session data
  */
 export async function getSession(sessionId) {
-  const query = `
-    SELECT
-      s.*,
-      c.name as class_name,
-      c.school_year,
-      u.name as teacher_name
-    FROM sessions s
-    JOIN classes c ON s.class_id = c.id
-    JOIN users u ON s.teacher_id = u.id
-    WHERE s.id = $1;
-  `;
-
   try {
-    const result = await pool.query(query, [sessionId]);
-    return result.rows[0] || null;
+    const sessions = await supabaseQuery(`sessions?id=eq.${sessionId}`, {
+      select: 'id,title,status,class_id,teacher_id,created_at,updated_at,start_time,end_time,duration_minutes,description,session_type,classes(name,school_year),users!sessions_teacher_id_fkey(name)'
+    });
+
+    if (!sessions || sessions.length === 0) {
+      return null;
+    }
+
+    const session = sessions[0];
+    return {
+      ...session,
+      class_name: session.classes?.name,
+      school_year: session.classes?.school_year,
+      teacher_name: session.users?.name
+    };
   } catch (error) {
     console.error('❌ Error fetching session:', error);
     throw error;
@@ -106,21 +126,25 @@ export async function getSession(sessionId) {
  * @returns {Promise<Array>} - Array of students
  */
 export async function getSessionStudents(sessionId) {
-  const query = `
-    SELECT
-      u.id,
-      u.name,
-      u.email
-    FROM sessions s
-    JOIN classes c ON s.class_id = c.id
-    JOIN class_students cs ON cs.class_id = c.id
-    JOIN users u ON u.id = cs.student_id
-    WHERE s.id = $1 AND u.role = 'aluno';
-  `;
-
   try {
-    const result = await pool.query(query, [sessionId]);
-    return result.rows;
+    // First get the session to find the class_id
+    const session = await getSession(sessionId);
+    if (!session) {
+      return [];
+    }
+
+    // Then get students from that class
+    const classStudents = await supabaseQuery(`class_students?class_id=eq.${session.class_id}`, {
+      select: 'student_id,users!class_students_student_id_fkey(id,name,email,user_role)'
+    });
+
+    return classStudents
+      .filter(cs => cs.users && cs.users.user_role === 'aluno')
+      .map(cs => ({
+        id: cs.users.id,
+        name: cs.users.name,
+        email: cs.users.email
+      }));
   } catch (error) {
     console.error('❌ Error fetching session students:', error);
     throw error;

@@ -56,9 +56,6 @@ export function StudentSession() {
   const [selectedGame, setSelectedGame] = useState('');
   const [gameResults, setGameResults] = useState(null);
 
-  // Simulated EEG interval
-  const eegIntervalRef = useRef(null);
-
   // Load session data
   useEffect(() => {
     if (user && sessionId) {
@@ -203,6 +200,24 @@ export function StudentSession() {
         setWsError(err.message || 'Erro de conexão');
       });
 
+      // Listen for EEG data updates from backend (sent by Python bridge or other students)
+      socket.on('eeg:update', (data) => {
+        // Only process data for this student
+        if (data.studentId === user.id) {
+          console.log('Received EEG data:', data);
+          setEegData({
+            attention: data.attention,
+            relaxation: data.relaxation,
+            signalQuality: data.signalQuality,
+          });
+        }
+      });
+
+      // Listen for EEG data acknowledgment
+      socket.on('eeg:received', (data) => {
+        console.log('EEG data received by backend:', data);
+      });
+
       socketRef.current = socket;
     }
 
@@ -218,57 +233,27 @@ export function StudentSession() {
     };
   }, [session, user]);
 
-  // Simulate EEG device
+  // Connect to EEG device (real device via Python bridge)
   const connectEEG = useCallback(() => {
     setEegConnected(true);
 
-    // Simulate EEG data every 250ms (4Hz)
-    eegIntervalRef.current = setInterval(() => {
-      const mockData = {
-        attention: 50 + Math.floor(Math.random() * 40), // 50-90
-        relaxation: 40 + Math.floor(Math.random() * 40), // 40-80
-        delta: 80000 + Math.floor(Math.random() * 120000),
-        theta: 150000 + Math.floor(Math.random() * 150000),
-        alpha: 250000 + Math.floor(Math.random() * 200000),
-        beta: 100000 + Math.floor(Math.random() * 150000),
-        gamma: 50000 + Math.floor(Math.random() * 70000),
-        signalQuality: 70 + Math.floor(Math.random() * 25), // 70-95
-        timestamp: new Date().toISOString(),
-      };
+    // EEG data will be received via 'eeg:update' Socket.IO event
+    // The Python bridge (eeg_bridge.py) sends data to the backend,
+    // which broadcasts it to all connected clients in the session room
 
-      setEegData({
-        attention: mockData.attention,
-        relaxation: mockData.relaxation,
-        signalQuality: mockData.signalQuality,
-      });
-
-      // Send to backend
-      if (socketRef.current && wsConnected) {
-        socketRef.current.emit('eeg:data', mockData);
-      }
-    }, 250);
-  }, [wsConnected]);
+    console.log('🔌 EEG connection marked as ready. Waiting for data from Python bridge...');
+    console.log('📝 To start the Python EEG bridge, run:');
+    console.log(`   python neuroone-python-eeg/eeg_bridge.py --student-id ${user.id} --session-id ${session.id}`);
+  }, [user, session]);
 
   const disconnectEEG = useCallback(() => {
-    if (eegIntervalRef.current) {
-      clearInterval(eegIntervalRef.current);
-      eegIntervalRef.current = null;
-    }
     setEegConnected(false);
     setEegData({
       attention: 0,
       relaxation: 0,
       signalQuality: 0,
     });
-  }, []);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (eegIntervalRef.current) {
-        clearInterval(eegIntervalRef.current);
-      }
-    };
+    console.log('🔌 EEG connection marked as disconnected');
   }, []);
 
   if (loading) {

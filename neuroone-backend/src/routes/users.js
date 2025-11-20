@@ -94,21 +94,11 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     logger.info(`[USERS API] GET /api/users/${id} - Getting user`);
 
-    const result = await query(
-      `SELECT
-        id,
-        email,
-        name,
-        user_role,
-        active,
-        created_at,
-        updated_at
-      FROM users
-      WHERE id = $1`,
-      [id]
-    );
+    const result = await supabaseQuery(`users?id=eq.${id}`, {
+      select: 'id,email,name,user_role,active,created_at,updated_at'
+    });
 
-    if (result.rows.length === 0) {
+    if (!result || result.length === 0) {
       logger.warn(`[USERS API] User ${id} not found`);
       return res.status(404).json({
         success: false,
@@ -120,7 +110,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({
       success: true,
-      data: result.rows[0],
+      data: result[0],
     });
   } catch (error) {
     logger.error('[USERS API] Error getting user:', error);

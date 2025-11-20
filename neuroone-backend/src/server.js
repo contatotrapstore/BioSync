@@ -131,14 +131,14 @@ io.on('connection', (socket) => {
   logger.info(`🔌 New connection: ${socket.id} - User: ${socket.user?.email} (${socket.user?.role})`);
 
   // Teacher events (with rate limiting)
-  socket.on('teacher:join', rateLimitMiddleware('teacher:join', (socket, data) => handleTeacherJoin(io, socket, data)));
-  socket.on('teacher:leave', rateLimitMiddleware('teacher:leave', (socket, data) => handleTeacherLeave(io, socket, data)));
-  socket.on('teacher:get-students', rateLimitMiddleware('teacher:get-students', (socket, data) => handleGetStudents(socket, data)));
+  socket.on('teacher:join', rateLimitMiddleware('teacher:join', function(data) { return handleTeacherJoin(io, this, data); }));
+  socket.on('teacher:leave', rateLimitMiddleware('teacher:leave', function(data) { return handleTeacherLeave(io, this, data); }));
+  socket.on('teacher:get-students', rateLimitMiddleware('teacher:get-students', function(data) { return handleGetStudents(this, data); }));
 
   // Student events (with rate limiting)
-  socket.on('student:join', rateLimitMiddleware('student:join', (socket, data) => handleStudentJoin(io, socket, data)));
-  socket.on('student:leave', rateLimitMiddleware('student:leave', (socket, data) => handleStudentLeave(io, socket, data)));
-  socket.on('eeg:data', rateLimitMiddleware('eeg:data', (socket, data) => handleEEGData(io, socket, data)));
+  socket.on('student:join', rateLimitMiddleware('student:join', function(data) { return handleStudentJoin(io, this, data); }));
+  socket.on('student:leave', rateLimitMiddleware('student:leave', function(data) { return handleStudentLeave(io, this, data); }));
+  socket.on('eeg:data', rateLimitMiddleware('eeg:data', function(data) { return handleEEGData(io, this, data); }));
 
   // Disconnect handler
   socket.on('disconnect', (reason) => {
