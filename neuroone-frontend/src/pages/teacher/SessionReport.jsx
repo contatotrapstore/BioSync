@@ -51,7 +51,6 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import WarningIcon from '@mui/icons-material/Warning';
-import InfoIcon from '@mui/icons-material/Info';
 import StarIcon from '@mui/icons-material/Star';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import SearchIcon from '@mui/icons-material/Search';
@@ -741,28 +740,6 @@ export function SessionReport() {
                 </Grid>
               )}
 
-              {/* Estatísticas Gerais */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Card sx={{ p: 2, bgcolor: 'info.lighter', borderLeft: 4, borderColor: 'info.main' }}>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <InfoIcon color="info" sx={{ fontSize: 40 }} />
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Estatísticas
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>{highAttentionStudents.length}</strong> alunos com alta atenção
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>{lowAttentionStudents.length}</strong> alunos com baixa atenção
-                      </Typography>
-                      <Typography variant="body2">
-                        Desvio padrão: <strong>{attentionStdDev.toFixed(1)}%</strong>
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Card>
-              </Grid>
             </Grid>
           )}
 

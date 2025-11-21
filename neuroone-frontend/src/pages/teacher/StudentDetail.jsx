@@ -61,7 +61,7 @@ export function StudentDetail() {
         .from('users')
         .select('id, name, email, cpf')
         .eq('id', studentId)
-        .eq('role', 'aluno')
+        .eq('user_role', 'aluno')
         .single();
 
       if (studentError) throw studentError;
