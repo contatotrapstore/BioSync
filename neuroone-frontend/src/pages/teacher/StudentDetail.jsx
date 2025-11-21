@@ -56,10 +56,10 @@ export function StudentDetail() {
     setError(null);
 
     try {
-      // 1. Fetch student info
+      // 1. Fetch student info (sem cpf que não existe na tabela)
       const { data: studentData, error: studentError } = await supabase
         .from('users')
-        .select('id, name, email, cpf')
+        .select('id, name, email')
         .eq('id', studentId)
         .eq('user_role', 'aluno')
         .single();
@@ -72,15 +72,16 @@ export function StudentDetail() {
 
       setStudent(studentData);
 
-      // 2. Fetch all sessions the student participated in
-      const { data: participations, error: participationsError } = await supabase
-        .from('session_participants')
-        .select('session_id')
+      // 2. Buscar sessões do aluno via eeg_data (fonte mais confiável)
+      const { data: eegData, error: eegError } = await supabase
+        .from('eeg_data')
+        .select('session_id, attention, relaxation')
         .eq('student_id', studentId);
 
-      if (participationsError) throw participationsError;
+      if (eegError) throw eegError;
 
-      const sessionIds = participations?.map(p => p.session_id) || [];
+      // Get unique session IDs from EEG data
+      const sessionIds = [...new Set((eegData || []).map(e => e.session_id))];
 
       if (sessionIds.length === 0) {
         setLoading(false);
@@ -103,18 +104,45 @@ export function StudentDetail() {
         .eq('student_id', studentId)
         .in('session_id', sessionIds);
 
-      if (metricsError) throw metricsError;
+      if (metricsError) {
+        console.warn('Erro ao buscar student_metrics:', metricsError);
+        // Continue without pre-calculated metrics
+      }
 
-      // Merge sessions with metrics
+      // Merge sessions with metrics, calculando de eeg_data se necessário
       const sessionsWithMetrics = (sessionsData || []).map(session => {
         const metric = metricsData?.find(m => m.session_id === session.id);
+
+        // Calcular métricas do eeg_data se student_metrics não tiver dados
+        let avg_attention = metric?.avg_attention || 0;
+        let avg_relaxation = metric?.avg_relaxation || 0;
+        let min_attention = metric?.min_attention || 0;
+        let max_attention = metric?.max_attention || 0;
+
+        if (avg_attention === 0 && eegData) {
+          const sessionEeg = eegData.filter(e => e.session_id === session.id);
+          if (sessionEeg.length > 0) {
+            const validAttention = sessionEeg.filter(e => e.attention != null);
+            const validRelaxation = sessionEeg.filter(e => e.relaxation != null);
+
+            if (validAttention.length > 0) {
+              avg_attention = validAttention.reduce((sum, e) => sum + e.attention, 0) / validAttention.length;
+              min_attention = Math.min(...validAttention.map(e => e.attention));
+              max_attention = Math.max(...validAttention.map(e => e.attention));
+            }
+            if (validRelaxation.length > 0) {
+              avg_relaxation = validRelaxation.reduce((sum, e) => sum + e.relaxation, 0) / validRelaxation.length;
+            }
+          }
+        }
+
         return {
           ...session,
           class_name: session.classes?.name || 'Turma não especificada',
-          avg_attention: metric?.avg_attention || 0,
-          avg_relaxation: metric?.avg_relaxation || 0,
-          min_attention: metric?.min_attention || 0,
-          max_attention: metric?.max_attention || 0,
+          avg_attention,
+          avg_relaxation,
+          min_attention,
+          max_attention,
         };
       });
 

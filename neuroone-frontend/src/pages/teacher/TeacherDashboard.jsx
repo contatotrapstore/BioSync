@@ -203,14 +203,36 @@ export function TeacherDashboard() {
 
       let avgAttention = 0;
       if (allSessions && allSessions.length > 0) {
+        const sessionIds = allSessions.map(s => s.id);
+
+        // Tentar buscar de session_metrics primeiro
         const { data: metricsData } = await supabase
           .from('session_metrics')
           .select('avg_attention')
-          .in('session_id', allSessions.map(s => s.id));
+          .in('session_id', sessionIds);
 
         if (metricsData && metricsData.length > 0) {
-          const sum = metricsData.reduce((acc, m) => acc + (m.avg_attention || 0), 0);
-          avgAttention = sum / metricsData.length;
+          const validMetrics = metricsData.filter(m => m.avg_attention > 0);
+          if (validMetrics.length > 0) {
+            const sum = validMetrics.reduce((acc, m) => acc + m.avg_attention, 0);
+            avgAttention = sum / validMetrics.length;
+          }
+        }
+
+        // Fallback: calcular de eeg_data se session_metrics não tem dados
+        if (avgAttention === 0) {
+          const { data: eegData } = await supabase
+            .from('eeg_data')
+            .select('attention')
+            .in('session_id', sessionIds);
+
+          if (eegData && eegData.length > 0) {
+            const validEeg = eegData.filter(e => e.attention != null && e.attention > 0);
+            if (validEeg.length > 0) {
+              const sum = validEeg.reduce((acc, e) => acc + e.attention, 0);
+              avgAttention = sum / validEeg.length;
+            }
+          }
         }
       }
 

@@ -67,28 +67,27 @@ export function StudentHistory() {
         startDate.setMonth(startDate.getMonth() - 1);
       }
 
-      // Fetch session participants for this student
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('session_participants')
-        .select('*')
+      // Buscar sessões com dados EEG do aluno (fonte mais confiável)
+      const { data: eegData, error: eegError } = await supabase
+        .from('eeg_data')
+        .select('session_id, timestamp, attention, relaxation')
         .eq('student_id', user.id)
-        .gte('joined_at', startDate.toISOString())
-        .order('joined_at', { ascending: false })
-        .limit(50);
+        .gte('timestamp', startDate.toISOString())
+        .order('timestamp', { ascending: false });
 
-      if (participantsError) {
-        console.error('Error fetching participants:', participantsError);
-        throw participantsError;
+      if (eegError) {
+        console.error('Error fetching EEG data:', eegError);
+        throw eegError;
       }
 
-      if (!participantsData || participantsData.length === 0) {
+      if (!eegData || eegData.length === 0) {
         setSessions([]);
         setStats(null);
         return;
       }
 
-      // Get unique session IDs
-      const sessionIds = [...new Set(participantsData.map(p => p.session_id))];
+      // Get unique session IDs from EEG data
+      const sessionIds = [...new Set(eegData.map(e => e.session_id))];
 
       // Fetch session details
       const { data: sessionsData, error: sessionsError } = await supabase
@@ -128,20 +127,45 @@ export function StudentHistory() {
         }
       }
 
-      // Combine all data
-      const combinedData = participantsData.map(participant => {
-        const session = sessionsData.find(s => s.id === participant.session_id);
-        const metrics = metricsData ? metricsData.find(m => m.session_id === participant.session_id) : null;
+      // Combine all data - criar registros para cada sessão única
+      const combinedData = sessionIds.map(sessionId => {
+        const session = sessionsData.find(s => s.id === sessionId);
+        const metrics = metricsData ? metricsData.find(m => m.session_id === sessionId) : null;
         const classInfo = session && session.class_id
           ? classesData.find(c => c.id === session.class_id)
           : null;
 
+        // Encontrar dados EEG dessa sessão
+        const sessionEegData = eegData.filter(e => e.session_id === sessionId);
+        const firstEeg = sessionEegData[sessionEegData.length - 1]; // mais antigo (ordered desc)
+
+        // Calcular métricas a partir do EEG se student_metrics estiver vazio
+        let avgAttention = metrics?.avg_attention || 0;
+        let avgRelaxation = metrics?.avg_relaxation || 0;
+        let maxAttention = metrics?.max_attention || 0;
+
+        if (!metrics && sessionEegData.length > 0) {
+          const validAttention = sessionEegData.filter(e => e.attention != null);
+          const validRelaxation = sessionEegData.filter(e => e.relaxation != null);
+
+          if (validAttention.length > 0) {
+            avgAttention = Math.round(validAttention.reduce((sum, e) => sum + e.attention, 0) / validAttention.length);
+            maxAttention = Math.max(...validAttention.map(e => e.attention));
+          }
+          if (validRelaxation.length > 0) {
+            avgRelaxation = Math.round(validRelaxation.reduce((sum, e) => sum + e.relaxation, 0) / validRelaxation.length);
+          }
+        }
+
         return {
-          ...participant,
+          id: sessionId,
+          session_id: sessionId,
+          student_id: user.id,
+          joined_at: firstEeg?.timestamp || session?.start_time,
           // Add metrics data
-          avg_attention: metrics?.avg_attention || 0,
-          avg_relaxation: metrics?.avg_relaxation || 0,
-          max_attention: metrics?.max_attention || 0,
+          avg_attention: avgAttention,
+          avg_relaxation: avgRelaxation,
+          max_attention: maxAttention,
           engagement_score: metrics?.engagement_score || 0,
           session: session ? {
             ...session,
