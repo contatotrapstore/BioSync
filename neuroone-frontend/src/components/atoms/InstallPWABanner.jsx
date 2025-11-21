@@ -113,11 +113,11 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
           zIndex: 1300,
           background: (theme) =>
             theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #0a4f5c 0%, #00D9FF 100%)'
-              : 'linear-gradient(135deg, #00D9FF 0%, #00b8d4 100%)',
+              ? 'linear-gradient(135deg, #1A1A1A 0%, #CDA434 100%)'
+              : 'linear-gradient(135deg, #CDA434 0%, #8B6C42 100%)',
           color: 'white',
           borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0, 217, 255, 0.3)',
+          boxShadow: '0 8px 32px rgba(205, 164, 52, 0.4)',
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
@@ -153,10 +153,10 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
                 onClick={handleInstall}
                 sx={{
                   bgcolor: 'white',
-                  color: '#00D9FF',
+                  color: '#8B6C42',
                   fontWeight: 600,
                   '&:hover': {
-                    bgcolor: '#f5f5f5',
+                    bgcolor: '#FFF8E7',
                     transform: 'scale(1.05)',
                   },
                   transition: 'all 0.2s',

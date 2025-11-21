@@ -59,7 +59,7 @@ export function SessionCreate() {
   async function fetchMyClasses() {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/v1/classes`, {
+      const response = await fetch(`${API_URL}/api/classes`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
