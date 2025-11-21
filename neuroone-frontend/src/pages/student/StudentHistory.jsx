@@ -4,10 +4,8 @@ import {
   Typography,
   Card,
   CardContent,
-  CardActions,
   Grid,
   Chip,
-  Stack,
   Alert,
   Divider,
 } from '@mui/material';
@@ -17,13 +15,9 @@ import EmptyState from '../../components/layout/EmptyState';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
-import { generateSessionReport, generateStudentSummary } from '../../utils/pdfExport';
 // MUI Icons
-import DownloadIcon from '@mui/icons-material/Download';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import Home from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -205,45 +199,6 @@ export function StudentHistory() {
     }
   }
 
-  function handleExportSession(session) {
-    const {
-      data: { user },
-    } = supabase.auth.getUser();
-
-    user.then((userData) => {
-      if (userData.user) {
-        const studentInfo = {
-          name: userData.user.user_metadata?.name || userData.user.email,
-          email: userData.user.email,
-        };
-
-        generateSessionReport(session.session, session, studentInfo);
-      }
-    });
-  }
-
-  function handleExportAll() {
-    const {
-      data: { user },
-    } = supabase.auth.getUser();
-
-    user.then((userData) => {
-      if (userData.user) {
-        const studentInfo = {
-          name: userData.user.user_metadata?.name || userData.user.email,
-          email: userData.user.email,
-        };
-
-        const sessionsWithMetrics = sessions.map((s) => ({
-          ...s.session,
-          metrics: s,
-        }));
-
-        generateStudentSummary(sessionsWithMetrics, studentInfo);
-      }
-    });
-  }
-
   function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -271,26 +226,14 @@ export function StudentHistory() {
         { label: 'Histórico', icon: <TimelineIcon fontSize="small" /> },
       ]}
       actions={
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/student')}
-            size="small"
-          >
-            Voltar
-          </Button>
-          {sessions.length > 0 && (
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              onClick={handleExportAll}
-              size="small"
-            >
-              Exportar Histórico
-            </Button>
-          )}
-        </Stack>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/student')}
+          size="small"
+        >
+          Voltar
+        </Button>
       }
       maxWidth="lg"
     >
@@ -449,16 +392,6 @@ export function StudentHistory() {
                       )}
                     </Grid>
                   </CardContent>
-
-                  <CardActions>
-                    <Button
-                      size="small"
-                      startIcon={<DownloadIcon />}
-                      onClick={() => handleExportSession(sessionData)}
-                    >
-                      Exportar Relatório
-                    </Button>
-                  </CardActions>
                 </Card>
               </Grid>
             ))}
