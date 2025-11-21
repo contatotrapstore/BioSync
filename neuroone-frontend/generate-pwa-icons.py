@@ -71,9 +71,13 @@ def main():
     cyan_bg = (0, 217, 255, 255)
 
     icons_to_generate = [
-        # Standard PWA icons (10% padding)
-        ("pwa-192x192.png", 192, 10, white_bg, "PWA icon 192x192"),
-        ("pwa-512x512.png", 512, 10, white_bg, "PWA icon 512x512"),
+        # Standard PWA icons (10% padding) - Multiple sizes for all devices
+        ("pwa-72x72.png", 72, 10, white_bg, "PWA icon 72x72 (small mobile)"),
+        ("pwa-96x96.png", 96, 10, white_bg, "PWA icon 96x96 (medium mobile)"),
+        ("pwa-144x144.png", 144, 10, white_bg, "PWA icon 144x144 (Windows tiles/tablets)"),
+        ("pwa-192x192.png", 192, 10, white_bg, "PWA icon 192x192 (Android standard)"),
+        ("pwa-384x384.png", 384, 10, white_bg, "PWA icon 384x384 (large tablets)"),
+        ("pwa-512x512.png", 512, 10, white_bg, "PWA icon 512x512 (high-res displays)"),
 
         # Maskable icons (20% safe zone padding)
         ("pwa-192x192-maskable.png", 192, 20, cyan_bg, "Maskable icon 192x192"),

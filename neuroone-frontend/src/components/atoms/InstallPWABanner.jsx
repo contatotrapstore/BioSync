@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, IconButton, Typography, Paper, Slide, Stack } from '@mui/material';
+import { Box, Button, IconButton, Typography, Paper, Slide, Stack, useMediaQuery, useTheme } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import CloseIcon from '@mui/icons-material/Close';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import TabletIcon from '@mui/icons-material/Tablet';
+import ComputerIcon from '@mui/icons-material/Computer';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
 /**
@@ -18,6 +20,11 @@ import { useInstallPrompt } from '../../hooks/useInstallPrompt';
  * @param {number} props.delaySeconds - Atraso antes de mostrar (default: 3)
  */
 export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // > 900px
+
   const {
     isInstallable,
     isInstalled,
@@ -27,6 +34,18 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
   } = useInstallPrompt();
 
   const [show, setShow] = useState(false);
+
+  // Determine icon and text based on device type
+  let DeviceIcon = PhoneIphoneIcon;
+  let deviceText = 'celular';
+
+  if (isTablet) {
+    DeviceIcon = TabletIcon;
+    deviceText = 'tablet';
+  } else if (isDesktop && !isMobile) {
+    DeviceIcon = ComputerIcon;
+    deviceText = 'computador';
+  }
 
   useEffect(() => {
     // Não mostrar se já está instalado
@@ -93,7 +112,7 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
       >
         <Stack direction="row" spacing={2} alignItems="center">
           {/* Icon */}
-          <PhoneIphoneIcon sx={{ fontSize: 40, flexShrink: 0 }} />
+          <DeviceIcon sx={{ fontSize: 40, flexShrink: 0 }} />
 
           {/* Content */}
           <Box sx={{ flex: 1 }}>
@@ -101,7 +120,7 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
               Instalar NeuroOne
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Acesse mais rápido e use como um app nativo no seu celular!
+              Acesse mais rápido e use como um app nativo no seu {deviceText}!
             </Typography>
           </Box>
 
