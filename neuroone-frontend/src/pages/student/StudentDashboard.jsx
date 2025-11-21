@@ -11,15 +11,12 @@ import { supabase } from '../../services/supabase';
 // MUI Icons
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import SettingsIcon from '@mui/icons-material/Settings';
 import WifiIcon from '@mui/icons-material/Wifi';
-import Home from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
 import Refresh from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { StudentSession } from './StudentSession';
 import { StudentHistory } from './StudentHistory';
-import { StudentSettings } from './StudentSettings';
 
 export function StudentDashboard() {
   const { user } = useAuth();
@@ -249,7 +246,7 @@ export function StudentDashboard() {
                 Ações Rápidas
               </Typography>
               <Grid container spacing={3}>
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Card
                     clickable
                     onClick={() => navigate('/student/history')}
@@ -261,21 +258,6 @@ export function StudentDashboard() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Ver sessões passadas e seu progresso
-                    </Typography>
-                  </Card>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Card
-                    clickable
-                    onClick={() => navigate('/student/settings')}
-                    sx={{ textAlign: 'center', py: 4 }}
-                  >
-                    <SettingsIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
-                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                      Configurações
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Configurar dispositivo EEG
                     </Typography>
                   </Card>
                 </Grid>
@@ -315,7 +297,6 @@ export function StudentDashboard() {
       />
       <Route path="/session/:sessionId" element={<StudentSession />} />
       <Route path="/history" element={<StudentHistory />} />
-      <Route path="/settings" element={<StudentSettings />} />
     </Routes>
   );
 }

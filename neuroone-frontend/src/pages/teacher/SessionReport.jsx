@@ -65,7 +65,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
 export function SessionReport() {
   const { sessionId } = useParams();
@@ -169,7 +168,7 @@ export function SessionReport() {
       }
 
       // Buscar métricas do backend
-      const metricsResponse = await fetch(`${WS_URL}/api/metrics/sessions/${sessionId}`);
+      const metricsResponse = await fetch(`${API_URL}/api/metrics/sessions/${sessionId}`);
 
       if (!metricsResponse.ok) {
         throw new Error('Não foi possível carregar as métricas da sessão');
@@ -203,7 +202,7 @@ export function SessionReport() {
   async function handleRecalculateMetrics() {
     setRecalculating(true);
     try {
-      const response = await fetch(`${WS_URL}/api/metrics/sessions/${sessionId}/calculate`, {
+      const response = await fetch(`${API_URL}/api/metrics/sessions/${sessionId}/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

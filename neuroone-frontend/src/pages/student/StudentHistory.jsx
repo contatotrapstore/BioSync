@@ -70,10 +70,10 @@ export function StudentHistory() {
       // Fetch session participants for this student
       const { data: participantsData, error: participantsError } = await supabase
         .from('session_participants')
-        .select('*, session_id')
+        .select('*')
         .eq('student_id', user.id)
-        .gte('created_at', startDate.toISOString())
-        .order('created_at', { ascending: false })
+        .gte('joined_at', startDate.toISOString())
+        .order('joined_at', { ascending: false })
         .limit(50);
 
       if (participantsError) {
