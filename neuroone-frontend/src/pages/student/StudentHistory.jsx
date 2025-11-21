@@ -93,12 +93,24 @@ export function StudentHistory() {
       // Fetch session details
       const { data: sessionsData, error: sessionsError } = await supabase
         .from('sessions')
-        .select('id, title, started_at, ended_at, class_id')
+        .select('id, title, start_time, end_time, class_id')
         .in('id', sessionIds);
 
       if (sessionsError) {
         console.error('Error fetching sessions:', sessionsError);
         throw sessionsError;
+      }
+
+      // Fetch student metrics for these sessions
+      const { data: metricsData, error: metricsError } = await supabase
+        .from('student_metrics')
+        .select('session_id, avg_attention, avg_relaxation, max_attention, engagement_score')
+        .eq('student_id', user.id)
+        .in('session_id', sessionIds);
+
+      if (metricsError) {
+        console.error('Error fetching metrics:', metricsError);
+        // Don't throw - metrics are optional, continue without them
       }
 
       // Fetch class details if there are class_ids
@@ -119,12 +131,18 @@ export function StudentHistory() {
       // Combine all data
       const combinedData = participantsData.map(participant => {
         const session = sessionsData.find(s => s.id === participant.session_id);
+        const metrics = metricsData ? metricsData.find(m => m.session_id === participant.session_id) : null;
         const classInfo = session && session.class_id
           ? classesData.find(c => c.id === session.class_id)
           : null;
 
         return {
           ...participant,
+          // Add metrics data
+          avg_attention: metrics?.avg_attention || 0,
+          avg_relaxation: metrics?.avg_relaxation || 0,
+          max_attention: metrics?.max_attention || 0,
+          engagement_score: metrics?.engagement_score || 0,
           session: session ? {
             ...session,
             class: classInfo ? { name: classInfo.name } : null
@@ -140,16 +158,16 @@ export function StudentHistory() {
           combinedData.reduce((sum, s) => sum + (s.avg_attention || 0), 0) / combinedData.length;
         const avgRelaxation =
           combinedData.reduce((sum, s) => sum + (s.avg_relaxation || 0), 0) / combinedData.length;
-        const totalScore = combinedData.reduce((sum, s) => sum + (s.game_score || 0), 0);
-        const maxAttention = Math.max(...combinedData.map((s) => s.peak_attention || 0));
-        const maxRelaxation = Math.max(...combinedData.map((s) => s.peak_relaxation || 0));
+        const totalScore = combinedData.reduce((sum, s) => sum + (s.engagement_score || 0), 0);
+        const maxAttention = Math.max(...combinedData.map((s) => s.max_attention || 0));
+        const maxRelaxation = Math.max(...combinedData.map((s) => s.avg_relaxation || 0));
 
         setStats({
           avgAttention: avgAttention.toFixed(1),
           avgRelaxation: avgRelaxation.toFixed(1),
-          totalScore,
+          totalScore: totalScore.toFixed(1),
           maxAttention,
-          maxRelaxation,
+          maxRelaxation: maxRelaxation.toFixed(1),
           totalSessions: combinedData.length,
         });
       } else {
@@ -225,7 +243,6 @@ export function StudentHistory() {
       title="Histórico de Sessões"
       subtitle="Acompanhe seu progresso e desempenho nas sessões"
       breadcrumbs={[
-        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
         { label: 'Aluno', icon: <SchoolIcon fontSize="small" /> },
         { label: 'Histórico', icon: <TimelineIcon fontSize="small" /> },
       ]}
@@ -359,11 +376,11 @@ export function StudentHistory() {
                     <Stack spacing={1} sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <EventIcon fontSize="small" />
-                        {formatDate(sessionData.session?.started_at)}
+                        {formatDate(sessionData.session?.start_time)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <AccessTimeIcon fontSize="small" />
-                        Duração: {formatDuration(sessionData.session?.started_at, sessionData.session?.ended_at)}
+                        Duração: {formatDuration(sessionData.session?.start_time, sessionData.session?.end_time)}
                       </Typography>
                       {sessionData.session?.class && (
                         <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -384,7 +401,7 @@ export function StudentHistory() {
                           {sessionData.avg_attention || 0}%
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Pico: {sessionData.peak_attention || 0}%
+                          Pico: {sessionData.max_attention || 0}%
                         </Typography>
                       </Grid>
                       <Grid item xs={6}>
@@ -393,9 +410,6 @@ export function StudentHistory() {
                         </Typography>
                         <Typography variant="h6" color="secondary">
                           {sessionData.avg_relaxation || 0}%
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Pico: {sessionData.peak_relaxation || 0}%
                         </Typography>
                       </Grid>
                       {sessionData.game_score && (
