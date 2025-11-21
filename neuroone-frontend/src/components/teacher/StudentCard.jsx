@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Divider, Stack } from '@mui/material';
+import { Box, Typography, Divider, Stack, Chip } from '@mui/material';
 import { Card } from '../atoms/Card';
 import { AttentionIndicator } from './AttentionIndicator';
 import { EEGChart } from './EEGChart';
@@ -7,6 +7,7 @@ import { EEGChart } from './EEGChart';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 /**
  * Card individual de aluno mostrando dados EEG em tempo real
@@ -14,8 +15,9 @@ import CloudDoneIcon from '@mui/icons-material/CloudDone';
  * @param {Object} eegData - Dados EEG em tempo real { attention, relaxation, delta, theta, alpha, beta, gamma }
  * @param {Object} thresholds - { low, high } para classificação de atenção
  * @param {boolean} connected - Se o aluno está conectado
+ * @param {boolean} dataStale - Se os dados estão desatualizados
  */
-export function StudentCard({ student, eegData = null, thresholds = { low: 40, high: 70 }, connected = false }) {
+export function StudentCard({ student, eegData = null, thresholds = { low: 40, high: 70 }, connected = false, dataStale = false }) {
   const hasData = connected && eegData && eegData.attention !== null && eegData.attention !== undefined;
 
   const getSignalQualityColor = (quality) => {
@@ -40,18 +42,29 @@ export function StudentCard({ student, eegData = null, thresholds = { low: 40, h
         opacity: connected ? 1 : 0.5,
         transition: 'all 0.3s ease',
         border: '2px solid',
-        borderColor: connected ? 'divider' : 'transparent',
+        borderColor: dataStale ? 'warning.main' : (connected ? 'divider' : 'transparent'),
         '&:hover': {
-          borderColor: connected ? 'primary.main' : 'divider',
+          borderColor: dataStale ? 'warning.dark' : (connected ? 'primary.main' : 'divider'),
         },
       }}
     >
       <Stack spacing={2}>
         {/* Header: Nome e Indicador */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-            {student.name}
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h4" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+              {student.name}
+            </Typography>
+            {dataStale && (
+              <Chip
+                icon={<WarningAmberIcon />}
+                label="Dados desatualizados"
+                color="warning"
+                size="small"
+                sx={{ fontSize: '0.65rem', height: '20px' }}
+              />
+            )}
+          </Box>
           <AttentionIndicator
             attention={hasData ? eegData.attention : null}
             thresholds={thresholds}

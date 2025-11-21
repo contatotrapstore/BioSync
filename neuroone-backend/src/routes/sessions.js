@@ -8,8 +8,16 @@ dotenv.config();
 
 const router = express.Router();
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://fsszpnbuabhhvrdmrtct.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc3pwbmJ1YWJoaHZyZG1ydGN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzM3MTY0NCwiZXhwIjoyMDc4OTQ3NjQ0fQ.imC7bY7nj0ruaiqJMnvTPScBjImelVK-HdMp8M5Dnxk';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+// Validate required environment variables
+if (!supabaseUrl) {
+  throw new Error('❌ SUPABASE_URL is not configured in .env file');
+}
+if (!supabaseServiceKey) {
+  throw new Error('❌ SUPABASE_SERVICE_KEY is not configured in .env file');
+}
 
 // Helper to query Supabase REST API directly (avoids client library hanging)
 async function supabaseQuery(table, options = {}) {

@@ -67,6 +67,32 @@ export function useWebSocketEEG(sessionId) {
         socket.emit('teacher:join', { sessionId });
       });
 
+      // Event: Teacher recebe lista inicial de alunos
+      socket.on('teacher:students', (data) => {
+        console.log('[Teacher] Lista de alunos recebida:', data);
+
+        // Inicializar studentsData com estados de conexão
+        const initialData = {};
+        data.students.forEach(student => {
+          if (student.connected) {
+            initialData[student.id] = {
+              attention: 0,
+              relaxation: 0,
+              delta: 0,
+              theta: 0,
+              alpha: 0,
+              beta: 0,
+              gamma: 0,
+              signalQuality: 0,
+              timestamp: new Date().toISOString(),
+              offline: false,
+            };
+          }
+        });
+
+        setStudentsData(initialData);
+      });
+
       // Event: Desconexão
       socket.on('disconnect', (reason) => {
         console.warn('[WebSocket] Desconectado:', reason);
@@ -111,8 +137,24 @@ export function useWebSocketEEG(sessionId) {
 
       // Event: Aluno conectou
       socket.on('student:connected', (data) => {
-        console.log('[Student] Conectou:', data.studentId);
-        // Pode ser usado para mostrar notificação
+        console.log('[Student] Conectou:', data.studentId, data.studentName);
+
+        // Atualizar estado para mostrar aluno como conectado
+        setStudentsData((prev) => ({
+          ...prev,
+          [data.studentId]: {
+            attention: 0,
+            relaxation: 0,
+            delta: 0,
+            theta: 0,
+            alpha: 0,
+            beta: 0,
+            gamma: 0,
+            signalQuality: 0,
+            timestamp: data.timestamp,
+            offline: false,
+          },
+        }));
       });
 
       // Event: Aluno desconectou

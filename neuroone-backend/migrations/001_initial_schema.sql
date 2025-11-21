@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
-  session_type TEXT DEFAULT 'neurofeedback' CHECK (session_type IN ('neurofeedback', 'assessment', 'training', 'other')),
+  session_type TEXT DEFAULT 'monitoramento' CHECK (session_type IN ('monitoramento', 'neurogame', 'avaliacao')),
   status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'active', 'completed', 'cancelled')),
   start_time TIMESTAMPTZ NOT NULL,
   end_time TIMESTAMPTZ,

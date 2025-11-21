@@ -6,8 +6,16 @@ dotenv.config();
 const { Pool } = pg;
 
 // Supabase REST API configuration
-const supabaseUrl = process.env.SUPABASE_URL || 'https://fsszpnbuabhhvrdmrtct.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc3pwbmJ1YWJoaHZyZG1ydGN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzM3MTY0NCwiZXhwIjoyMDc4OTQ3NjQ0fQ.imC7bY7nj0ruaiqJMnvTPScBjImelVK-HdMp8M5Dnxk';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+// Validate required environment variables
+if (!supabaseUrl) {
+  throw new Error('❌ SUPABASE_URL is not configured in .env file');
+}
+if (!supabaseServiceKey) {
+  throw new Error('❌ SUPABASE_SERVICE_KEY is not configured in .env file');
+}
 
 // Helper to query Supabase REST API
 async function supabaseQuery(table, options = {}) {
@@ -148,6 +156,22 @@ export async function getSessionStudents(sessionId) {
   } catch (error) {
     console.error('❌ Error fetching session students:', error);
     throw error;
+  }
+}
+
+/**
+ * Check if a student is enrolled in a session's class
+ * @param {string} sessionId - Session UUID
+ * @param {string} studentId - Student UUID
+ * @returns {Promise<boolean>} - True if student is enrolled
+ */
+export async function isStudentEnrolled(sessionId, studentId) {
+  try {
+    const students = await getSessionStudents(sessionId);
+    return students.some(s => s.id === studentId);
+  } catch (error) {
+    console.error('❌ Error checking student enrollment:', error);
+    return false;
   }
 }
 

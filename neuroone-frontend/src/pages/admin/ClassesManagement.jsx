@@ -172,7 +172,7 @@ export function ClassesManagement() {
         {/* Stats Summary */}
         <Card sx={{ mb: 3 }}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                   Total de Turmas
@@ -183,7 +183,7 @@ export function ClassesManagement() {
               </Box>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                   Turmas Ativas
@@ -194,7 +194,7 @@ export function ClassesManagement() {
               </Box>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                   Turmas Inativas
@@ -205,7 +205,7 @@ export function ClassesManagement() {
               </Box>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Box>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
                   Total de Alunos

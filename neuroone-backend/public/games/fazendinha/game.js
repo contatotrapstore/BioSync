@@ -1,3 +1,15 @@
+// ========== DEBUG LOGGER ==========
+// Para ativar logs, execute no console: localStorage.setItem('DEBUG_MODE', 'true')
+// Para desativar logs: localStorage.removeItem('DEBUG_MODE')
+const DEBUG_MODE = localStorage.getItem('DEBUG_MODE') === 'true';
+const debugLog = {
+  log: (...args) => DEBUG_MODE && console.log(...args),
+  info: (...args) => DEBUG_MODE && console.info(...args),
+  warn: (...args) => console.warn(...args), // Warnings sempre aparecem
+  error: (...args) => console.error(...args), // Errors sempre aparecem
+  success: (...args) => DEBUG_MODE && console.log(...args),
+};
+
 // Variáveis globais do jogo
 let scene, camera, renderer, clock;
 let maze, player, musica, audioCheck, objetivo;
@@ -19,6 +31,14 @@ let item;
 let isColliding = false;
 let totalItens = 0;
 let velocidadeTrator = 0;
+
+// Socket.IO - Integração com backend
+let socket = null;
+let sessionId = null;
+let studentId = null;
+let studentName = null;
+let lastEEGSendTime = 0;
+const EEG_SEND_INTERVAL = 200; // Enviar dados EEG a cada 200ms (5 Hz - alinhado com server rate limit)
 
 const posChecks = [
 { x: -29, y: 0, z: 12 },
@@ -60,6 +80,147 @@ const loseScreen = document.getElementById('loseScreen');
 const playAgainWinButton = document.getElementById('playAgainWin');
 const playAgainLoseButton = document.getElementById('playAgainLose');
 const loadingBar = document.getElementById('loadingBar'); // Adicionei essa linha
+
+// ========== SOCKET.IO - INTEGRAÇÃO COM BACKEND ==========
+
+/**
+ * Extrai parâmetros da URL
+ */
+function getURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    sessionId: params.get('sessionId'),
+    studentId: params.get('studentId'),
+    studentName: decodeURIComponent(params.get('studentName') || 'Aluno'),
+    token: params.get('token'),
+  };
+}
+
+/**
+ * Inicializa conexão Socket.IO com o backend
+ */
+function initializeSocketIO() {
+  debugLog.log('🎮 [GAME] Inicializando Socket.IO...');
+
+  // Extrair parâmetros da URL
+  const params = getURLParams();
+  sessionId = params.sessionId;
+  studentId = params.studentId;
+  studentName = params.studentName;
+
+  debugLog.log('📋 [GAME] Parâmetros da URL:', { sessionId, studentId, studentName });
+
+  if (!sessionId || !studentId) {
+    console.error('❌ [GAME] sessionId ou studentId não fornecidos na URL');
+    console.error('   URL atual:', window.location.href);
+    return;
+  }
+
+  // Obter token de autenticação: prioridade URL (cross-origin), fallback localStorage
+  let authToken = params.token; // Tentar da URL primeiro
+  let tokenSource = 'URL';
+
+  if (!authToken) {
+    // Fallback: tentar localStorage (mesma origem)
+    authToken = localStorage.getItem('authToken');
+    tokenSource = 'localStorage';
+  }
+
+  debugLog.log('🔑 [GAME] Token encontrado:', authToken ? `SIM (origem: ${tokenSource}, comprimento: ${authToken.length})` : 'NÃO');
+
+  if (!authToken) {
+    console.error('❌ [GAME] Token de autenticação não encontrado na URL nem no localStorage');
+    console.error('   URL atual:', window.location.href);
+    console.error('   localStorage.authToken:', localStorage.getItem('authToken'));
+    return;
+  }
+
+  // Conectar ao backend
+  const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : 'https://neurogame-7av9.onrender.com';
+
+  debugLog.log('🔌 [GAME] Conectando ao backend:', API_URL);
+
+  socket = io(API_URL, {
+    auth: { token: authToken },
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+  });
+
+  // Eventos Socket.IO
+  socket.on('connect', () => {
+    debugLog.log('✅ [GAME] Socket.IO conectado!', socket.id);
+    debugLog.log('📤 [GAME] Enviando student:join com:', { sessionId, studentId, studentName });
+
+    // Entrar na sessão como estudante
+    socket.emit('student:join', {
+      sessionId: sessionId,
+      studentId: studentId,
+      studentName: studentName,
+    });
+  });
+
+  socket.on('student:joined', (data) => {
+    debugLog.log('✅ [GAME] Entrou na sessão:', data);
+  });
+
+  socket.on('disconnect', (reason) => {
+    debugLog.log('🔌 [GAME] Socket.IO desconectado:', reason);
+  });
+
+  socket.on('error', (error) => {
+    console.error('❌ [GAME] Erro Socket.IO:', error);
+  });
+
+  socket.on('eeg:received', (data) => {
+    debugLog.log('📊 [GAME] Dados EEG recebidos pelo backend:', data.timestamp);
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('❌ [GAME] Erro de conexão Socket.IO:', error.message);
+  });
+}
+
+/**
+ * Envia dados EEG para o backend via Socket.IO
+ * @param {number} attention - Nível de atenção (0-100)
+ * @param {number} relaxation - Nível de relaxamento (0-100)
+ */
+function sendEEGData(attention, relaxation) {
+  if (!socket || !socket.connected) {
+    // Log apenas primeira vez para evitar spam
+    if (!sendEEGData.loggedNotConnected) {
+      console.warn('⚠️ [GAME] sendEEGData chamado mas socket não conectado');
+      sendEEGData.loggedNotConnected = true;
+    }
+    return; // Socket não conectado
+  }
+
+  // Throttling: enviar apenas a cada 200ms (5 Hz - alinhado com server rate limit)
+  const now = Date.now();
+  if (now - lastEEGSendTime < EEG_SEND_INTERVAL) {
+    return;
+  }
+  lastEEGSendTime = now;
+
+  // Log periódico (a cada 5 segundos) para não sobrecarregar console
+  if (!sendEEGData.lastLogTime || (now - sendEEGData.lastLogTime) > 5000) {
+    debugLog.log('📊 [GAME] Enviando EEG:', { attention: Math.round(attention || 0), relaxation: Math.round(relaxation || 0) });
+    sendEEGData.lastLogTime = now;
+  }
+
+  // Enviar dados
+  socket.emit('eeg:data', {
+    attention: Math.round(attention || 0),
+    relaxation: Math.round(relaxation || 0),
+    timestamp: new Date().toISOString(),
+    signalQuality: 100, // Qualidade fixa por enquanto
+  });
+}
+
+// ========== FIM SOCKET.IO ==========
 
 // Inicialização do jogo
 function init() {	
@@ -290,7 +451,10 @@ function startGame() {
 }
 
 // Atualizar posição da câmera
-function updateCamera() {  
+function updateCamera() {
+  // Verificar se maze foi carregado antes de acessar position
+  if (!maze) return;
+
   //if (!player) return;
   // Posicionar câmera atrás do jogador
   if(gameState === 'playing'){
@@ -443,7 +607,7 @@ function updatePlayer(deltaTime) {
 	trator.play();
 	moveSpeed += (moveSpeed < getVelocidadeMaxima()) ? 0.01 : 0;
 	setVelocidade(moveSpeed);
-	console.log(moveSpeed);
+	debugLog.log(moveSpeed);
 	let direction = new THREE.Vector3(0, 0, 0);
     switch(direcao){        
         case 0:
@@ -523,6 +687,9 @@ function animate() {
 document.addEventListener('DOMContentLoaded', function() {
   init();
   loadModels();
+
+  // Inicializar Socket.IO para enviar dados EEG em tempo real
+  initializeSocketIO();
 });
 
 // Eventos de teclado

@@ -1,4 +1,3 @@
-
 let audiosDinamicos = [];
 let volumeControlContainer;
 let volumeSlider;
@@ -6,7 +5,7 @@ let volumeButton;
 let controleAtivo = false;
 let feedbackPositivo, feedbackNegativo, tipoJogo;
 let velocidade, velocidadeMaxima, pontuacaoHabilitada;
-let tipoFeedback = 1; 
+let tipoFeedback = 1;
 let valorAtual = 0;
 let valorMaximo = 51;
 let valorMinimo = 45;
@@ -112,7 +111,7 @@ function toggleModal() {
 
 function updateStatus(message) {
 	statusDiv.textContent = `Status: ${message}`;
-	console.log(message);
+	debugLog.log(message);
 }
 
 function appendData(data) {
@@ -130,7 +129,7 @@ function displayUuids(services) {
 		html += `<p><strong>Serviço: ${service.uuid}</strong></p><ul>`;
 		try {
 			const chars = await service.getCharacteristics();
-			console.log(`Chars no serviço ${service.uuid}:`, chars);
+			debugLog.log(`Chars no serviço ${service.uuid}:`, chars);
 			if (chars.length === 0) {
 				html += `<li>Sem chars. Tente outro serviço.</li>`;
 			}
@@ -224,18 +223,18 @@ async function sendStartCommand() {
 
 function parseThinkGearPacket(buffer) {
 	const view = new Uint8Array(buffer);
-	console.log('Raw bytes:', Array.from(view).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', '));
+	debugLog.log('Raw bytes:', Array.from(view).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', '));
 	let output = '';
 	let i = 0;
 	while (i < view.length - 2) {
 		if (view[i] !== 0xAA || view[i+1] !== 0xAA) {
-			console.log(`Sync falhou no índice ${i}: ${view[i]}, ${view[i+1]}`);
+			debugLog.log(`Sync falhou no índice ${i}: ${view[i]}, ${view[i+1]}`);
 			i++;
 			continue;
 		}
 		const len = view[i+2];
 		if (i + len + 4 > view.length) {
-			console.log(`Pacote incompleto no índice ${i}, len: ${len}, buffer: ${view.length}`);
+			debugLog.log(`Pacote incompleto no índice ${i}, len: ${len}, buffer: ${view.length}`);
 			output += 'Pacote incompleto | ';
 			break;
 		}
@@ -246,7 +245,7 @@ function parseThinkGearPacket(buffer) {
 		let sum = 0;
 		for (let j = 0; j < len; j++) sum += view[payloadStart + j];
 		const calcChecksum = (~sum) & 0xFF;
-		console.log(`Pacote: Sync=0xAA,0xAA, Len=${len}, Payload=[${Array.from(payload).map(b => '0x' + b.toString(16).padStart(2, '0')).join(',')}], Checksum=0x${checksum.toString(16)}, Calc=0x${calcChecksum.toString(16)}`);
+		debugLog.log(`Pacote: Sync=0xAA,0xAA, Len=${len}, Payload=[${Array.from(payload).map(b => '0x' + b.toString(16).padStart(2, '0')).join(',')}], Checksum=0x${checksum.toString(16)}, Calc=0x${calcChecksum.toString(16)}`);
 		if (checksum === calcChecksum) {
 			let j = 0;
 			while (j < len) {
@@ -304,22 +303,34 @@ function handleThinkGearStream(event) {
 }
 
 async function connectAndDiscover() {
-	if (!navigator.bluetooth) return updateStatus('Web Bluetooth não rola. Chrome/Edge HTTPS only.');
+	if (!navigator.bluetooth) {
+		alert('❌ Web Bluetooth não disponível!\n\nVerifique:\n1. Use Chrome, Edge ou Opera\n2. Acesse via HTTPS ou localhost\n3. Bluetooth do PC está ligado');
+		return updateStatus('Web Bluetooth não disponível.');
+	}
+
 	try {
 		updateStatus('Buscando dispositivos... Ative pairing no MindWave (LED piscando).');
-		device = await navigator.bluetooth.requestDevice({
-			filters: [                
-                { services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] } // Filtra por serviço
-            ],
+
+		// Tenta primeiro com filtros específicos para MindWave
+		let requestOptions = {
+			filters: [
+				{ name: 'MindWave' },
+				{ namePrefix: 'Mind' },
+				{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] },
+				{ services: ['00001101-0000-1000-8000-00805f9b34fb'] }
+			],
 			optionalServices: [
 				'00001101-0000-1000-8000-00805f9b34fb',
 				'0000ffe0-0000-1000-8000-00805f9b34fb',
 				'0000ffe1-0000-1000-8000-00805f9b34fb',
 				'generic_access',
-				'battery_service'
+				'battery_service',
+				'device_information'
 			]
-		});
-		updateStatus('Conectando...');
+		};
+
+		device = await navigator.bluetooth.requestDevice(requestOptions);
+		updateStatus('Conectando ao ' + device.name + '...');
 		server = await device.gatt.connect();
 		updateStatus('Descobrindo serviços...');
 		disconnectBtn.style.display = 'inline-block';
@@ -331,8 +342,27 @@ async function connectAndDiscover() {
 			resetVars();
 		});
 	} catch (error) {
-		updateStatus(`Erro: ${error.message}. Pareie como serial no sistema primeiro.`);
-		console.error(error);
+		console.error('Erro completo:', error);
+
+		if (error.message.includes('User cancelled')) {
+			updateStatus('Pareamento cancelado pelo usuário.');
+		} else if (error.message.includes('Connection attempt failed')) {
+			// Erro específico: dispositivo bloqueado/ocupado
+			alert('⚠️ DISPOSITIVO BLOQUEADO!\n\n' +
+				'O dispositivo apareceu mas não conseguiu conectar.\n' +
+				'Isso acontece quando ele já está pareado no Windows.\n\n' +
+				'SOLUÇÃO:\n' +
+				'1. Windows → Configurações → Bluetooth\n' +
+				'2. REMOVA o dispositivo "=SichirayUSB"\n' +
+				'3. DESLIGUE e LIGUE o MindWave novamente\n' +
+				'4. Tente conectar APENAS pelo navegador');
+
+			updateStatus('❌ REMOVA o dispositivo do Bluetooth do Windows primeiro!\n\n' +
+				'O Windows está bloqueando a conexão. Vá em:\n' +
+				'Configurações → Bluetooth → Remover "=SichirayUSB"');
+		} else {
+			updateStatus(`❌ Erro: ${error.message}\n\n✅ Checklist:\n1. MindWave está LIGADO?\n2. LED está PISCANDO (modo pareamento)?\n3. Bluetooth do PC está ATIVO?\n4. Já pareou no Windows antes? (Configurações > Bluetooth)`);
+		}
 	}
 }
 
@@ -390,44 +420,18 @@ function getPublicIPv4(callback) {
 }
 
 
-function initWebSocket(callback, ip) {    
-  //ws = new WebSocket('ws://'+iplocal+':8080');
-  var novoIP = 'ws://'+ip+':8080'
-  ws = new WebSocket(novoIP);
-	
-  let conectado = false;
-  const statusIndicator = document.getElementById('statusIndicator');
-  const statusText = document.getElementById('statusText');
-  const attentionValue = document.getElementById('attentionValue');
-  const meditationValue = document.getElementById('meditationValue');
+// FUNÇÃO LEGADA - NÃO MAIS USADA
+// Agora usamos Socket.IO (game.js) para enviar dados EEG em tempo real
+function initWebSocket(callback, ip) {
+  console.warn('⚠️ initWebSocket() é função legada - agora usamos Socket.IO');
 
-  ws.onopen = () => {
-    statusIndicator.style.background = 'rgba(0,255,0,1)';
-    statusText.innerText = 'Conectado';
-    conectado = true;
-    callback(true);
-  };
+  // Simular sucesso para não quebrar código que ainda chama esta função
+  if (callback) {
+    setTimeout(() => callback(true), 100);
+  }
 
-  ws.onmessage = (event) => {
-      dados = JSON.parse(event.data);	  
-      attentionValue.innerText = att;
-      meditationValue.innerText = med;
-      if (tipoFeedback == 1) valorAtual = att;
-      else valorAtual = med;
-  };
- 
-
-  ws.onerror = () => {	
-    /*statusIndicator.style.background = 'rgba(255,0,0,1)';
-    statusText.innerText = 'Erro de Conexão';*/
-    event.preventDefault();
-  };
-
-  ws.onclose = () => {
-    /*statusIndicator.style.background = 'rgba(255,0,0,1)';
-    statusText.innerText = 'Desconectado';*/
-    conectado = false;
-  };
+  // A função update() em funcoes.js agora chama sendEEGData() do game.js
+  // que envia dados via Socket.IO para o backend
 }
 
 function habilitarControles(){	
@@ -457,7 +461,7 @@ function habilitarControles(){
 	
 	habilitarPontuacao(false);
 	
-	console.log('Controles Habilitados');
+	debugLog.log('Controles Habilitados');
 }
 
 function verificarOpcao() {  
@@ -513,21 +517,21 @@ function registrarPontuacao(jogo, tempo, tipo){
 	
 	const pontuacao = (tempoAtencao / totalMonitoringDuration) * 1000;
 	const feedbackAtual = (tipoFeedback == 1) ? 'Atencao' : 'Meditacao'
-    console.log('Jogo atual: '+jogo);
-	console.log('Tipo Feedback: '+feedbackAtual);
-    console.log('Tempo Total: '+formatTime(totalMonitoringDuration));
-    console.log('Tempo Feedback Positivo: '+formatTime(tempoAtencao));
-    console.log('Tempo Feedback Negativo: '+formatTime(tempoMeditacao));
+    debugLog.log('Jogo atual: '+jogo);
+	debugLog.log('Tipo Feedback: '+feedbackAtual);
+    debugLog.log('Tempo Total: '+formatTime(totalMonitoringDuration));
+    debugLog.log('Tempo Feedback Positivo: '+formatTime(tempoAtencao));
+    debugLog.log('Tempo Feedback Negativo: '+formatTime(tempoMeditacao));
 	
 	// Calcula porcentagens
 	const porcentagemAtencao = calcularPorcentagem(tempoAtencao, totalMonitoringDuration);
 	const porcentagemDesatencao = calcularPorcentagem(tempoMeditacao, totalMonitoringDuration);
 
 	// Exibe resultados
-	console.log(`% Feedback Positivo: ${Math.round(porcentagemAtencao)}%`);
-	console.log(`% Feedback Negativo: ${Math.round(porcentagemDesatencao)}%`);	
-    if(!validarPontuacao(tipo)) console.log('Pontuação não registrada');
-	else console.log('Pontuação: '+Math.floor(pontuacao));
+	debugLog.log(`% Feedback Positivo: ${Math.round(porcentagemAtencao)}%`);
+	debugLog.log(`% Feedback Negativo: ${Math.round(porcentagemDesatencao)}%`);	
+    if(!validarPontuacao(tipo)) debugLog.log('Pontuação não registrada');
+	else debugLog.log('Pontuação: '+Math.floor(pontuacao));
     
     // Salvar individualmente no localStorage
     localStorage.setItem('jogo', jogo);
@@ -545,15 +549,15 @@ function registrarPontuacao(jogo, tempo, tipo){
 	//Exibe Pontuação
 	
     
-    console.log('Dados salvos no localStorage');
+    debugLog.log('Dados salvos no localStorage');
 }
  
-function update() {  
+function update() {
   const statusIndicator = document.getElementById('statusIndicator');
   const statusText = document.getElementById('statusText');
   const attentionValue = document.getElementById('attentionValue');
   const meditationValue = document.getElementById('meditationValue');
-  
+
   if(controleAtivo){
 	  attentionValue.innerText = att;
       meditationValue.innerText = med;
@@ -564,6 +568,11 @@ function update() {
 	  statusIndicator.style.background = 'rgba(0,255,0,1)';
 	  if (tipoFeedback == 1) valorAtual = att;
 	  else valorAtual = med;
+
+	  // Enviar dados EEG para backend via Socket.IO (definido em game.js)
+	  if (typeof sendEEGData === 'function') {
+		  sendEEGData(att, med);
+	  }
   }
   
  
@@ -701,9 +710,9 @@ function formatTime(seconds) {
 }
 
 function exibirTempos(){
-	console.log('Tempo Total: '+formatTime(totalMonitoringDuration));
-	console.log('Tempo Atenção: '+formatTime(tempoAtencao));
-	console.log('Tempo Meditação: '+formatTime(tempoMeditacao));	
+	debugLog.log('Tempo Total: '+formatTime(totalMonitoringDuration));
+	debugLog.log('Tempo Atenção: '+formatTime(tempoAtencao));
+	debugLog.log('Tempo Meditação: '+formatTime(tempoMeditacao));	
 }
 
 function getPositivo(){

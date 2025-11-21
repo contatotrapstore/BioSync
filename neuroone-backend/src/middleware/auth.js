@@ -46,20 +46,31 @@ export async function verifyToken(token) {
  * @param {Function} next - Next middleware function
  */
 export async function socketAuthMiddleware(socket, next) {
+  console.log('🔐 [AUTH] Socket authentication attempt...');
+  console.log('🔐 [AUTH] Socket ID:', socket.id);
+  console.log('🔐 [AUTH] Handshake auth:', socket.handshake.auth);
+  console.log('🔐 [AUTH] Handshake query:', socket.handshake.query);
+
   try {
     // Get token from auth handshake or query
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
     if (!token) {
+      console.error('❌ [AUTH] No token provided');
       return next(new Error('Authentication token required'));
     }
+
+    console.log('🔐 [AUTH] Token found, verifying...');
 
     // Verify token
     const user = await verifyToken(token);
 
     if (!user) {
+      console.error('❌ [AUTH] Token verification failed');
       return next(new Error('Invalid or expired token'));
     }
+
+    console.log('🔐 [AUTH] Token verified for user:', user.email);
 
     // Attach user to socket
     socket.user = {
@@ -69,10 +80,10 @@ export async function socketAuthMiddleware(socket, next) {
       name: user.user_metadata?.name || user.email,
     };
 
-    console.log(`✅ Authenticated: ${socket.user.email} (${socket.user.role})`);
+    console.log(`✅ [AUTH] Authenticated: ${socket.user.email} (${socket.user.role})`);
     next();
   } catch (error) {
-    console.error('Socket authentication error:', error);
+    console.error('❌ [AUTH] Exception during authentication:', error);
     next(new Error('Authentication failed'));
   }
 }

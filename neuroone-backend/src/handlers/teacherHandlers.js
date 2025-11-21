@@ -1,4 +1,10 @@
 import { getSession, getSessionStudents } from '../services/database.js';
+import {
+  addTeacherToRoom,
+  removeTeacherFromRoom,
+  getConnectedStudents,
+  getConnectedStudentIds,
+} from '../services/roomState.js';
 
 /**
  * Handle teacher joining a session room
@@ -22,6 +28,13 @@ export async function handleTeacherJoin(io, socket, data) {
       return;
     }
 
+    // Verify teacher owns this session
+    if (socket.user && session.teacher_id !== socket.user.id) {
+      socket.emit('error', { message: 'You do not have permission to access this session' });
+      console.log(`🚫 Teacher ${socket.user.id} attempted to join session ${sessionId} without ownership`);
+      return;
+    }
+
     // Join room
     const roomName = `session:${sessionId}`;
     await socket.join(roomName);
@@ -32,6 +45,9 @@ export async function handleTeacherJoin(io, socket, data) {
     socket.data.roomName = roomName;
 
     console.log(`👨‍🏫 Teacher ${socket.id} joined session ${sessionId}`);
+
+    // Add teacher to room state
+    addTeacherToRoom(sessionId, socket.id);
 
     // Send confirmation
     socket.emit('teacher:joined', {
@@ -45,18 +61,34 @@ export async function handleTeacherJoin(io, socket, data) {
       },
     });
 
-    // Get all students in session
-    const students = await getSessionStudents(sessionId);
+    // Get all students in session from database
+    const allStudents = await getSessionStudents(sessionId);
 
-    // Send initial student list
+    // Get currently connected students from room state
+    const connectedStudentIds = getConnectedStudentIds(sessionId);
+
+    // Merge database list with connection state
     socket.emit('teacher:students', {
       sessionId,
-      students: students.map((s) => ({
+      students: allStudents.map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
-        connected: false,
+        connected: connectedStudentIds.has(s.id),
       })),
+    });
+
+    // Send latest EEG data for connected students
+    const connectedStudents = getConnectedStudents(sessionId);
+    connectedStudents.forEach((student) => {
+      if (student.lastEEG) {
+        socket.emit('eeg:update', {
+          sessionId,
+          studentId: student.studentId,
+          studentName: student.studentName,
+          ...student.lastEEG,
+        });
+      }
     });
 
     // Notify room that teacher joined
@@ -90,6 +122,9 @@ export async function handleTeacherLeave(io, socket, data) {
 
     console.log(`👨‍🏫 Teacher ${socket.id} left session ${sessionId}`);
 
+    // Remove teacher from room state
+    removeTeacherFromRoom(sessionId, socket.id);
+
     // Notify room
     io.to(roomName).emit('teacher:disconnected', {
       timestamp: new Date().toISOString(),
@@ -112,14 +147,19 @@ export async function handleGetStudents(socket, data) {
   try {
     const { sessionId } = data;
 
-    const students = await getSessionStudents(sessionId);
+    // Get all students from database
+    const allStudents = await getSessionStudents(sessionId);
+
+    // Get currently connected students from room state
+    const connectedStudentIds = getConnectedStudentIds(sessionId);
 
     socket.emit('teacher:students', {
       sessionId,
-      students: students.map((s) => ({
+      students: allStudents.map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
+        connected: connectedStudentIds.has(s.id),
       })),
     });
   } catch (error) {

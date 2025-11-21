@@ -35,8 +35,50 @@ export function StudentDashboard() {
     }
   }, [user]);
 
-  async function fetchActiveSessions() {
-    setLoading(true);
+  // Realtime subscription for active sessions
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to sessions table changes
+    const channel = supabase
+      .channel('student-sessions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'sessions',
+          filter: `status=eq.active`,
+        },
+        (payload) => {
+          console.log('[Realtime] Session change detected:', payload);
+          // Refetch active sessions when any change occurs (without loading spinner)
+          fetchActiveSessions(false);
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  // Polling as fallback (every 30 seconds)
+  useEffect(() => {
+    if (!user) return;
+
+    const pollingInterval = setInterval(() => {
+      fetchActiveSessions(false); // Poll without showing loading
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(pollingInterval);
+  }, [user]);
+
+  async function fetchActiveSessions(showLoading = true) {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       // Buscar turmas do aluno
       const { data: classStudents, error: classError } = await supabase
@@ -47,6 +89,12 @@ export function StudentDashboard() {
       if (classError) throw classError;
 
       const classIds = classStudents.map((cs) => cs.class_id);
+
+      if (classIds.length === 0) {
+        setActiveSessions([]);
+        setError(null);
+        return;
+      }
 
       // Buscar sessões ativas
       const { data: sessions, error: sessionsError } = await supabase
@@ -59,11 +107,14 @@ export function StudentDashboard() {
       if (sessionsError) throw sessionsError;
 
       setActiveSessions(sessions || []);
+      setError(null);
     } catch (error) {
       console.error('Erro ao buscar sessões:', error);
       setError(error.message || 'Erro ao carregar sessões ativas.');
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }
 
@@ -76,7 +127,6 @@ export function StudentDashboard() {
             title="Painel do Aluno"
             subtitle={`Bem-vindo, ${user?.name || 'Aluno'}!`}
             breadcrumbs={[
-              { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
               { label: 'Aluno', icon: <SchoolIcon fontSize="small" /> },
               { label: 'Dashboard' },
             ]}
@@ -117,7 +167,7 @@ export function StudentDashboard() {
               ) : (
                 <Grid container spacing={3}>
                   {activeSessions.map((session) => (
-                    <Grid item xs={12} md={6} key={session.id}>
+                    <Grid size={{ xs: 12, md: 6 }} key={session.id}>
                       <Card
                         variant="outlined"
                         sx={{
@@ -199,7 +249,7 @@ export function StudentDashboard() {
                 Ações Rápidas
               </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Card
                     clickable
                     onClick={() => navigate('/student/history')}
@@ -214,7 +264,7 @@ export function StudentDashboard() {
                     </Typography>
                   </Card>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Card
                     clickable
                     onClick={() => navigate('/student/settings')}

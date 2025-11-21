@@ -17,6 +17,7 @@ export function StudentGrid({ students = [], thresholds = { low: 40, high: 70 } 
             eegData={student.eegData || null}
             thresholds={thresholds}
             connected={student.connected || false}
+            dataStale={student.dataStale || false}
           />
         </Grid>
       ))}

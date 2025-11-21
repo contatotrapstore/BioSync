@@ -142,11 +142,40 @@ export function SessionActive() {
         prevStudents.map((student) => ({
           ...student,
           eegData: studentsData[student.id] || student.eegData,
-          connected: !!studentsData[student.id] && !studentsData[student.id].offline,
+          // Only show as connected if EEG device is really connected (signalQuality > 0)
+          connected: !!studentsData[student.id] &&
+                    !studentsData[student.id].offline &&
+                    studentsData[student.id].signalQuality > 0,
         }))
       );
     }
   }, [studentsData]);
+
+  // Detectar dados obsoletos (sem atualização por mais de 15 segundos)
+  useEffect(() => {
+    const STALE_THRESHOLD_MS = 15000; // 15 segundos
+
+    const checkStaleData = setInterval(() => {
+      const now = Date.now();
+
+      setStudents((prevStudents) =>
+        prevStudents.map((student) => {
+          if (student.eegData && student.eegData.timestamp && student.connected) {
+            const lastUpdate = new Date(student.eegData.timestamp).getTime();
+            const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+
+            return {
+              ...student,
+              dataStale: isStale,
+            };
+          }
+          return student;
+        })
+      );
+    }, 5000); // Verificar a cada 5 segundos
+
+    return () => clearInterval(checkStaleData);
+  }, []);
 
   // Timer de duração da sessão
   useEffect(() => {

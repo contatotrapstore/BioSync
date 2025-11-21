@@ -9,11 +9,6 @@ import {
   Stack,
   Chip,
   LinearProgress,
-  Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/atoms/Card';
@@ -25,8 +20,6 @@ import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import BluetoothIcon from '@mui/icons-material/Bluetooth';
 import BluetoothDisabledIcon from '@mui/icons-material/BluetoothDisabled';
-import { ConcentrationGame } from '../../components/games/ConcentrationGame';
-import { BalanceGame } from '../../components/games/BalanceGame';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -46,16 +39,11 @@ export function StudentSession() {
 
   // EEG state
   const [eegConnected, setEegConnected] = useState(false);
-  const [monitorPaused, setMonitorPaused] = useState(false); // Pausa monitor quando jogo assume controle
   const [eegData, setEegData] = useState({
     attention: 0,
     relaxation: 0,
     signalQuality: 0,
   });
-
-  // Game state
-  const [selectedGame, setSelectedGame] = useState('');
-  const [gameResults, setGameResults] = useState(null);
 
   // Load session data
   useEffect(() => {
@@ -83,6 +71,8 @@ export function StudentSession() {
         throw new Error(sessionResult.error || 'Erro ao buscar sessão');
       }
 
+      // Build complete session object BEFORE calling setSession
+      // This prevents multiple re-renders that cause WebSocket reconnections
       const sessionData = sessionResult.data;
 
       // Buscar dados da turma
@@ -98,17 +88,25 @@ export function StudentSession() {
         }
       }
 
-      // Buscar dados do professor
-      const teacherResponse = await fetch(`${API_URL}/api/users/${sessionData.teacher_id}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      // Buscar dados do professor (com timeout)
+      try {
+        const teacherResponse = await Promise.race([
+          fetch(`${API_URL}/api/users/${sessionData.teacher_id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
 
-      if (teacherResponse.ok) {
-        const teacherResult = await teacherResponse.json();
-        if (teacherResult.success) {
-          sessionData.teacher = teacherResult.data;
+        if (teacherResponse.ok) {
+          const teacherResult = await teacherResponse.json();
+          if (teacherResult.success) {
+            sessionData.teacher = teacherResult.data;
+          }
         }
+      } catch (error) {
+        console.warn('Não foi possível carregar dados do professor:', error.message);
+        // Continua mesmo sem dados do professor
       }
 
       // Verify student is in this class
@@ -140,6 +138,7 @@ export function StudentSession() {
         return;
       }
 
+      // Call setSession ONCE with complete data to prevent WebSocket reconnections
       setSession(sessionData);
     } catch (error) {
       console.error('Erro ao carregar sessão:', error);
@@ -234,29 +233,57 @@ export function StudentSession() {
     };
   }, [session, user]);
 
-  // Auto-connect EEG monitor when WebSocket is ready
+  // Detect real EEG connection based on signal quality (not just WebSocket)
   useEffect(() => {
-    if (wsConnected && session && user) {
-      // Monitor conecta automaticamente - Python bridge gerencia conexão Bluetooth real
-      setEegConnected(true);
-      console.log('📊 Monitor EEG ativado automaticamente');
-      console.log('📝 Python EEG bridge deve estar rodando:');
-      console.log(`   python neuroone-python-eeg/eeg_bridge.py --student-id ${user.id} --session-id ${session.id}`);
-    }
-  }, [wsConnected, session, user]);
-
-  // Pausar/retomar monitor quando jogo inicia/termina
-  useEffect(() => {
-    if (selectedGame && (selectedGame === 'concentration' || selectedGame === 'balance')) {
-      console.log(`🎮 Jogo "${selectedGame}" assumiu controle do EEG - Monitor pausado`);
-      setMonitorPaused(true);
-    } else {
-      if (monitorPaused) {
-        console.log('📊 Monitor EEG resumido - Jogo encerrado');
+    if (eegData.signalQuality > 0) {
+      if (!eegConnected) {
+        setEegConnected(true);
+        console.log('✅ EEG device conectado! Signal quality:', eegData.signalQuality);
       }
-      setMonitorPaused(false);
+    } else {
+      if (eegConnected) {
+        setEegConnected(false);
+        console.log('❌ EEG device desconectado');
+      }
     }
-  }, [selectedGame]);
+  }, [eegData.signalQuality, eegConnected]);
+
+  // Helper function to open windows with smart sizing
+  const openGameWindow = (url, type = 'game') => {
+    const screenWidth = window.screen.availWidth;
+    const screenHeight = window.screen.availHeight;
+
+    let width, height, left, top;
+
+    if (type === 'game') {
+      // Jogo em tela cheia ou quase tela cheia
+      width = Math.min(1920, screenWidth);
+      height = Math.min(1080, screenHeight);
+      left = (screenWidth - width) / 2;
+      top = (screenHeight - height) / 2;
+    } else if (type === 'monitor') {
+      // Monitor em tamanho tablet landscape
+      width = 1024;
+      height = 768;
+      left = (screenWidth - width) / 2;
+      top = (screenHeight - height) / 2;
+    }
+
+    const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`;
+    const newWindow = window.open(url, '_blank', features);
+
+    // Tentar colocar em fullscreen se for jogo (pode não funcionar em todos os browsers)
+    if (type === 'game' && newWindow) {
+      try {
+        newWindow.moveTo(0, 0);
+        newWindow.resizeTo(screenWidth, screenHeight);
+      } catch (e) {
+        console.log('Fullscreen não disponível neste navegador');
+      }
+    }
+
+    return newWindow;
+  };
 
   if (loading) {
     return (
@@ -316,30 +343,14 @@ export function StudentSession() {
           </Alert>
         )}
 
-        {/* EEG Data Display - Monitor ativo automaticamente */}
+        {/* EEG Data Display - Only show when connected */}
         {eegConnected && (
-          <>
-            {/* Aviso se Python bridge não estiver enviando dados */}
-            {eegData.attention === 0 && eegData.relaxation === 0 && (
-              <Alert severity="info" sx={{ mb: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                  📊 Monitor EEG aguardando dados do Python bridge
-                </Typography>
-                <Typography variant="caption">
-                  Certifique-se de que o Python bridge está rodando com seu student ID e session ID corretos.
-                </Typography>
-              </Alert>
-            )}
-
-            <Card sx={{ mb: 3, p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h2">
-                  Dados em Tempo Real {monitorPaused && '(Pausado - Jogo Ativo)'}
-                </Typography>
-                {monitorPaused && (
-                  <Chip label="Monitor Pausado" color="warning" size="small" />
-                )}
-              </Box>
+          <Card sx={{ mb: 3, p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h2">
+                Dados em Tempo Real
+              </Typography>
+            </Box>
 
               {/* Attention */}
               <Box sx={{ mb: 3 }}>
@@ -413,141 +424,137 @@ export function StudentSession() {
                   }}
                 />
               </Box>
-            </Card>
-
-            {/* Game Area */}
-            <Card sx={{ mb: 3, p: 3 }}>
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Selecionar Jogo</InputLabel>
-                <Select
-                  value={selectedGame}
-                  label="Selecionar Jogo"
-                  onChange={(e) => setSelectedGame(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Nenhum</em>
-                  </MenuItem>
-                  <MenuItem value="concentration">Jogo de Concentração</MenuItem>
-                  <MenuItem value="balance">Jogo de Balanço</MenuItem>
-                  <MenuItem value="fazendinha">🎮 Fazendinha 3D (Neurofeedback)</MenuItem>
-                  <MenuItem value="monitor">📊 Monitor EEG Standalone</MenuItem>
-                </Select>
-              </FormControl>
-
-              {selectedGame === 'fazendinha' && (
-                <Paper
-                  sx={{
-                    p: 4,
-                    textAlign: 'center',
-                    backgroundColor: 'primary.50',
-                    border: '2px solid',
-                    borderColor: 'primary.main',
-                  }}
-                >
-                  <SportsEsportsIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-                  <Typography variant="h2" sx={{ mb: 1 }}>
-                    🎮 Fazendinha 3D
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-                    Jogo completo com renderização 3D. Controle o trator com sua atenção!
-                  </Typography>
-                  <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary' }}>
-                    O jogo será aberto em uma nova aba. Conecte seu headset EEG via Bluetooth dentro do jogo.
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={() => {
-                      const gameUrl = `${API_URL}/games/fazendinha/index.html?sessionId=${session.id}&studentId=${user.id}&studentName=${encodeURIComponent(user.name)}`;
-                      window.open(gameUrl, '_blank', 'width=1280,height=720');
-                    }}
-                  >
-                    Abrir Fazendinha 3D
-                  </Button>
-                </Paper>
-              )}
-
-              {selectedGame === 'monitor' && (
-                <Paper
-                  sx={{
-                    p: 4,
-                    textAlign: 'center',
-                    backgroundColor: 'info.50',
-                    border: '2px solid',
-                    borderColor: 'info.main',
-                  }}
-                >
-                  <BluetoothIcon sx={{ fontSize: 64, color: 'info.main', mb: 2 }} />
-                  <Typography variant="h2" sx={{ mb: 1 }}>
-                    📊 Monitor EEG Standalone
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-                    Interface visual para monitorar suas ondas cerebrais em tempo real.
-                  </Typography>
-                  <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary' }}>
-                    Visualize atenção, meditação e todas as bandas de ondas cerebrais (Delta, Theta, Alpha, Beta, Gamma).
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="info"
-                    size="large"
-                    onClick={() => {
-                      const monitorUrl = `${API_URL}/monitor/eeg-monitor.html?sessionId=${session.id}&studentId=${user.id}`;
-                      window.open(monitorUrl, '_blank', 'width=1024,height=768');
-                    }}
-                  >
-                    Abrir Monitor EEG
-                  </Button>
-                </Paper>
-              )}
-
-              {selectedGame === 'concentration' && (
-                <ConcentrationGame
-                  eegData={eegData}
-                  onGameEnd={(results) => {
-                    setGameResults(results);
-                    console.log('Game results:', results);
-                  }}
-                />
-              )}
-
-              {selectedGame === 'balance' && (
-                <BalanceGame
-                  eegData={eegData}
-                  onGameEnd={(results) => {
-                    setGameResults(results);
-                    console.log('Game results:', results);
-                  }}
-                />
-              )}
-
-              {!selectedGame && (
-                <Paper
-                  sx={{
-                    p: 4,
-                    textAlign: 'center',
-                    backgroundColor: 'grey.50',
-                    border: '2px dashed',
-                    borderColor: 'grey.300',
-                  }}
-                >
-                  <SportsEsportsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h2" sx={{ mb: 1 }}>
-                    Selecione um Jogo
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Escolha um jogo de neurofeedback acima para começar a treinar!
-                  </Typography>
-                </Paper>
-              )}
-            </Card>
-
-            {/* Exit Button */}
-            <Button variant="outlined" onClick={() => navigate('/student')} fullWidth>
-              Sair da Sessão
-            </Button>
-          </>
+          </Card>
         )}
+
+        {/* Game/Monitor Options - Always visible */}
+        {session.session_type === 'neurogame' ? (
+          <Box sx={{ mb: 3 }}>
+                <Typography variant="h2" sx={{ mb: 2 }}>
+                  🚀 Jogos de Neurofeedback
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                  Jogos que abrem em nova janela com conexão Bluetooth própria
+                </Typography>
+
+                {/* Fazendinha 3D */}
+                <Card sx={{ mb: 2, p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <SportsEsportsIcon sx={{ fontSize: 48, color: 'primary.main', flexShrink: 0 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h3" sx={{ mb: 1 }}>
+                        🎮 Fazendinha 3D
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                        Jogo completo com renderização 3D. Controle o trator com sua atenção!
+                      </Typography>
+                      <Alert severity="warning" sx={{ mb: 2 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                          ⚠️ Atenção: Conexão Bluetooth Separada
+                        </Typography>
+                        <Typography variant="caption">
+                          Este jogo abre em tela cheia para melhor experiência imersiva.
+                          Gerencia sua própria conexão Bluetooth. O monitor integrado desta página será pausado enquanto você joga.
+                        </Typography>
+                      </Alert>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        onClick={async () => {
+                          // Get auth token from Supabase
+                          const { data } = await supabase.auth.getSession();
+                          const token = data?.session?.access_token;
+
+                          if (token) {
+                            // Store in localStorage as fallback for same-origin pages
+                            localStorage.setItem('authToken', token);
+
+                            // Pass token in URL for cross-origin game window (localhost:3001)
+                            const gameUrl = `${API_URL}/games/fazendinha/index.html?sessionId=${session.id}&studentId=${user.id}&studentName=${encodeURIComponent(user.name)}&token=${encodeURIComponent(token)}`;
+                            console.log('✅ Token incluído na URL do jogo');
+                            openGameWindow(gameUrl, 'game');
+                          } else {
+                            console.error('❌ Não foi possível obter token de autenticação');
+                            alert('Erro: Não foi possível autenticar. Por favor, faça login novamente.');
+                          }
+                        }}
+                      >
+                        Abrir Fazendinha 3D em Tela Cheia
+                      </Button>
+                    </Box>
+                  </Box>
+                </Card>
+          </Box>
+        ) : session.session_type === 'monitoramento' ? (
+          <Box sx={{ mb: 3 }}>
+                <Typography variant="h2" sx={{ mb: 2 }}>
+                  📊 Monitor de Ondas Cerebrais
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                  Acompanhe suas ondas cerebrais em tempo real durante a aula
+                </Typography>
+
+                {/* Monitor EEG Standalone */}
+                <Card sx={{ mb: 3, p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <BluetoothIcon sx={{ fontSize: 48, color: 'info.main', flexShrink: 0 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h3" sx={{ mb: 1 }}>
+                        📊 Monitor EEG Standalone
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                        Interface visual avançada para monitorar todas as ondas cerebrais em tempo real.
+                      </Typography>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                          ℹ️ Visualização Avançada em Tamanho Tablet
+                        </Typography>
+                        <Typography variant="caption">
+                          Este monitor abre em janela otimizada (1024x768) perfeita para tablets.
+                          Mostra as 8 bandas de ondas cerebrais (Delta, Theta, Alpha, Beta, Gamma)
+                          com gráficos detalhados e conexão Bluetooth própria.
+                        </Typography>
+                      </Alert>
+                      <Button
+                        variant="contained"
+                        color="info"
+                        size="large"
+                        fullWidth
+                        onClick={async () => {
+                          // Get auth token from Supabase
+                          const { data } = await supabase.auth.getSession();
+                          const token = data?.session?.access_token;
+
+                          if (token) {
+                            // Store in localStorage as fallback for same-origin pages
+                            localStorage.setItem('authToken', token);
+
+                            // Pass token in URL for cross-origin monitor window (localhost:3001)
+                            const monitorUrl = `${API_URL}/monitor/eeg-monitor.html?sessionId=${session.id}&studentId=${user.id}&token=${encodeURIComponent(token)}`;
+                            console.log('✅ Token incluído na URL do monitor');
+                            openGameWindow(monitorUrl, 'monitor');
+                          } else {
+                            console.error('❌ Não foi possível obter token de autenticação');
+                            alert('Erro: Não foi possível autenticar. Por favor, faça login novamente.');
+                          }
+                        }}
+                      >
+                        Abrir Monitor em Tamanho Tablet
+                      </Button>
+                    </Box>
+                  </Box>
+                </Card>
+          </Box>
+        ) : (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            Tipo de sessão não reconhecido. Entre em contato com o professor.
+          </Alert>
+        )}
+
+        <Button variant="outlined" onClick={() => navigate('/student')} fullWidth>
+          Sair da Sessão
+        </Button>
       </Box>
     </Container>
   );

@@ -13,25 +13,87 @@
       --muted:#9fb0ffaa;
     }
 	
-	@media (max-width: 700px) {
+	/* Tablet landscape e desktop pequeno (768px - 1024px) */
+	@media (max-width: 1024px) and (min-width: 768px) {
 		.card {
-			flex-direction:column !important;
-			height:80% !important;
+			width: 95vw !important;
+			height: auto !important;
+			min-height: 60vh !important;
+			max-height: 85vh !important;
 		}
-		.right{
-			flex: 0 0 40% !important;
+		.left {
+			padding: 20px !important;
 		}
-		#formulario{
-			flex-direction:column !important;
-			padding-top:20px !important;
-			gap:0px !important;
+		.right {
+			padding: 20px !important;
 		}
-		#formulario input{
-			width:100% !important;
-			margin-bottom:10px !important;
+		.status-light {
+			--size: 160px !important;
 		}
-		#infoAluno h1{
-			font-size:18px !important;
+		#nomeInput {
+			font-size: 14px !important;
+			padding: 12px 16px !important;
+		}
+		.mock-gui {
+			width: 200px !important;
+		}
+		.mock-gui .bar {
+			height: 48px !important;
+			font-size: 14px !important;
+		}
+		#infoAluno h1 {
+			font-size: 24px !important;
+		}
+	}
+
+	/* Mobile e tablet portrait (max-width: 767px) */
+	@media (max-width: 767px) {
+		.app {
+			padding: 12px !important;
+		}
+		.card {
+			flex-direction: column !important;
+			width: 96vw !important;
+			height: auto !important;
+			min-height: 70vh !important;
+			max-height: 90vh !important;
+		}
+		.left {
+			flex: 0 0 auto !important;
+			padding: 16px !important;
+		}
+		.right {
+			flex: 1 1 auto !important;
+			padding: 16px !important;
+		}
+		.status-wrapper {
+			margin-top: 10px !important;
+		}
+		.status-light {
+			--size: 120px !important;
+		}
+		.status-label {
+			font-size: 12px !important;
+		}
+		#formulario {
+			flex-direction: column !important;
+			padding-top: 10px !important;
+			gap: 10px !important;
+		}
+		#formulario input {
+			width: 100% !important;
+			margin-bottom: 0 !important;
+			font-size: 14px !important;
+		}
+		.mock-gui {
+			width: 100% !important;
+		}
+		.mock-gui .bar {
+			height: 44px !important;
+			font-size: 13px !important;
+		}
+		#infoAluno h1 {
+			font-size: 18px !important;
 		}
 	}
 	
@@ -50,10 +112,13 @@
     }
 
     /* CARD PRINCIPAL */
-    .app{display:flex; align-items:center; justify-content:center; height:100vh; padding:24px;}
+    .app{display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;}
     .card{
       position:relative;
-      width:min(1120px, 92vw); height:min(38vh, 340px);
+      width:min(1120px, 92vw);
+      height:auto;
+      min-height:400px;
+      max-height:85vh;
       background: linear-gradient(180deg, #0f1628, #0b1325);
       border:1px solid var(--line); border-radius:22px;
       box-shadow: 0 18px 50px #0008, inset 0 1px 0 #2a3966aa;
@@ -89,8 +154,8 @@
 
     /* PAINEL DIREITO - INPUT + BOTÃO + NOME */
     .infoAluno{
-      width:100%; position:relative; height:100%; border-radius:14px; border:1px solid #223055; overflow:hidden; background:#0b1223;
-      display:flex; align-items:center; justify-content:center;
+      width:100%; position:relative; min-height:200px; height:100%; border-radius:14px; border:1px solid #223055; overflow:hidden; background:#0b1223;
+      display:flex; align-items:center; justify-content:center; padding:20px;
     }
     #formulario{
 	  display:flex;
@@ -277,7 +342,22 @@
     </section>
   </main>
 
+  <!-- Socket.IO Client (servido localmente) -->
+  <script src="/monitor/socket.io.min.js"></script>
+
   <script>
+    // ========== DEBUG LOGGER ==========
+    // Para ativar logs, execute no console: localStorage.setItem('DEBUG_MODE', 'true')
+    // Para desativar logs: localStorage.removeItem('DEBUG_MODE')
+    const DEBUG_MODE = localStorage.getItem('DEBUG_MODE') === 'true';
+    const debugLog = {
+      log: (...args) => DEBUG_MODE && console.log(...args),
+      info: (...args) => DEBUG_MODE && console.info(...args),
+      warn: (...args) => console.warn(...args), // Warnings sempre aparecem
+      error: (...args) => console.error(...args), // Errors sempre aparecem
+      success: (...args) => DEBUG_MODE && console.log(...args),
+    };
+
     const light = document.getElementById('statusLight');
     const label = document.getElementById('statusLabel');
     const botao = document.getElementById('botao');
@@ -285,7 +365,7 @@
     const infoAluno = document.getElementById('infoAluno');
     const nomeInput = document.getElementById('nomeInput');
     const nomeAlunoSpan = document.getElementById('nomeAluno');
-	
+
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	
 	let device = null;
@@ -314,9 +394,13 @@
 					MiddleGamma: 0
 				};
 	
-	// WebSocket global (será criado uma única vez)
-	let ws = null;
+	// Socket.IO - Integração com backend
+	let socket = null;
+	let sessionId = null;
+	let studentId = null;
 	let sendInterval = null;
+	let lastEEGSendTime = 0;
+	const EEG_SEND_INTERVAL = 200; // ms (5 Hz = 300 requests/min, matches backend rate limit of 300/60s)
 
     // Inicia no estado "aguardando"
     light.setAttribute('data-state', 'gray');
@@ -329,10 +413,24 @@
         nomeInput.placeholder = 'Digite o nome antes de iniciar';
         return;
       }
-	  
-	  codigo = gerarCodigo();
-	  connectAndDiscover();	  
-	  
+
+	  // Extrair sessionId e studentId da URL
+	  const params = new URLSearchParams(window.location.search);
+	  sessionId = params.get('sessionId');
+	  studentId = params.get('studentId');
+
+	  if (!sessionId || !studentId) {
+		console.error('❌ sessionId ou studentId não fornecidos na URL');
+		alert('Erro: URL inválida. Abra o monitor através do dashboard do aluno.');
+		return;
+	  }
+
+	  // Inicializar Socket.IO para enviar dados ao backend
+	  initializeSocketIO(nome);
+
+	  // Conectar Bluetooth
+	  connectAndDiscover();
+
       // Esconde input + botão
       formulario.style.display = 'None';
       // Mostra nome do aluno
@@ -352,7 +450,7 @@
 	
 	
 	function updateStatus(message) {		
-		console.log(message);
+		debugLog.log(message);
 	}
 
 	function appendData(data) {
@@ -370,7 +468,7 @@
 			html += `<p><strong>Serviço: ${service.uuid}</strong></p><ul>`;
 			try {
 				const chars = await service.getCharacteristics();
-				console.log(`Chars no serviço ${service.uuid}:`, chars);
+				debugLog.log(`Chars no serviço ${service.uuid}:`, chars);
 				if (chars.length === 0) {
 					html += `<li>Sem chars. Tente outro serviço.</li>`;
 				}
@@ -383,9 +481,9 @@
 						selectedChar = characteristics[characteristics.length - 1];
 						updateStatus(`Char selecionada: ${selectedChar.char.uuid}. Provável stream ThinkGear.`);
 						sendStartCommand();
-						setTimeout(() => {							
+						setTimeout(() => {
 							startStream();
-							connectWebSocket();
+							// Socket.IO já está conectado via initializeSocketIO() - não precisa reconectar
 						}, 1000);
 					}
 					const option = document.createElement('option');
@@ -461,65 +559,164 @@
 	}
 	
 
-	function connectWebSocket() {
-		console.log('Tentando conectar ao Websocket');
-		// Se já estiver conectado ou conectando, reutiliza
-		if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
-			return ws;
+	/**
+	 * Inicializa conexão Socket.IO com o backend
+	 */
+	function initializeSocketIO(studentName) {
+		debugLog.log('📊 [MONITOR] Inicializando Socket.IO...');
+		debugLog.log('📋 [MONITOR] Parâmetros:', { sessionId, studentId, studentName });
+
+		// Obter token de autenticação: prioridade URL (cross-origin), fallback localStorage
+		const params = new URLSearchParams(window.location.search);
+		let authToken = params.get('token'); // Tentar da URL primeiro
+		let tokenSource = 'URL';
+
+		if (!authToken) {
+			// Fallback: tentar localStorage (mesma origem)
+			authToken = localStorage.getItem('authToken');
+			tokenSource = 'localStorage';
 		}
 
-		// Cria nova conexão
-		ws = new WebSocket('wss://biosynctec.com.br/ws/');
+		debugLog.log('🔑 [MONITOR] Token encontrado:', authToken ? `SIM (origem: ${tokenSource}, comprimento: ${authToken.length})` : 'NÃO');
 
-		ws.onopen = () => {
-			console.log('WebSocket conectado com sucesso');
+		if (!authToken) {
+			console.error('❌ [MONITOR] Token de autenticação não encontrado na URL nem no localStorage');
+			console.error('   URL atual:', window.location.href);
+			console.error('   localStorage.authToken:', localStorage.getItem('authToken'));
+			return;
+		}
 
-			// Inicia o envio automático a cada 1 segundo
-			if (sendInterval) clearInterval(sendInterval); // limpa caso já exista
-			
+		// Conectar ao backend
+		const API_URL = window.location.hostname === 'localhost'
+			? 'http://localhost:3001'
+			: 'https://neurogame-7av9.onrender.com';
+
+		debugLog.log('🔌 [MONITOR] Conectando ao backend:', API_URL);
+
+		socket = io(API_URL, {
+			auth: { token: authToken },
+			transports: ['websocket', 'polling'],
+			reconnection: true,
+			reconnectionAttempts: 5,
+		});
+
+		// Eventos Socket.IO
+		socket.on('connect', () => {
+			debugLog.log('✅ [MONITOR] Socket.IO conectado!', socket.id);
+			debugLog.log('📤 [MONITOR] Enviando student:join com:', { sessionId, studentId, studentName });
+
+			// Entrar na sessão como estudante
+			socket.emit('student:join', {
+				sessionId: sessionId,
+				studentId: studentId,
+				studentName: studentName,
+			});
+
+			// Iniciar envio automático de dados EEG
+			if (sendInterval) clearInterval(sendInterval);
+
 			sendInterval = setInterval(() => {
-				if (ws && ws.readyState === WebSocket.OPEN) {
-					const payload = {
-						Nome: nomeInput.value.trim(),
-						Codigo: codigo,
-						Att: ondas.Att,
-						Med: ondas.Med,
-						Delta: ondas.Delta,
-						Theta: ondas.Theta,
-						LowAlpha: ondas.LowAlpha,
-						HighAlpha: ondas.HighAlpha,
-						LowBeta: ondas.LowBeta,
-						HighBeta: ondas.HighBeta,
-						LowGamma: ondas.LowGamma,
-						MiddleGamma: ondas.MiddleGamma
-					};
+				sendEEGData();
+			}, EEG_SEND_INTERVAL);
 
-					const jsonString = JSON.stringify(payload);
-					ws.send(jsonString);
+			debugLog.log('⏱️ [MONITOR] Envio automático iniciado (intervalo:', EEG_SEND_INTERVAL, 'ms)');
+		});
 
-					console.log('Enviado:', jsonString); // opcional: ver no console
-				}
-			}, 1000); // a cada 1000ms = 1 segundo
-		};
+		socket.on('student:joined', (data) => {
+			debugLog.log('✅ [MONITOR] Entrou na sessão:', data);
+		});
 
-		ws.onclose = () => {
-			console.log('WebSocket desconectado. Tentando reconectar em 5s...');
+		socket.on('disconnect', (reason) => {
+			debugLog.log('🔌 [MONITOR] Socket.IO desconectado:', reason);
 
-			// Para o envio automático
+			// Parar envio automático
 			if (sendInterval) {
 				clearInterval(sendInterval);
 				sendInterval = null;
+				debugLog.log('⏱️ [MONITOR] Envio automático parado');
 			}
+		});
 
-			// Reconecta automaticamente
-			setTimeout(connectWebSocket, 5000);
+		socket.on('error', (error) => {
+			console.error('❌ [MONITOR] Erro Socket.IO:', {
+				message: error?.message || 'Unknown error',
+				type: error?.constructor?.name,
+				stack: error?.stack,
+				full: error
+			});
+		});
+
+		socket.on('eeg:received', (data) => {
+			debugLog.log('📊 [MONITOR] Dados EEG recebidos pelo backend:', data.timestamp);
+		});
+
+		socket.on('connect_error', (error) => {
+			console.error('❌ [MONITOR] Erro de conexão Socket.IO:', error.message);
+		});
+	}
+
+	/**
+	 * Envia dados EEG para o backend via Socket.IO
+	 */
+	function sendEEGData() {
+		if (!socket || !socket.connected) {
+			// Log apenas primeira vez para evitar spam
+			if (!sendEEGData.loggedNotConnected) {
+				console.warn('⚠️ [MONITOR] sendEEGData chamado mas socket não conectado');
+				sendEEGData.loggedNotConnected = true;
+			}
+			return; // Socket não conectado
+		}
+
+		// Throttling
+		const now = Date.now();
+		if (now - lastEEGSendTime < EEG_SEND_INTERVAL) {
+			return;
+		}
+		lastEEGSendTime = now;
+
+		// ⚠️ VALIDAÇÃO: Não enviar dados se ainda não recebemos valores eSense do MindWave
+		if (ondas.Att === 0 && ondas.Med === 0) {
+			if (!sendEEGData.warnedNoData) {
+				console.warn('⚠️ [MONITOR] MindWave não está transmitindo dados eSense (Attention/Meditation)');
+				console.warn('   Aguardando pacotes ThinkGear com códigos 0x04 e 0x05...');
+				console.warn('   Valores atuais:', {
+					Att: ondas.Att,
+					Med: ondas.Med,
+					Delta: ondas.Delta,
+					Theta: ondas.Theta
+				});
+				sendEEGData.warnedNoData = true;
+			}
+			return; // Não enviar dados inválidos
+		}
+
+		// Log periódico (a cada 5 segundos) para não sobrecarregar console
+		if (!sendEEGData.lastLogTime || (now - sendEEGData.lastLogTime) > 5000) {
+			console.log('📊 [MONITOR] Enviando EEG válido:', {
+				attention: Math.round(ondas.Att),
+				relaxation: Math.round(ondas.Med),
+				delta: Math.round(ondas.Delta),
+				theta: Math.round(ondas.Theta),
+				signalQuality: 100
+			});
+			sendEEGData.lastLogTime = now;
+		}
+
+		// Enviar dados no formato esperado pelo backend
+		const payload = {
+			attention: Math.round(ondas.Att),
+			relaxation: Math.round(ondas.Med),
+			delta: Math.round(ondas.Delta || 0),
+			theta: Math.round(ondas.Theta || 0),
+			alpha: Math.round((ondas.LowAlpha + ondas.HighAlpha) / 2 || 0),
+			beta: Math.round((ondas.LowBeta + ondas.HighBeta) / 2 || 0),
+			gamma: Math.round((ondas.LowGamma + ondas.MiddleGamma) / 2 || 0),
+			signalQuality: 100,
+			timestamp: new Date().toISOString(),
 		};
 
-		ws.onerror = (err) => {
-			console.error('Erro no WebSocket:', err);
-		};
-
-		return ws;
+		socket.emit('eeg:data', payload);
 	}
 	
 	function gerarCodigo() {
@@ -535,18 +732,18 @@
 	
 	function parseThinkGearPacket(buffer) {
 		const view = new Uint8Array(buffer);
-		//console.log('Raw bytes:', Array.from(view).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', '));
+		//debugLog.log('Raw bytes:', Array.from(view).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', '));
 		let output = '';
 		let i = 0;
 		while (i < view.length - 2) {
 			if (view[i] !== 0xAA || view[i+1] !== 0xAA) {
-				console.log(`Sync falhou no índice ${i}: ${view[i]}, ${view[i+1]}`);
+				debugLog.log(`Sync falhou no índice ${i}: ${view[i]}, ${view[i+1]}`);
 				i++;
 				continue;
 			}
 			const len = view[i+2];
 			if (i + len + 4 > view.length) {
-				console.log(`Pacote incompleto no índice ${i}, len: ${len}, buffer: ${view.length}`);
+				debugLog.log(`Pacote incompleto no índice ${i}, len: ${len}, buffer: ${view.length}`);
 				output += 'Pacote incompleto | ';
 				break;
 			}
@@ -557,7 +754,7 @@
 			let sum = 0;
 			for (let j = 0; j < len; j++) sum += view[payloadStart + j];
 			const calcChecksum = (~sum) & 0xFF;
-			//console.log(`Pacote: Sync=0xAA,0xAA, Len=${len}, Payload=[${Array.from(payload).map(b => '0x' + b.toString(16).padStart(2, '0')).join(',')}], Checksum=0x${checksum.toString(16)}, Calc=0x${calcChecksum.toString(16)}`);
+			//debugLog.log(`Pacote: Sync=0xAA,0xAA, Len=${len}, Payload=[${Array.from(payload).map(b => '0x' + b.toString(16).padStart(2, '0')).join(',')}], Checksum=0x${checksum.toString(16)}, Calc=0x${calcChecksum.toString(16)}`);
 			if (checksum === calcChecksum) {
 				let j = 0;
 				
@@ -619,22 +816,34 @@
 	}
 
 	async function connectAndDiscover() {
-		if (!navigator.bluetooth) return updateStatus('Adaptador Bluetooth não encontrado.');
+		if (!navigator.bluetooth) {
+			alert('❌ Web Bluetooth não disponível!\n\nVerifique:\n1. Use Chrome, Edge ou Opera\n2. Acesse via HTTPS ou localhost\n3. Bluetooth do PC está ligado');
+			return updateStatus('Adaptador Bluetooth não encontrado.');
+		}
+
 		try {
 			updateStatus('Buscando dispositivos... Ative pairing no MindWave (LED piscando).');
-			device = await navigator.bluetooth.requestDevice({
-				filters: [                
-					{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] } // Filtra por serviço
+
+			// Tenta primeiro com filtros específicos para MindWave
+			let requestOptions = {
+				filters: [
+					{ name: 'MindWave' },
+					{ namePrefix: 'Mind' },
+					{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] },
+					{ services: ['00001101-0000-1000-8000-00805f9b34fb'] }
 				],
 				optionalServices: [
 					'00001101-0000-1000-8000-00805f9b34fb',
 					'0000ffe0-0000-1000-8000-00805f9b34fb',
 					'0000ffe1-0000-1000-8000-00805f9b34fb',
 					'generic_access',
-					'battery_service'
+					'battery_service',
+					'device_information'
 				]
-			});
-			updateStatus('Conectando...');
+			};
+
+			device = await navigator.bluetooth.requestDevice(requestOptions);
+			updateStatus('Conectando ao ' + device.name + '...');
 			server = await device.gatt.connect();
 			updateStatus('Descobrindo serviços...');
 			disconnectBtn.style.display = 'inline-block';
@@ -646,8 +855,27 @@
 				resetVars();
 			});
 		} catch (error) {
-			updateStatus(`Erro: ${error.message}. Pareie como serial no sistema primeiro.`);
-			console.error(error);
+			console.error('Erro completo:', error);
+
+			if (error.message.includes('User cancelled')) {
+				updateStatus('Pareamento cancelado pelo usuário.');
+			} else if (error.message.includes('Connection attempt failed')) {
+				// Erro específico: dispositivo bloqueado/ocupado
+				alert('⚠️ DISPOSITIVO BLOQUEADO!\n\n' +
+					'O dispositivo apareceu mas não conseguiu conectar.\n' +
+					'Isso acontece quando ele já está pareado no Windows.\n\n' +
+					'SOLUÇÃO:\n' +
+					'1. Windows → Configurações → Bluetooth\n' +
+					'2. REMOVA o dispositivo "=SichirayUSB"\n' +
+					'3. DESLIGUE e LIGUE o MindWave novamente\n' +
+					'4. Tente conectar APENAS pelo navegador');
+
+				updateStatus('❌ REMOVA o dispositivo do Bluetooth do Windows primeiro!\n\n' +
+					'O Windows está bloqueando a conexão. Vá em:\n' +
+					'Configurações → Bluetooth → Remover "=SichirayUSB"');
+			} else {
+				updateStatus(`❌ Erro: ${error.message}\n\n✅ Checklist:\n1. MindWave está LIGADO?\n2. LED está PISCANDO (modo pareamento)?\n3. Bluetooth do PC está ATIVO?\n4. Já pareou no Windows antes? (Configurações > Bluetooth)`);
+			}
 		}
 	}
 

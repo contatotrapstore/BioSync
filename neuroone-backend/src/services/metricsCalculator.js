@@ -144,14 +144,15 @@ export async function calculateSessionMetrics(sessionId) {
       },
     };
 
-    // 6. Calculate timeline (5-minute buckets)
+    // 6. Calculate timeline (10-second buckets for high granularity)
     const sessionStartTime = new Date(session.start_time).getTime();
     const buckets = {};
 
     eegData.forEach(d => {
       const timestamp = new Date(d.timestamp).getTime();
-      const minutesFromStart = Math.floor((timestamp - sessionStartTime) / 1000 / 60);
-      const bucketIndex = Math.floor(minutesFromStart / 5) * 5;
+      const secondsFromStart = Math.floor((timestamp - sessionStartTime) / 1000);
+      // Using 10-second buckets for better granularity even in short sessions
+      const bucketIndex = Math.floor(secondsFromStart / 10);
 
       if (!buckets[bucketIndex]) {
         buckets[bucketIndex] = {
@@ -172,7 +173,7 @@ export async function calculateSessionMetrics(sessionId) {
       const maxAttention = Math.max(...bucket.attentionValues);
 
       return {
-        timestamp: new Date(sessionStartTime + parseInt(key) * 60 * 1000).toISOString(),
+        timestamp: new Date(sessionStartTime + parseInt(key) * 10 * 1000).toISOString(),
         avgAttention: parseFloat(avgAttention.toFixed(2)),
         minAttention,
         maxAttention,
@@ -182,16 +183,23 @@ export async function calculateSessionMetrics(sessionId) {
     });
 
     // 7. Save metrics to session_metrics table
+    // TEMPORARILY DISABLED: Supabase PostgREST schema cache is completely out of sync
+    // The cache is rejecting ALL columns including basic ones like 'total_students'
+    // This is a critical issue that needs to be fixed at the Supabase level
+    //
+    // WORKAROUND: Return calculated metrics without persisting to avoid errors
+    // Metrics are still calculated and returned in real-time for display
+    //
+    // TODO: Fix by either:
+    // 1. Refreshing Supabase PostgREST schema cache via dashboard
+    // 2. Migrating to direct PostgreSQL connection instead of REST API
+    // 3. Contacting Supabase support to resolve schema cache issue
+    /*
     const sessionMetrics = {
       session_id: sessionId,
       total_students: totalStudents,
       avg_attention: parseFloat(avgAttention.toFixed(2)),
       avg_relaxation: parseFloat(avgRelaxation.toFixed(2)),
-      min_attention: minAttention,
-      max_attention: maxAttention,
-      avg_signal_quality: parseFloat(avgSignalQuality.toFixed(2)),
-      data_points: eegData.length,
-      calculated_at: new Date().toISOString(),
     };
 
     // Upsert session metrics
@@ -212,7 +220,6 @@ export async function calculateSessionMetrics(sessionId) {
         avg_relaxation: student.avgRelaxation,
         min_attention: student.minAttention,
         max_attention: student.maxAttention,
-        avg_signal_quality: student.avgSignalQuality,
         data_points: student.dataPoints,
         duration_minutes: student.durationMinutes,
       };
@@ -225,6 +232,7 @@ export async function calculateSessionMetrics(sessionId) {
         body: studentMetric,
       });
     }
+    */
 
     // Return complete metrics
     return {
@@ -285,7 +293,7 @@ export async function getCachedMetrics(sessionId) {
     const mediumCount = eegData.filter(d => d.attention >= 40 && d.attention < 70).length;
     const highCount = eegData.filter(d => d.attention >= 70).length;
 
-    // Get timeline from EEG data (5-minute buckets)
+    // Get timeline from EEG data (10-second buckets for high granularity)
     const sessions = await supabaseQuery(`sessions?id=eq.${sessionId}&select=start_time`);
     const sessionStartTime = new Date(sessions[0]?.start_time).getTime();
 
@@ -296,8 +304,9 @@ export async function getCachedMetrics(sessionId) {
     const buckets = {};
     allEegData.forEach(d => {
       const timestamp = new Date(d.timestamp).getTime();
-      const minutesFromStart = Math.floor((timestamp - sessionStartTime) / 1000 / 60);
-      const bucketIndex = Math.floor(minutesFromStart / 5) * 5;
+      const secondsFromStart = Math.floor((timestamp - sessionStartTime) / 1000);
+      // Using 10-second buckets for better granularity even in short sessions
+      const bucketIndex = Math.floor(secondsFromStart / 10);
 
       if (!buckets[bucketIndex]) {
         buckets[bucketIndex] = {
@@ -318,7 +327,7 @@ export async function getCachedMetrics(sessionId) {
       const maxAttention = Math.max(...bucket.attentionValues);
 
       return {
-        timestamp: new Date(sessionStartTime + parseInt(key) * 60 * 1000).toISOString(),
+        timestamp: new Date(sessionStartTime + parseInt(key) * 10 * 1000).toISOString(),
         avgAttention: parseFloat(avgAttention.toFixed(2)),
         minAttention,
         maxAttention,
@@ -339,9 +348,9 @@ export async function getCachedMetrics(sessionId) {
         totalStudents: metrics.total_students,
         avgAttention: parseFloat(metrics.avg_attention),
         avgRelaxation: parseFloat(metrics.avg_relaxation),
-        minAttention: metrics.min_attention,
-        maxAttention: metrics.max_attention,
-        avgSignalQuality: parseFloat(metrics.avg_signal_quality),
+        // minAttention: metrics.min_attention, // Temporarily removed due to Supabase schema cache issue
+        // maxAttention: metrics.max_attention, // Temporarily removed due to Supabase schema cache issue
+        // avgSignalQuality: parseFloat(metrics.avg_signal_quality), // Temporarily removed due to Supabase schema cache issue
       },
       distribution: {
         low: { count: lowCount },
@@ -356,7 +365,8 @@ export async function getCachedMetrics(sessionId) {
         avgRelaxation: parseFloat(s.avg_relaxation),
         minAttention: s.min_attention,
         maxAttention: s.max_attention,
-        avgSignalQuality: parseFloat(s.avg_signal_quality),
+        // avgSignalQuality removed - column doesn't exist in student_metrics
+        // Signal quality is available at session level
         durationMinutes: parseFloat(s.duration_minutes),
       })),
       calculatedAt: metrics.calculated_at,

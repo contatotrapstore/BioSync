@@ -106,7 +106,7 @@ export const sessionSchemas = {
       .allow('', null),
 
     session_type: Joi.string()
-      .valid('monitoramento', 'treinamento', 'avaliacao')
+      .valid('monitoramento', 'neurogame', 'avaliacao')
       .optional()
       .default('monitoramento'),
 
@@ -156,7 +156,11 @@ export const sessionSchemas = {
     notes: Joi.string()
       .max(2000)
       .optional()
-      .allow('', null)
+      .allow('', null),
+
+    end_time: Joi.date()
+      .iso()
+      .optional()
   }).min(1),
 
   // Finalize session
