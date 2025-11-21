@@ -31,7 +31,11 @@ import { createRateLimitMiddleware, clearSocketLimits } from './middleware/rateL
 dotenv.config(); // Reloading after .env update
 
 const PORT = process.env.PORT || 3001;
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'http://localhost:5173',
+  'https://neuroone.jogosadm.com.br',
+  'https://neuroone.vercel.app'
+];
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
