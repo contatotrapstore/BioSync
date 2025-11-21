@@ -75,7 +75,7 @@ biosync-backend/
 
 **Deploy:**
 - Plataforma: Render.com
-- URL: `https://neurogame-7av9.onrender.com`
+- URL: `https://biosync-jlfh.onrender.com`
 - CI/CD: Auto-deploy via GitHub push
 
 ---

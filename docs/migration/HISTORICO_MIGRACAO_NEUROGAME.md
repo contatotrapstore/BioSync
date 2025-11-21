@@ -443,7 +443,7 @@ a157757 - feat: migração completa do sistema de psicólogos e pontuações
 ### Links Úteis
 - Supabase Dashboard: https://supabase.com/dashboard/project/uszmhhukjohjarplnlmp
 - Admin Panel: https://neuro-game-nu.vercel.app
-- API Backend: https://neurogame-7av9.onrender.com/api/v1
+- API Backend: https://biosync-jlfh.onrender.com/api/v1
 
 ---
 

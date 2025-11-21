@@ -112,12 +112,12 @@ function updateCamera() {
 
 **Antes:**
 ```html
-connect-src 'self' ws://localhost:3001 wss://neurogame-7av9.onrender.com https://api.ipify.org
+connect-src 'self' ws://localhost:3001 wss://biosync-jlfh.onrender.com https://api.ipify.org
 ```
 
 **Depois:**
 ```html
-connect-src 'self' blob: ws://localhost:3001 wss://neurogame-7av9.onrender.com https://api.ipify.org https://cdn.socket.io
+connect-src 'self' blob: ws://localhost:3001 wss://biosync-jlfh.onrender.com https://api.ipify.org https://cdn.socket.io
 ```
 
 **Mudanças:**
@@ -443,7 +443,7 @@ python neuroone-python-eeg/eeg_bridge.py --student-id <ID> --session-id <SESSION
 
 2. **Teste em ambiente de produção:**
    - Deploy das alterações para Render.com
-   - Verificar CSP com domínio real (wss://neurogame-7av9.onrender.com)
+   - Verificar CSP com domínio real (wss://biosync-jlfh.onrender.com)
    - Confirmar que tudo funciona em HTTPS
 
 3. **Documentar para usuários:**

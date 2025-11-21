@@ -184,7 +184,7 @@ Access to XMLHttpRequest has been blocked by CORS policy
 **Solução:**
 1. Verifique se backend está online:
    ```bash
-   curl https://neurogame-7av9.onrender.com/api/v1/health
+   curl https://biosync-jlfh.onrender.com/api/v1/health
    ```
 
 2. Faça logout e login novamente
@@ -282,7 +282,7 @@ Invalid credentials
 **Solução:**
 1. Teste conexão com backend:
    ```bash
-   curl https://neurogame-7av9.onrender.com/api/v1/health
+   curl https://biosync-jlfh.onrender.com/api/v1/health
    ```
 
 2. Verifique credenciais:
@@ -444,7 +444,7 @@ Installed Build Tools revision 34.0.0 is corrupted
 **Solução:**
 1. Verifique `.env`:
    ```env
-   VITE_API_URL=https://neurogame-7av9.onrender.com/api/v1
+   VITE_API_URL=https://biosync-jlfh.onrender.com/api/v1
    ```
 
 2. Rebuild app:
@@ -455,7 +455,7 @@ Installed Build Tools revision 34.0.0 is corrupted
 
 3. Teste backend:
    ```bash
-   curl https://neurogame-7av9.onrender.com/api/v1/health
+   curl https://biosync-jlfh.onrender.com/api/v1/health
    ```
 
 4. Verifique conexão de internet do dispositivo

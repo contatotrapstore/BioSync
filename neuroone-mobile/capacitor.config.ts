@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     allowNavigation: [
       'https://biosync-jlfh.onrender.com',
-      'https://neurogame-7av9.onrender.com'
+      'https://biosync-jlfh.onrender.com'
     ]
   },
   android: {

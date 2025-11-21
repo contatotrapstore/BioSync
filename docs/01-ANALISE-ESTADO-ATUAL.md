@@ -134,7 +134,7 @@ BioSync Game FN/
 - axios client configurado
 - Interceptors JWT
 - Refresh token automático
-- Base URL: https://neurogame-7av9.onrender.com/api/v1
+- Base URL: https://biosync-jlfh.onrender.com/api/v1
 
 STATUS: ✅ MANTER (mudar endpoints)
 ```
@@ -420,7 +420,7 @@ Precisa adicionar:
 Frontend (biosync-admin):   Vercel
 Backend (biosync-backend):  Render.com
 Database:                   Supabase (sa-east-1)
-Domain:                     neurogame-7av9.onrender.com
+Domain:                     biosync-jlfh.onrender.com
 ```
 
 **Status:** ✅ **MANTER infraestrutura**

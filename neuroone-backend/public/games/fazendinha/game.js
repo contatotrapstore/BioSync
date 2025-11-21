@@ -138,7 +138,7 @@ function initializeSocketIO() {
   // Conectar ao backend
   const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3001'
-    : 'https://neurogame-7av9.onrender.com';
+    : 'https://biosync-jlfh.onrender.com';
 
   debugLog.log('🔌 [GAME] Conectando ao backend:', API_URL);
 

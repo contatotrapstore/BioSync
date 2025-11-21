@@ -69,7 +69,7 @@ npm install
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-VITE_API_URL=https://neurogame-7av9.onrender.com/api/v1
+VITE_API_URL=https://biosync-jlfh.onrender.com/api/v1
 ```
 
 ### 3. Sincronizar com Capacitor

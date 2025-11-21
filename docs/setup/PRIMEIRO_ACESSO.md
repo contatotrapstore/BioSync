@@ -89,16 +89,16 @@ Senha: Demo@123456
 4. Clique em "Entrar"
 
 ### API Backend
-**URL Base:** https://neurogame-7av9.onrender.com/api/v1
+**URL Base:** https://biosync-jlfh.onrender.com/api/v1
 
 **Health Check:**
 ```bash
-curl https://neurogame-7av9.onrender.com/api/v1/health
+curl https://biosync-jlfh.onrender.com/api/v1/health
 ```
 
 **Teste de Login:**
 ```bash
-curl -X POST https://neurogame-7av9.onrender.com/api/v1/auth/login \
+curl -X POST https://biosync-jlfh.onrender.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"psitalessales","password":"23112018Vt!"}'
 ```
@@ -246,12 +246,12 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 ### Testar Sistema de Psicólogos
 ```bash
 # 1. Login como psicóloga
-curl -X POST https://neurogame-7av9.onrender.com/api/v1/auth/login \
+curl -X POST https://biosync-jlfh.onrender.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"psicologavivianewis@gmail.com","password":"SENHA_DELA"}'
 
 # 2. Listar pacientes (usar token recebido)
-curl https://neurogame-7av9.onrender.com/api/v1/psychologists/patients \
+curl https://biosync-jlfh.onrender.com/api/v1/psychologists/patients \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 

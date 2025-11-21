@@ -21,7 +21,7 @@
 ```
 Backend Node.js (REST API):
 - Desenvolvimento: http://localhost:3000/api/v1
-- Produção: https://neurogame-7av9.onrender.com/api/v1
+- Produção: https://biosync-jlfh.onrender.com/api/v1
 
 Servidor Python WebSocket:
 - Desenvolvimento: ws://localhost:8080
@@ -29,7 +29,7 @@ Servidor Python WebSocket:
 
 Backend Node.js WebSocket:
 - Desenvolvimento: ws://localhost:3001
-- Produção: wss://neurogame-7av9.onrender.com/ws
+- Produção: wss://biosync-jlfh.onrender.com/ws
 ```
 
 ### Autenticação
@@ -879,7 +879,7 @@ Relatório completo de uma turma.
 
 ### Conexão
 
-**URL:** `ws://localhost:3001` (dev) ou `wss://neurogame-7av9.onrender.com/ws` (prod)
+**URL:** `ws://localhost:3001` (dev) ou `wss://biosync-jlfh.onrender.com/ws` (prod)
 
 **Autenticação:**
 ```javascript

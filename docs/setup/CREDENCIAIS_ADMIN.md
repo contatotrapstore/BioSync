@@ -61,7 +61,7 @@ https://neuro-game-nu.vercel.app/login
 - ⚠️ O backend aceita username no campo email!
 
 ### API Backend
-https://neurogame-7av9.onrender.com
+https://biosync-jlfh.onrender.com
 
 ### Launcher Desktop
 Baixe o instalador em: `INSTALADORES/NeuroGame Launcher Setup 1.0.9.exe`
@@ -76,7 +76,7 @@ Baixe o instalador em: `INSTALADORES/NeuroGame Launcher Setup 1.0.9.exe`
 
 ### Com cURL:
 ```bash
-curl -X POST https://neurogame-7av9.onrender.com/api/v1/auth/login \
+curl -X POST https://biosync-jlfh.onrender.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"psitalessales","password":"23112018Vt!"}'
 ```
