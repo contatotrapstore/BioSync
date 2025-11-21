@@ -91,10 +91,10 @@ export function SessionReport() {
   const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
-    if (user && sessionId) {
+    if (user && userRole && sessionId) {
       fetchSessionReport();
     }
-  }, [user, sessionId]);
+  }, [user, userRole, sessionId]);
 
   async function fetchSessionReport() {
     setLoading(true);
@@ -118,6 +118,14 @@ export function SessionReport() {
       const sessionData = sessionResult.data;
 
       // Verificar permissão: permitir professor dono da sessão OU direção
+      console.log('[SessionReport] Verificação de permissão:', {
+        teacher_id: sessionData.teacher_id,
+        user_id: user.id,
+        userRole: userRole,
+        isTeacher: sessionData.teacher_id === user.id,
+        isDirection: userRole === 'direcao'
+      });
+
       if (sessionData.teacher_id !== user.id && userRole !== 'direcao') {
         setError('Você não tem permissão para acessar este relatório.');
         return;
@@ -410,7 +418,11 @@ export function SessionReport() {
       title="Relatório da Sessão"
       subtitle={session ? `${session.title} • ${session.class?.name}` : 'Carregando...'}
       breadcrumbs={[
-        { label: 'Professor', icon: <School fontSize="small" />, href: '/teacher' },
+        {
+          label: userRole === 'direcao' ? 'Dashboard' : 'Professor',
+          icon: <School fontSize="small" />,
+          href: userRole === 'direcao' ? '/admin' : '/teacher'
+        },
         { label: 'Relatório' },
       ]}
       actions={
@@ -450,7 +462,7 @@ export function SessionReport() {
             variant="outlined"
             size="small"
             startIcon={<ArrowBack />}
-            onClick={() => navigate('/teacher')}
+            onClick={() => navigate(userRole === 'direcao' ? '/admin/sessions' : '/teacher')}
             disabled={loading}
           >
             Voltar
