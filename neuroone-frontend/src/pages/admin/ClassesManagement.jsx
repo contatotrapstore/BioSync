@@ -48,7 +48,7 @@ export function ClassesManagement() {
   async function fetchClasses() {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/classes`, {
+      const response = await fetch(`${API_URL}/api/v1/classes`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });

@@ -8,11 +8,13 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       devOptions: {
         enabled: true,
-        type: 'module'
+        type: 'module',
+        navigateFallback: 'index.html'
       },
+      injectRegister: 'auto',
       includeAssets: [
         'favicon.png',
         'apple-touch-icon.png',
