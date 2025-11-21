@@ -70,7 +70,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
 export function SessionReport() {
   const { sessionId } = useParams();
-  const { user, userRole } = useAuth();
+  const { user, role: userRole } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);

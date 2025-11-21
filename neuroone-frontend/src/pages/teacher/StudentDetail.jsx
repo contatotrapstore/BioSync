@@ -32,7 +32,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function StudentDetail() {
   const { studentId } = useParams();
-  const { user, userRole } = useAuth();
+  const { user, role: userRole } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
