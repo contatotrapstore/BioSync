@@ -70,7 +70,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
 export function SessionReport() {
   const { sessionId } = useParams();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -117,8 +117,8 @@ export function SessionReport() {
 
       const sessionData = sessionResult.data;
 
-      // Verificar permissão
-      if (sessionData.teacher_id !== user.id) {
+      // Verificar permissão: permitir professor dono da sessão OU direção
+      if (sessionData.teacher_id !== user.id && userRole !== 'direcao') {
         setError('Você não tem permissão para acessar este relatório.');
         return;
       }
@@ -143,6 +143,11 @@ export function SessionReport() {
       }
 
       setSession(sessionData);
+
+      // Carregar notas existentes se houver
+      if (sessionData.notes) {
+        setNotes(sessionData.notes);
+      }
 
       // Buscar métricas do backend
       const metricsResponse = await fetch(`${WS_URL}/api/metrics/sessions/${sessionId}`);
@@ -192,33 +197,10 @@ export function SessionReport() {
     }
   }
 
-  async function handleExportCSV() {
-    try {
-      const response = await fetch(`${WS_URL}/api/metrics/sessions/${sessionId}/export`);
-
-      if (!response.ok) {
-        throw new Error('Erro ao exportar CSV');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `session-${sessionId}-metrics.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Erro ao exportar CSV:', error);
-      alert('Erro ao exportar CSV: ' + error.message);
-    }
-  }
-
   async function handleSaveNotes() {
     setSavingNotes(true);
     try {
-      const response = await fetch(`${API_URL}/api/sessions/${sessionId}/notes`, {
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes })
@@ -228,7 +210,14 @@ export function SessionReport() {
         throw new Error('Erro ao salvar notas');
       }
 
-      alert('Notas salvas com sucesso!');
+      const result = await response.json();
+      if (result.success) {
+        alert('Notas salvas com sucesso!');
+        // Atualizar session local
+        setSession(prev => ({ ...prev, notes }));
+      } else {
+        throw new Error(result.error || 'Erro ao salvar notas');
+      }
     } catch (error) {
       console.error('Erro ao salvar notas:', error);
       alert('Erro ao salvar notas: ' + error.message);
@@ -421,7 +410,6 @@ export function SessionReport() {
       title="Relatório da Sessão"
       subtitle={session ? `${session.title} • ${session.class?.name}` : 'Carregando...'}
       breadcrumbs={[
-        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
         { label: 'Professor', icon: <School fontSize="small" />, href: '/teacher' },
         { label: 'Relatório' },
       ]}
@@ -457,15 +445,6 @@ export function SessionReport() {
             disabled={loading || recalculating}
           >
             {recalculating ? 'Recalculando...' : 'Recalcular'}
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<DownloadIcon />}
-            onClick={handleExportCSV}
-            disabled={loading || !metrics}
-          >
-            CSV
           </Button>
           <Button
             variant="outlined"

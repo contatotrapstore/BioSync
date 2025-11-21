@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Forbidden } from './pages/Forbidden';
@@ -15,14 +16,16 @@ import { ClassDetails } from './pages/teacher/ClassDetails';
 import { SessionCreate } from './pages/teacher/SessionCreate';
 import { SessionActive } from './pages/teacher/SessionActive';
 import { SessionReport } from './pages/teacher/SessionReport';
+import { StudentDetail } from './pages/teacher/StudentDetail';
 import { StudentDashboard } from './pages/student/StudentDashboard';
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/forbidden" element={<Forbidden />} />
@@ -70,6 +73,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/session/:sessionId/report"
+              element={
+                <ProtectedRoute allowedRoles={['direcao']}>
+                  <SessionReport />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Teacher routes - only professor */}
             <Route
@@ -112,6 +123,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/teacher/student/:studentId"
+              element={
+                <ProtectedRoute allowedRoles={['professor']}>
+                  <StudentDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Student routes - only aluno */}
             <Route
@@ -129,6 +148,7 @@ function App() {
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

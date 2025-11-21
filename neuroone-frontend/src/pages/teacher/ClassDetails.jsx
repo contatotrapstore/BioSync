@@ -129,7 +129,7 @@ export function ClassDetails() {
             const sessionIds = studentSessions.map(sp => sp.session_id);
 
             const { data: metrics } = await supabase
-              .from('session_participants')
+              .from('student_metrics')
               .select('avg_attention, avg_relaxation')
               .eq('student_id', student.id)
               .in('session_id', sessionIds);
@@ -226,7 +226,7 @@ export function ClassDetails() {
         const sessionIds = classSessions.map(s => s.id);
 
         const { data: allMetrics } = await supabase
-          .from('session_participants')
+          .from('student_metrics')
           .select('avg_attention, avg_relaxation')
           .in('session_id', sessionIds);
 
@@ -306,7 +306,6 @@ export function ClassDetails() {
       title={classData.name}
       subtitle={classData.description || 'Detalhes e estatísticas da turma'}
       breadcrumbs={[
-        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
         { label: 'Professor', icon: <SchoolIcon fontSize="small" />, href: '/teacher' },
         { label: 'Turma', icon: <ClassIcon fontSize="small" /> },
       ]}
@@ -390,9 +389,11 @@ export function ClassDetails() {
                   <React.Fragment key={student.id}>
                     {index > 0 && <Divider />}
                     <ListItem
+                      onClick={() => navigate(`/teacher/student/${student.id}`)}
                       sx={{
                         py: 2,
                         px: 0,
+                        cursor: 'pointer',
                         '&:hover': {
                           bgcolor: 'action.hover',
                           borderRadius: 1,
@@ -469,9 +470,11 @@ export function ClassDetails() {
                   <React.Fragment key={session.id}>
                     {index > 0 && <Divider />}
                     <ListItem
+                      onClick={() => navigate(`/teacher/session/${session.id}/report`)}
                       sx={{
                         py: 2,
                         px: 0,
+                        cursor: 'pointer',
                         '&:hover': {
                           bgcolor: 'action.hover',
                           borderRadius: 1,

@@ -130,11 +130,25 @@ export function TeacherDashboard() {
 
           // Pega primeiro resultado se existir
           const metrics = metricsData && metricsData.length > 0 ? metricsData[0] : null;
+          let avg_attention = metrics?.avg_attention || 0;
+
+          // Fallback: Se não há métricas calculadas e sessão está concluída, calcula de eeg_data
+          if (avg_attention === 0 && session.status === 'completed') {
+            const { data: eegData } = await supabase
+              .from('eeg_data')
+              .select('attention')
+              .eq('session_id', session.id);
+
+            if (eegData && eegData.length > 0) {
+              const sum = eegData.reduce((acc, d) => acc + (d.attention || 0), 0);
+              avg_attention = sum / eegData.length;
+            }
+          }
 
           return {
             ...session,
             class_name: session.classes?.name || 'Turma não especificada',
-            avg_attention: metrics?.avg_attention || 0,
+            avg_attention,
           };
         })
       );
@@ -237,7 +251,6 @@ export function TeacherDashboard() {
       title="Painel do Professor"
       subtitle={`Bem-vindo, ${profile?.name || 'Professor'}`}
       breadcrumbs={[
-        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
         { label: 'Professor', icon: <School fontSize="small" /> },
         { label: 'Dashboard' },
       ]}
@@ -306,34 +319,6 @@ export function TeacherDashboard() {
           />
         </Grid>
       </Grid>
-
-      {/* Call to Action - Nova Sessão */}
-      <Alert
-        severity="info"
-        icon={<Psychology />}
-        sx={{
-          mb: 4,
-          '& .MuiAlert-message': { width: '100%' },
-        }}
-        action={
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<Add />}
-            onClick={handleNewSession}
-            sx={{ whiteSpace: 'nowrap' }}
-          >
-            Iniciar Sessão
-          </Button>
-        }
-      >
-        <Typography variant="subtitle1" fontWeight={600}>
-          Pronto para iniciar uma nova sessão?
-        </Typography>
-        <Typography variant="body2">
-          Conecte o headset EEG e comece o monitoramento dos alunos
-        </Typography>
-      </Alert>
 
       {/* Minhas Turmas */}
       <Box sx={{ mb: 4 }}>

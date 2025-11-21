@@ -4,8 +4,6 @@ import {
   Typography,
   Grid,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Stack,
   Alert,
   Radio,
@@ -48,7 +46,6 @@ export function SessionCreate() {
     duration_minutes: 30,
     attention_threshold_low: 40,
     attention_threshold_high: 70,
-    enable_alerts: true,
   });
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -144,7 +141,7 @@ export function SessionCreate() {
           title: formData.title,
           description: formData.description || null,
           session_type: formData.session_type,
-          status: 'scheduled',
+          status: 'active',
           start_time: new Date().toISOString(),
           duration_minutes: formData.duration_minutes,
         })
@@ -185,7 +182,6 @@ export function SessionCreate() {
       title="Nova Sessão Neurofeedback"
       subtitle="Configure e inicie uma nova sessão de monitoramento com seus alunos"
       breadcrumbs={[
-        { label: 'Início', icon: <Home fontSize="small" />, href: '/' },
         { label: 'Professor', icon: <SchoolIcon fontSize="small" /> },
         { label: 'Nova Sessão' },
       ]}
@@ -337,12 +333,12 @@ export function SessionCreate() {
 
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Card
-                    onClick={() => setFormData({ ...formData, session_type: 'treinamento' })}
+                    onClick={() => setFormData({ ...formData, session_type: 'neurogame' })}
                     sx={{
                       cursor: 'pointer',
-                      border: formData.session_type === 'treinamento' ? 2 : 1,
-                      borderColor: formData.session_type === 'treinamento' ? 'primary.main' : 'divider',
-                      bgcolor: formData.session_type === 'treinamento' ? 'action.selected' : 'background.paper',
+                      border: formData.session_type === 'neurogame' ? 2 : 1,
+                      borderColor: formData.session_type === 'neurogame' ? 'primary.main' : 'divider',
+                      bgcolor: formData.session_type === 'neurogame' ? 'action.selected' : 'background.paper',
                       transition: 'all 0.2s ease',
                       '&:hover': {
                         borderColor: 'primary.main',
@@ -350,7 +346,7 @@ export function SessionCreate() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                      <Radio value="treinamento" />
+                      <Radio value="neurogame" />
                       <Box sx={{ flex: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                           <SportsEsportsIcon sx={{ color: 'primary.main' }} />
@@ -468,16 +464,6 @@ export function SessionCreate() {
                     </Stack>
                   </Box>
                 </Box>
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.enable_alerts}
-                      onChange={(e) => setFormData({ ...formData, enable_alerts: e.target.checked })}
-                    />
-                  }
-                  label="Habilitar alertas quando alunos perderem atenção"
-                />
               </Stack>
             </Card>
           </Box>

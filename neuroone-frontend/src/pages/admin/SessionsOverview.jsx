@@ -24,6 +24,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import Refresh from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { supabase } from '../../services/supabase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -75,7 +76,42 @@ export function SessionsOverview() {
         throw new Error(result.error || 'Erro ao buscar sessões');
       }
 
-      setSessions(result.data || []);
+      const sessionsData = result.data || [];
+
+      // Add fallback calculation for avg_attention if session_metrics is empty
+      const sessionsWithMetrics = await Promise.all(
+        sessionsData.map(async (session) => {
+          // Query cached metrics first
+          const { data: metricsData } = await supabase
+            .from('session_metrics')
+            .select('avg_attention')
+            .eq('session_id', session.id)
+            .limit(1);
+
+          const metrics = metricsData && metricsData.length > 0 ? metricsData[0] : null;
+          let avg_attention = metrics?.avg_attention || 0;
+
+          // Fallback: Calculate from raw EEG data if metrics are empty and session is completed
+          if (avg_attention === 0 && session.status === 'completed') {
+            const { data: eegData } = await supabase
+              .from('eeg_data')
+              .select('attention')
+              .eq('session_id', session.id);
+
+            if (eegData && eegData.length > 0) {
+              const sum = eegData.reduce((acc, d) => acc + (d.attention || 0), 0);
+              avg_attention = sum / eegData.length;
+            }
+          }
+
+          return {
+            ...session,
+            avg_attention,
+          };
+        })
+      );
+
+      setSessions(sessionsWithMetrics);
     } catch (error) {
       console.error('Erro ao buscar sessões:', error);
     } finally {
@@ -334,7 +370,9 @@ export function SessionsOverview() {
                 {filteredSessions.map((session) => (
                   <TableRow
                     key={session.id}
+                    onClick={() => navigate(`/admin/session/${session.id}/report`)}
                     sx={{
+                      cursor: 'pointer',
                       '&:hover': {
                         backgroundColor: 'action.hover',
                       },
