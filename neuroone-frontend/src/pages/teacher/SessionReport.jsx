@@ -167,6 +167,15 @@ export function SessionReport() {
       const metricsResult = await metricsResponse.json();
 
       if (metricsResult.success && metricsResult.data) {
+        console.log('[SessionReport] Metrics loaded:', {
+          hasDistribution: !!metricsResult.data.distribution,
+          distribution: metricsResult.data.distribution,
+          totalDataPoints: metricsResult.data.distribution
+            ? (metricsResult.data.distribution.low?.count || 0) +
+              (metricsResult.data.distribution.medium?.count || 0) +
+              (metricsResult.data.distribution.high?.count || 0)
+            : 0
+        });
         setMetrics(metricsResult.data);
       } else {
         throw new Error('Resposta de métricas inválida');
@@ -958,15 +967,18 @@ export function SessionReport() {
                 </Card>
               </Collapse>
 
-              <StudentPerformanceTable students={filteredStudents.map(s => ({
-                id: s.studentId || s.id,
-                name: s.studentName || s.name,
-                avg_attention: s.avgAttention,
-                avg_relaxation: s.avgRelaxation,
-                duration_minutes: s.durationMinutes,
-                avg_signal_quality: s.avgSignalQuality,
-                data_points: s.dataPoints,
-              }))} />
+              <StudentPerformanceTable
+                students={filteredStudents.map(s => ({
+                  id: s.studentId || s.id,
+                  name: s.studentName || s.name,
+                  avg_attention: s.avgAttention,
+                  avg_relaxation: s.avgRelaxation,
+                  duration_minutes: s.durationMinutes,
+                  avg_signal_quality: s.avgSignalQuality,
+                  data_points: s.dataPoints,
+                }))}
+                onStudentClick={(studentId) => navigate(`/teacher/student/${studentId}`)}
+              />
 
               {filteredStudents.length === 0 && (
                 <Alert severity="info" sx={{ mt: 2 }}>
@@ -983,19 +995,28 @@ export function SessionReport() {
                 Distribuição de Níveis de Atenção
               </Typography>
               <Card sx={{ p: 3 }}>
-                <AttentionDistributionChart
-                  distribution={{
-                    low: distribution.low.count,
-                    medium: distribution.medium.count,
-                    high: distribution.high.count
-                  }}
-                  height={400}
-                />
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="body2" color="text.secondary" align="center">
-                    Total de {totalDataPoints} pontos de dados EEG analisados
-                  </Typography>
-                </Box>
+                {totalDataPoints > 0 ? (
+                  <>
+                    <AttentionDistributionChart
+                      distribution={{
+                        low: distribution.low.count,
+                        medium: distribution.medium.count,
+                        high: distribution.high.count
+                      }}
+                      height={400}
+                    />
+                    <Box sx={{ mt: 3 }}>
+                      <Typography variant="body2" color="text.secondary" align="center">
+                        Total de {totalDataPoints} pontos de dados EEG analisados
+                      </Typography>
+                    </Box>
+                  </>
+                ) : (
+                  <Alert severity="info">
+                    Nenhum dado de distribuição disponível para esta sessão.
+                    Isso pode ocorrer se não houve coleta de dados EEG durante a sessão.
+                  </Alert>
+                )}
               </Card>
             </Box>
           )}

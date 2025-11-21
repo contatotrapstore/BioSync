@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { Card } from '../atoms/Card';
 
-export function StudentPerformanceTable({ students = [] }) {
+export function StudentPerformanceTable({ students = [], onStudentClick }) {
   const [orderBy, setOrderBy] = useState('avg_attention');
   const [order, setOrder] = useState('desc');
 
@@ -80,7 +80,15 @@ export function StudentPerformanceTable({ students = [] }) {
           </TableHead>
           <TableBody>
             {sortedStudents.map((student, index) => (
-              <TableRow key={student.id} hover>
+              <TableRow
+                key={student.id}
+                hover
+                onClick={() => onStudentClick?.(student.id)}
+                sx={{
+                  cursor: onStudentClick ? 'pointer' : 'default',
+                  '&:hover': onStudentClick ? { backgroundColor: 'action.hover' } : {}
+                }}
+              >
                 <TableCell>
                   <Box sx={{ fontSize: '1.1rem' }}>{getMedal(index)}</Box>
                 </TableCell>
