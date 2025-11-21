@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography, Backdrop } from '@mui/material';
+import { Box, CircularProgress, Typography, Backdrop, useTheme } from '@mui/material';
 
 /**
  * LoadingOverlay - Overlay de carregamento
@@ -20,6 +20,9 @@ export default function LoadingOverlay({
   message,
   size = 40,
 }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   if (!open) return null;
 
   // Conteúdo do loading
@@ -90,7 +93,7 @@ export default function LoadingOverlay({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: isDark ? 'rgba(18, 18, 18, 0.95)' : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(2px)',
         zIndex: 10,
         borderRadius: 'inherit',

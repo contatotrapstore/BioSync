@@ -91,15 +91,27 @@ export function SessionReport() {
   const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
+    console.log('[SessionReport] useEffect triggered:', {
+      user: !!user,
+      userRole,
+      sessionId,
+      shouldFetch: !!(user && userRole && sessionId)
+    });
+
     if (user && userRole && sessionId) {
+      console.log('[SessionReport] Calling fetchSessionReport...');
       fetchSessionReport();
+    } else {
+      console.log('[SessionReport] NOT fetching - missing dependencies');
     }
   }, [user, userRole, sessionId]);
 
   async function fetchSessionReport() {
+    console.log('[SessionReport] fetchSessionReport STARTED for sessionId:', sessionId);
     setLoading(true);
     try {
       // Buscar sessão
+      console.log('[SessionReport] Fetching session from:', `${API_URL}/api/sessions/${sessionId}`);
       const sessionResponse = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
@@ -181,9 +193,10 @@ export function SessionReport() {
         throw new Error('Resposta de métricas inválida');
       }
     } catch (error) {
-      console.error('Erro ao carregar relatório:', error);
+      console.error('[SessionReport] Error loading report:', error);
       setError(error.message || 'Erro ao carregar relatório.');
     } finally {
+      console.log('[SessionReport] fetchSessionReport COMPLETED, setLoading(false)');
       setLoading(false);
     }
   }
