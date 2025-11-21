@@ -104,24 +104,24 @@ export function useInstallPrompt() {
     setIsInstallable(false);
     setInstallResult('dismissed');
 
-    // Salva no localStorage para não mostrar novamente por um tempo
-    const dismissedAt = Date.now();
-    localStorage.setItem('pwa-install-dismissed', dismissedAt.toString());
+    // Salva a DATA (não timestamp) quando dispensado - reseta à meia-noite
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    localStorage.setItem('pwa-install-dismissed-date', today);
+    console.log(`[PWA] Dismissed on ${today} - will show again tomorrow`);
   }, []);
 
   /**
-   * Verifica se o prompt foi dispensado recentemente
-   * @param {number} hours - Número de horas para considerar
-   * @returns {boolean}
+   * Verifica se o prompt foi dispensado hoje (reseta à meia-noite)
+   * @returns {boolean} - true se foi dispensado no mesmo dia
    */
-  const wasRecentlyDismissed = useCallback((hours = 24) => {
-    const dismissedAt = localStorage.getItem('pwa-install-dismissed');
+  const wasDismissedToday = useCallback(() => {
+    const dismissedDate = localStorage.getItem('pwa-install-dismissed-date');
 
-    if (!dismissedAt) return false;
+    if (!dismissedDate) return false;
 
-    const hoursSinceDismissed = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60);
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
 
-    return hoursSinceDismissed < hours;
+    return dismissedDate === today;
   }, []);
 
   return {
@@ -130,6 +130,6 @@ export function useInstallPrompt() {
     promptInstall,
     dismissPrompt,
     installResult,
-    wasRecentlyDismissed,
+    wasDismissedToday,
   };
 }

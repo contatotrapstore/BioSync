@@ -20,7 +20,6 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { StudentSession } from './StudentSession';
 import { StudentHistory } from './StudentHistory';
 import { StudentSettings } from './StudentSettings';
-import { InstallPWABanner } from '../../components/atoms/InstallPWABanner';
 
 export function StudentDashboard() {
   const { user } = useAuth();
@@ -311,9 +310,6 @@ export function StudentDashboard() {
                 </li>
               </Box>
             </Alert>
-
-            {/* PWA Install Banner */}
-            <InstallPWABanner />
           </DashboardLayout>
         }
       />

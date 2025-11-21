@@ -30,7 +30,7 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
     isInstalled,
     promptInstall,
     dismissPrompt,
-    wasRecentlyDismissed,
+    wasDismissedToday,
   } = useInstallPrompt();
 
   const [show, setShow] = useState(false);
@@ -54,8 +54,8 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
       return;
     }
 
-    // Não mostrar se foi dispensado recentemente (últimas 24h)
-    if (wasRecentlyDismissed(24)) {
+    // Não mostrar se foi dispensado hoje (reseta à meia-noite)
+    if (wasDismissedToday()) {
       setShow(false);
       return;
     }
@@ -69,7 +69,7 @@ export function InstallPWABanner({ autoShow = true, delaySeconds = 3 }) {
 
       return () => clearTimeout(timer);
     }
-  }, [isInstallable, isInstalled, autoShow, delaySeconds, wasRecentlyDismissed]);
+  }, [isInstallable, isInstalled, autoShow, delaySeconds, wasDismissedToday]);
 
   const handleInstall = async () => {
     const result = await promptInstall();

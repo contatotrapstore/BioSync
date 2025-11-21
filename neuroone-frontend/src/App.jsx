@@ -18,6 +18,7 @@ import { SessionActive } from './pages/teacher/SessionActive';
 import { SessionReport } from './pages/teacher/SessionReport';
 import { StudentDetail } from './pages/teacher/StudentDetail';
 import { StudentDashboard } from './pages/student/StudentDashboard';
+import { InstallPWABanner } from './components/atoms/InstallPWABanner';
 
 function App() {
   return (
@@ -145,6 +146,9 @@ function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+          {/* Global PWA Install Banner - appears for all users on all pages */}
+          <InstallPWABanner />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
